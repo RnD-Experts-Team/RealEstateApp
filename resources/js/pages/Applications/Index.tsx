@@ -1,8 +1,7 @@
-// resources/js/Pages/Applications/Index.tsx
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/usePermissions';
 import AppLayout from '@/layouts/app-layout';
-import { Application, ApplicationFilters, PaginatedApplications , Attachment } from '@/types/application';
+import { Application, ApplicationFilters, PaginatedApplications, Attachment } from '@/types/application';
 import { PageProps } from '@/types/auth';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -60,7 +59,7 @@ const exportToCSV = (data: Application[], filename: string = 'applications.csv')
 
         const formatAttachments = (attachments?: Attachment[]): string => {
             if (!attachments || attachments.length === 0) return '';
-            return attachments.map(a => a.name).join('; ');
+            return attachments.map((a) => a.name).join('; ');
         };
 
         const headers = [
@@ -76,7 +75,7 @@ const exportToCSV = (data: Application[], filename: string = 'applications.csv')
             'Stage in Progress',
             'Notes',
             'Attachments Count',
-            'Attachment Names'
+            'Attachment Names',
         ];
 
         const csvData = [
@@ -127,7 +126,16 @@ const exportToCSV = (data: Application[], filename: string = 'applications.csv')
     }
 };
 
-export default function Index({ applications, filters, cities, properties, units, filterCities, filterProperties, filterUnits }: Props) {
+export default function Index({
+    applications,
+    filters,
+    cities,
+    properties,
+    units,
+    filterCities,
+    filterProperties,
+    filterUnits,
+}: Props) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
@@ -141,25 +149,55 @@ export default function Index({ applications, filters, cities, properties, units
         unit: '',
         name: '',
         applicant_applied_from: '',
+        is_hidden: false,
     });
 
-    const initialPerPage = (filters as any)?.per_page ? String((filters as any).per_page) : String(applications?.per_page ?? 15);
-    const [perPage, setPerPage] = useState<string>(initialPerPage === String(applications?.total ?? '') ? 'all' : initialPerPage);
+    const initialPerPage = (filters as any)?.per_page
+        ? String((filters as any).per_page)
+        : String(applications?.per_page ?? 15);
+
+    const [perPage, setPerPage] = useState<string>(
+        initialPerPage === String(applications?.total ?? '') ? 'all' : initialPerPage
+    );
 
     useEffect(() => {
-        const f = filters || ({} as any);
+        const f = (filters || {}) as any;
         setSearchFilters({
             city: (f.city as string) || '',
             property: (f.property as string) || '',
             unit: (f.unit as string) || '',
             name: (f.name as string) || '',
             applicant_applied_from: (f.applicant_applied_from as string) || '',
+            is_hidden: Boolean(f.is_hidden) || false,
         });
     }, [filters]);
 
-    const handleSearch = (filters: { city: string; property: string; unit: string; name: string; applicant_applied_from: string }) => {
-        setSearchFilters(filters);
-        router.get(route('applications.index'), { ...filters, per_page: perPage, page: 1 }, {
+    // ✅ build preserve payload exactly like Payments (and matching your controller inputs)
+    const buildPreservePayload = () => ({
+        filter_city: searchFilters.city || '',
+        filter_property: searchFilters.property || '',
+        filter_unit: searchFilters.unit || '',
+        filter_name: searchFilters.name || '',
+        filter_applicant_applied_from: searchFilters.applicant_applied_from || '',
+        filter_is_hidden: searchFilters.is_hidden ? 'true' : '',
+        per_page: perPage,
+        page: applications.current_page,
+    });
+
+    const handleSearch = (nextFilters: {
+        city: string;
+        property: string;
+        unit: string;
+        name: string;
+        applicant_applied_from: string;
+        is_hidden: boolean;
+    }) => {
+        setSearchFilters(nextFilters);
+
+        const params: any = { ...nextFilters, per_page: perPage, page: 1 };
+        if (!nextFilters.is_hidden) delete params.is_hidden; // only send when true
+
+        router.get(route('applications.index'), params, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -172,6 +210,7 @@ export default function Index({ applications, filters, cities, properties, units
             unit: '',
             name: '',
             applicant_applied_from: '',
+            is_hidden: false,
         };
         setSearchFilters(cleared);
         setPerPage('15');
@@ -181,15 +220,26 @@ export default function Index({ applications, filters, cities, properties, units
     const handleDelete = (application: Application) => {
         if (confirm('Are you sure you want to delete this application?')) {
             router.delete(route('applications.destroy', application.id), {
-                data: {
-                    filter_city: searchFilters.city || '',
-                    filter_property: searchFilters.property || '',
-                    filter_unit: searchFilters.unit || '',
-                    filter_name: searchFilters.name || '',
-                    filter_applicant_applied_from: searchFilters.applicant_applied_from || '',
-                    per_page: perPage,
-                    page: applications.current_page,
-                },
+                data: buildPreservePayload(),
+                preserveState: true,
+                preserveScroll: true,
+            });
+        }
+    };
+
+    // ✅ NEW: hide/unhide like Payments
+    const handleHide = (application: Application) => {
+        if (confirm('Are you sure you want to hide this application?')) {
+            router.patch(route('applications.hide', application.id), buildPreservePayload(), {
+                preserveState: true,
+                preserveScroll: true,
+            });
+        }
+    };
+
+    const handleUnhide = (application: Application) => {
+        if (confirm('Are you sure you want to unhide this application?')) {
+            router.patch(route('applications.unhide', application.id), buildPreservePayload(), {
                 preserveState: true,
                 preserveScroll: true,
             });
@@ -207,7 +257,6 @@ export default function Index({ applications, filters, cities, properties, units
         try {
             const filename = `applications-${new Date().toISOString().split('T')[0]}.csv`;
             exportToCSV(applications.data, filename);
-            console.log('Export completed successfully');
         } catch (error) {
             console.error('Export failed:', error);
             alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -216,9 +265,7 @@ export default function Index({ applications, filters, cities, properties, units
         }
     };
 
-    const handleDrawerSuccess = () => {
-        setIsDrawerOpen(false);
-    };
+    const handleDrawerSuccess = () => setIsDrawerOpen(false);
 
     const handleEditDrawerSuccess = () => {
         setIsEditDrawerOpen(false);
@@ -243,11 +290,16 @@ export default function Index({ applications, filters, cities, properties, units
     const hasViewPermission = hasPermission('applications.show');
     const hasEditPermission = hasAnyPermission(['applications.edit', 'applications.update']);
     const hasDeletePermission = hasPermission('applications.destroy');
+
+    // ✅ if you have permissions like payments.hide, use that.
+    // If not, you can tie it to applications.update (or whatever you use).
+    const hasHidePermission = hasAnyPermission(['applications.hide', 'applications.update']);
     const hasAnyActionPermission = hasAnyPermission([
         'applications.show',
         'applications.edit',
         'applications.update',
         'applications.destroy',
+        'applications.hide',
     ]);
 
     return (
@@ -277,39 +329,43 @@ export default function Index({ applications, filters, cities, properties, units
                             />
                         </CardHeader>
 
-                <CardContent>
-                    {applications.data.length > 0 ? (
-                        <>
-                            <ApplicationsTable
-                                applications={applications.data}
-                                onEdit={handleEditClick}
-                                onDelete={handleDelete}
-                                hasViewPermission={hasViewPermission}
-                                hasEditPermission={hasEditPermission}
-                                hasDeletePermission={hasDeletePermission}
-                                hasAnyActionPermission={hasAnyActionPermission}
-                                filters={searchFilters}
-                            />
-                            <Pagination
-                                links={applications.links}
-                                meta={{
-                                    current_page: applications.current_page,
-                                    last_page: applications.last_page,
-                                    per_page: applications.per_page,
-                                    total: applications.total,
-                                    from: applications.from,
-                                    to: applications.to,
-                                }}
-                                filters={searchFilters}
-                                perPage={perPage}
-                                onPerPageChange={setPerPage}
-                            />
-                        </>
-                    ) : (
-                        <EmptyState />
-                    )}
-                </CardContent>
-            </Card>
+                        <CardContent>
+                            {applications.data.length > 0 ? (
+                                <>
+                                    <ApplicationsTable
+                                        applications={applications.data}
+                                        onEdit={handleEditClick}
+                                        onDelete={handleDelete}
+                                        onHide={handleHide}
+                                        onUnhide={handleUnhide}
+                                        hasViewPermission={hasViewPermission}
+                                        hasEditPermission={hasEditPermission}
+                                        hasDeletePermission={hasDeletePermission}
+                                        hasHidePermission={hasHidePermission}
+                                        hasAnyActionPermission={hasAnyActionPermission}
+                                        filters={searchFilters}
+                                    />
+
+                                    <Pagination
+                                        links={applications.links}
+                                        meta={{
+                                            current_page: applications.current_page,
+                                            last_page: applications.last_page,
+                                            per_page: applications.per_page,
+                                            total: applications.total,
+                                            from: applications.from,
+                                            to: applications.to,
+                                        }}
+                                        filters={searchFilters}
+                                        perPage={perPage}
+                                        onPerPageChange={setPerPage}
+                                    />
+                                </>
+                            ) : (
+                                <EmptyState />
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
 

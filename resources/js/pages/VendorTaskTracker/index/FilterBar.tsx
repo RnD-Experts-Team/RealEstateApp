@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronDown, Search, X } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface CityOption {
     id: number;
@@ -35,6 +35,7 @@ interface FilterBarProps {
         unit_name?: string;
         vendor_name?: string;
         status?: string;
+        is_hidden?: string | boolean; // ✅ NEW
     };
     cities: CityOption[];
     properties: PropertyOption[];
@@ -52,16 +53,11 @@ const STATUS_OPTIONS = [
     { value: 'Pending', label: 'Pending' },
 ];
 
-export default function FilterBar({
-    filters,
-    cities,
-    properties,
-    units,
-    vendors,
-    onSearch,
-    onClear,
-}: FilterBarProps) {
-    const [tempFilters, setTempFilters] = useState(filters);
+export default function FilterBar({ filters, cities, properties, units, vendors, onSearch, onClear }: FilterBarProps) {
+    const [tempFilters, setTempFilters] = useState<any>({
+        ...filters,
+        is_hidden: String(filters.is_hidden).toLowerCase() === 'true' || filters.is_hidden === true,
+    });
 
     // City autocomplete states
     const [cityInput, setCityInput] = useState(filters.city || '');
@@ -91,36 +87,37 @@ export default function FilterBar({
     // Status filter state
     const [statusInput, setStatusInput] = useState(filters.status || 'exclude_completed');
 
-    // Filter cities based on input
+    useEffect(() => {
+        setTempFilters({
+            ...filters,
+            is_hidden: String(filters.is_hidden).toLowerCase() === 'true' || filters.is_hidden === true,
+        });
+        setCityInput(filters.city || '');
+        setPropertyInput(filters.property || '');
+        setUnitInput(filters.unit_name || '');
+        setVendorInput(filters.vendor_name || '');
+        setStatusInput(filters.status || 'exclude_completed');
+    }, [filters]);
+
     useEffect(() => {
         if (!cities) return;
 
         if (cityInput.trim() === '') {
             setFilteredCities(cities);
         } else {
-            const filtered = cities.filter((city) =>
-                city.city.toLowerCase().includes(cityInput.toLowerCase())
-            );
+            const filtered = cities.filter((city) => city.city.toLowerCase().includes(cityInput.toLowerCase()));
             setFilteredCities(filtered);
         }
     }, [cityInput, cities]);
 
-    // Filter properties based on input
     const filteredProperties =
-        properties?.filter((property) =>
-            property.property_name.toLowerCase().includes(propertyInput.toLowerCase())
-        ) || [];
+        properties?.filter((property) => property.property_name.toLowerCase().includes(propertyInput.toLowerCase())) || [];
 
-    // Filter vendors based on input
     const filteredVendors =
-        vendors?.filter((vendor) =>
-            vendor.vendor_name.toLowerCase().includes(vendorInput.toLowerCase())
-        ) || [];
+        vendors?.filter((vendor) => vendor.vendor_name.toLowerCase().includes(vendorInput.toLowerCase())) || [];
 
-    const filteredUnits =
-        units?.filter((unit) => unit.unit_name.toLowerCase().includes(unitInput.toLowerCase())) || [];
+    const filteredUnits = units?.filter((unit) => unit.unit_name.toLowerCase().includes(unitInput.toLowerCase())) || [];
 
-    // Handle clicks outside dropdowns
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -161,8 +158,8 @@ export default function FilterBar({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleTempFilterChange = (key: keyof typeof tempFilters, value: string) => {
-        setTempFilters({ ...tempFilters, [key]: value });
+    const handleTempFilterChange = (key: string, value: any) => {
+        setTempFilters((prev: any) => ({ ...prev, [key]: value }));
     };
 
     const handleCitySelect = (city: string) => {
@@ -171,63 +168,18 @@ export default function FilterBar({
         setShowCityDropdown(false);
     };
 
-    const handleCityInputChange = (value: string) => {
-        setCityInput(value);
-        handleTempFilterChange('city', value);
-        setShowCityDropdown(true);
-    };
-
-    const handlePropertyInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setPropertyInput(value);
-        handleTempFilterChange('property', value);
-        setShowPropertyDropdown(value.length > 0);
-    };
-
-    const handlePropertySelect = (property: PropertyOption) => {
-        setPropertyInput(property.property_name);
-        handleTempFilterChange('property', property.property_name);
-        setShowPropertyDropdown(false);
-    };
-
-    const handleUnitInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setUnitInput(value);
-        handleTempFilterChange('unit_name', value);
-        setShowUnitDropdown(value.length > 0);
-    };
-
-    const handleUnitSelect = (unit: UnitOption) => {
-        setUnitInput(unit.unit_name);
-        handleTempFilterChange('unit_name', unit.unit_name);
-        setShowUnitDropdown(false);
-    };
-
-    const handleVendorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setVendorInput(value);
-        handleTempFilterChange('vendor_name', value);
-        setShowVendorDropdown(value.length > 0);
-    };
-
-    const handleVendorSelect = (vendor: VendorOption) => {
-        setVendorInput(vendor.vendor_name);
-        handleTempFilterChange('vendor_name', vendor.vendor_name);
-        setShowVendorDropdown(false);
-    };
-
-    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        setStatusInput(value);
-        handleTempFilterChange('status', value);
-    };
-
     const handleSearchClick = () => {
-        onSearch(tempFilters);
+        const payload: any = { ...tempFilters };
+
+        // only send is_hidden when true (like your MoveIn style)
+        if (payload.is_hidden) payload.is_hidden = 'true';
+        else delete payload.is_hidden;
+
+        onSearch(payload);
     };
 
     const handleClearFilters = () => {
-        setTempFilters({});
+        setTempFilters({ status: 'exclude_completed', is_hidden: false });
         setCityInput('');
         setPropertyInput('');
         setUnitInput('');
@@ -241,15 +193,19 @@ export default function FilterBar({
     };
 
     return (
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-7">
-            {/* City Filter with Autocomplete */}
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-8">
+            {/* City */}
             <div className="relative">
                 <Input
                     ref={cityInputRef}
                     type="text"
                     placeholder="Filter by City"
                     value={cityInput}
-                    onChange={(e) => handleCityInputChange(e.target.value)}
+                    onChange={(e) => {
+                        setCityInput(e.target.value);
+                        handleTempFilterChange('city', e.target.value);
+                        setShowCityDropdown(true);
+                    }}
                     onFocus={() => setShowCityDropdown(true)}
                     className="text-input-foreground bg-input pr-8"
                 />
@@ -273,14 +229,18 @@ export default function FilterBar({
                 )}
             </div>
 
-            {/* Property Filter with Autocomplete */}
+            {/* Property */}
             <div className="relative">
                 <Input
                     ref={propertyInputRef}
                     type="text"
                     placeholder="Filter by Property"
                     value={propertyInput}
-                    onChange={handlePropertyInputChange}
+                    onChange={(e) => {
+                        setPropertyInput(e.target.value);
+                        handleTempFilterChange('property', e.target.value);
+                        setShowPropertyDropdown(e.target.value.length > 0);
+                    }}
                     onFocus={() => setShowPropertyDropdown(true)}
                     className="text-input-foreground bg-input pr-8"
                 />
@@ -295,7 +255,11 @@ export default function FilterBar({
                             <div
                                 key={property.id}
                                 className="cursor-pointer px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                                onClick={() => handlePropertySelect(property)}
+                                onClick={() => {
+                                    setPropertyInput(property.property_name);
+                                    handleTempFilterChange('property', property.property_name);
+                                    setShowPropertyDropdown(false);
+                                }}
                             >
                                 {property.property_name}
                             </div>
@@ -304,14 +268,18 @@ export default function FilterBar({
                 )}
             </div>
 
-            {/* Unit Filter with Autocomplete */}
+            {/* Unit */}
             <div className="relative">
                 <Input
                     ref={unitInputRef}
                     type="text"
                     placeholder="Filter by Unit"
                     value={unitInput}
-                    onChange={handleUnitInputChange}
+                    onChange={(e) => {
+                        setUnitInput(e.target.value);
+                        handleTempFilterChange('unit_name', e.target.value);
+                        setShowUnitDropdown(e.target.value.length > 0);
+                    }}
                     onFocus={() => setShowUnitDropdown(true)}
                     className="text-input-foreground bg-input pr-8"
                 />
@@ -326,7 +294,11 @@ export default function FilterBar({
                             <div
                                 key={unit.id}
                                 className="cursor-pointer px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                                onClick={() => handleUnitSelect(unit)}
+                                onClick={() => {
+                                    setUnitInput(unit.unit_name);
+                                    handleTempFilterChange('unit_name', unit.unit_name);
+                                    setShowUnitDropdown(false);
+                                }}
                             >
                                 {unit.unit_name}
                             </div>
@@ -335,14 +307,18 @@ export default function FilterBar({
                 )}
             </div>
 
-            {/* Vendor Filter with Autocomplete */}
+            {/* Vendor */}
             <div className="relative">
                 <Input
                     ref={vendorInputRef}
                     type="text"
                     placeholder="Filter by Vendor"
                     value={vendorInput}
-                    onChange={handleVendorInputChange}
+                    onChange={(e) => {
+                        setVendorInput(e.target.value);
+                        handleTempFilterChange('vendor_name', e.target.value);
+                        setShowVendorDropdown(e.target.value.length > 0);
+                    }}
                     onFocus={() => setShowVendorDropdown(true)}
                     className="text-input-foreground bg-input pr-8"
                 />
@@ -357,24 +333,27 @@ export default function FilterBar({
                             <div
                                 key={vendor.id}
                                 className="cursor-pointer px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                                onClick={() => handleVendorSelect(vendor)}
+                                onClick={() => {
+                                    setVendorInput(vendor.vendor_name);
+                                    handleTempFilterChange('vendor_name', vendor.vendor_name);
+                                    setShowVendorDropdown(false);
+                                }}
                             >
                                 {vendor.vendor_name}
-                                {vendor.city && (
-                                    <span className="ml-2 text-xs text-muted-foreground">
-                                        ({vendor.city})
-                                    </span>
-                                )}
+                                {vendor.city && <span className="ml-2 text-xs text-muted-foreground">({vendor.city})</span>}
                             </div>
                         ))}
                     </div>
                 )}
             </div>
 
-            {/* Status Filter Dropdown */}
+            {/* Status */}
             <select
                 value={statusInput}
-                onChange={handleStatusChange}
+                onChange={(e) => {
+                    setStatusInput(e.target.value);
+                    handleTempFilterChange('status', e.target.value);
+                }}
                 className="rounded-md border border-input bg-input px-3 py-2 text-sm text-input-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
                 {STATUS_OPTIONS.map((option) => (
@@ -384,13 +363,35 @@ export default function FilterBar({
                 ))}
             </select>
 
-            {/* Search Button */}
+            {/* ✅ Visible/Hidden toggle */}
+            <div className="flex items-center">
+                <div className="w-full flex items-center rounded-md border border-input bg-input p-1 h-10">
+                    <Button
+                        type="button"
+                        variant={!tempFilters.is_hidden ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => handleTempFilterChange('is_hidden', false)}
+                    >
+                        Visible
+                    </Button>
+                    <Button
+                        type="button"
+                        variant={tempFilters.is_hidden ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => handleTempFilterChange('is_hidden', true)}
+                    >
+                        Hidden
+                    </Button>
+                </div>
+            </div>
+
             <Button onClick={handleSearchClick} variant="default" className="flex items-center">
                 <Search className="mr-2 h-4 w-4" />
                 Search
             </Button>
 
-            {/* Clear Filters Button */}
             <Button onClick={handleClearFilters} variant="outline" className="flex items-center">
                 <X className="mr-2 h-4 w-4" />
                 Clear

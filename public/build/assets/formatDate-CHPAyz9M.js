@@ -1,0 +1,1 @@
+import{f as s}from"./format-DUNHsrA7.js";const u=(r,t="-")=>{if(!r)return t;const e=/^(\d{4})-(\d{2})-(\d{2})/.exec(r);if(!e)return t;const[,o,m,n]=e,f=new Date(Number(o),Number(m)-1,Number(n));return s(f,"P")};export{u as f};

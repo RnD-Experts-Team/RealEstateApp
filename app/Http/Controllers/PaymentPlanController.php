@@ -8,6 +8,7 @@ use App\Models\PaymentPlan;
 use App\Services\PaymentPlanService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Http\RedirectResponse;
 
 class PaymentPlanController extends Controller
 {
@@ -36,13 +37,16 @@ class PaymentPlanController extends Controller
         $tenant = $request->get('tenant');
         $perPageParam = $request->get('per_page', 15);
         $perPage = is_numeric($perPageParam) ? (int) $perPageParam : ($perPageParam === 'all' ? 'all' : 15);
+$isHidden = filter_var($request->get('is_hidden', false), FILTER_VALIDATE_BOOLEAN);
 
         // Decide which dataset to retrieve based on filters/search
         if ($city || $property || $unit || $tenant) {
-            $paymentPlans = $this->paymentPlanService->filterPaymentPlansByNames($city, $property, $unit, $tenant, $perPage);
-        } else {
-            $paymentPlans = $this->paymentPlanService->getAllPaymentPlans($perPage);
-        }
+    $paymentPlans = $this->paymentPlanService
+        ->filterPaymentPlansByNames($city, $property, $unit, $tenant, $perPage, $isHidden);
+} else {
+    $paymentPlans = $this->paymentPlanService
+        ->getAllPaymentPlans($perPage, $isHidden);
+}
 
         // Transform the data to include the user-friendly names
         $paymentPlans->getCollection()->transform(function ($plan) {
@@ -59,6 +63,7 @@ class PaymentPlanController extends Controller
                 'status' => $plan->status,
                 'dates' => $plan->dates,
                 'notes' => $plan->notes,
+                'is_hidden' => (bool) $plan->is_hidden,
                 'created_at' => $plan->created_at,
                 'updated_at' => $plan->updated_at,
             ];
@@ -74,6 +79,7 @@ class PaymentPlanController extends Controller
                 'property' => $property,
                 'unit' => $unit,
                 'tenant' => $tenant,
+                'is_hidden' => $isHidden,
             ],
             'perPage' => $perPageParam,
             'cities' => $dropdownData['cities'],
@@ -97,6 +103,7 @@ class PaymentPlanController extends Controller
             'property' => $request->input('property'),
             'unit' => $request->input('unit'),
             'tenant' => $request->input('tenant'),
+            'is_hidden' => $request->input('is_hidden'),
             'per_page' => $request->input('per_page'),
             'page' => $request->input('page'),
         ], fn($v) => !is_null($v) && $v !== '');
@@ -117,9 +124,9 @@ class PaymentPlanController extends Controller
         $tenant = request()->get('tenant');
         $perPageParam = request()->get('per_page', 15);
         $pageParam = request()->get('page');
-
+$isHidden = filter_var(request()->get('is_hidden', false), FILTER_VALIDATE_BOOLEAN);
         // Compute adjacent record IDs based on filters and index ordering
-        $adjacent = $this->paymentPlanService->getAdjacentPaymentPlanIds($paymentPlan->id, $city, $property, $unit, $tenant);
+        $adjacent = $this->paymentPlanService->getAdjacentPaymentPlanIds($paymentPlan->id, $city, $property, $unit, $tenant,$isHidden);
 
         // Transform the data to include user-friendly names
         $transformedPlan = [
@@ -135,6 +142,7 @@ class PaymentPlanController extends Controller
             'status' => $paymentPlan->status,
             'dates' => $paymentPlan->dates,
             'notes' => $paymentPlan->notes,
+            'is_hidden' => (bool) $paymentPlan->is_hidden,
             'created_at' => $paymentPlan->created_at,
             'updated_at' => $paymentPlan->updated_at,
         ];
@@ -148,6 +156,7 @@ class PaymentPlanController extends Controller
                 'property' => $property,
                 'unit' => $unit,
                 'tenant' => $tenant,
+                'is_hidden' => $isHidden,
             ],
             'search' => $search,
             'perPage' => $perPageParam,
@@ -168,6 +177,7 @@ class PaymentPlanController extends Controller
             'tenant' => $request->input('tenant'),
             'per_page' => $request->input('per_page'),
             'page' => $request->input('page'),
+            'is_hidden' => $request->input('is_hidden'),
         ], fn($v) => !is_null($v) && $v !== '');
 
         return redirect()->route('payment-plans.index', $queryParams)
@@ -187,6 +197,7 @@ class PaymentPlanController extends Controller
             'tenant' => $request->input('tenant'),
             'per_page' => $request->input('per_page'),
             'page' => $request->input('page'),
+            'is_hidden' => $request->input('is_hidden'),
         ], fn($v) => !is_null($v) && $v !== '');
 
         return redirect()->route('payment-plans.index', $queryParams)
@@ -199,4 +210,42 @@ class PaymentPlanController extends Controller
         
         return response()->json($tenants);
     }
+
+    public function hide(Request $request, PaymentPlan $payment_plan): RedirectResponse
+{
+    $this->paymentPlanService->hidePaymentPlan($payment_plan);
+
+    $queryParams = array_filter([
+        'search' => $request->input('search'),
+        'city' => $request->input('city'),
+        'property' => $request->input('property'),
+        'unit' => $request->input('unit'),
+        'tenant' => $request->input('tenant'),
+        'is_hidden' => $request->input('is_hidden'), // keep current tab
+        'per_page' => $request->input('per_page'),
+        'page' => $request->input('page'),
+    ], fn($v) => !is_null($v) && $v !== '');
+
+    return redirect()->route('payment-plans.index', $queryParams)
+        ->with('success', 'Payment plan hidden.');
+}
+
+public function unhide(Request $request, PaymentPlan $payment_plan): RedirectResponse
+{
+    $this->paymentPlanService->unhidePaymentPlan($payment_plan);
+
+    $queryParams = array_filter([
+        'search' => $request->input('search'),
+        'city' => $request->input('city'),
+        'property' => $request->input('property'),
+        'unit' => $request->input('unit'),
+        'tenant' => $request->input('tenant'),
+        'is_hidden' => $request->input('is_hidden'), // keep current tab
+        'per_page' => $request->input('per_page'),
+        'page' => $request->input('page'),
+    ], fn($v) => !is_null($v) && $v !== '');
+
+    return redirect()->route('payment-plans.index', $queryParams)
+        ->with('success', 'Payment plan unhidden.');
+}
 }

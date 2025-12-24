@@ -34,6 +34,7 @@ class VendorTaskTracker extends Model
         'is_archived' => 'boolean',
         'vendor_id' => 'integer',
         'unit_id' => 'integer',
+        'is_hidden' => 'boolean',
     ];
 
     /**

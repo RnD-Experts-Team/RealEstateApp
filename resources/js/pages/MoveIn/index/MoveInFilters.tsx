@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { City } from '@/types/City';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { Search, X } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface UnitData {
     id: number;
@@ -21,8 +21,9 @@ interface MoveInFiltersProps {
         city: string;
         property: string;
         unit: string;
+        is_hidden: boolean; // ✅ NEW
     };
-    onSearch: (filters: { city: string; property: string; unit: string }) => void;
+    onSearch: (filters: { city: string; property: string; unit: string; is_hidden: boolean }) => void; // ✅
     onClear: () => void;
     hasActiveFilters: boolean;
 }
@@ -37,6 +38,11 @@ export default function MoveInFilters({
     hasActiveFilters,
 }: MoveInFiltersProps) {
     const [tempFilters, setTempFilters] = useState(initialFilters);
+
+    useEffect(() => {
+        setTempFilters(initialFilters);
+    }, [initialFilters]);
+
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
     const [showUnitDropdown, setShowUnitDropdown] = useState(false);
@@ -45,36 +51,35 @@ export default function MoveInFilters({
     const propertyInputRef = useRef<HTMLInputElement>(null);
     const unitInputRef = useRef<HTMLInputElement>(null);
 
-    // Filter cities based on input
     const filteredCities = cities
-        .map((city) => city.city)
+        .map((c) => c.city)
         .filter((name, index, self) => self.indexOf(name) === index)
         .filter((name) => name.toLowerCase().includes(tempFilters.city.toLowerCase()));
 
-    // Filter properties based on input
     const filteredProperties = properties
-        .map((property) => property.property_name)
+        .map((p) => p.property_name)
         .filter((name, index, self) => self.indexOf(name) === index)
         .filter((name) => name.toLowerCase().includes(tempFilters.property.toLowerCase()));
 
-    const filteredUnits = Array.from(new Set(units.map((u) => u.unit_name)))
-        .filter((name) => name.toLowerCase().includes(tempFilters.unit.toLowerCase()));
+    const filteredUnits = Array.from(new Set(units.map((u) => u.unit_name))).filter((name) =>
+        name.toLowerCase().includes(tempFilters.unit.toLowerCase()),
+    );
 
-    const handleTempFilterChange = (key: string, value: string) => {
+    const handleTempFilterChange = (key: keyof typeof tempFilters, value: any) => {
         setTempFilters((prev) => ({ ...prev, [key]: value }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const { city, property, unit } = tempFilters;
-        onSearch({ city, property, unit });
+        const { city, property, unit, is_hidden } = tempFilters;
+        onSearch({ city, property, unit, is_hidden });
     };
 
     return (
         <CardHeader>
             <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-                    {/* City Filter */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
+                    {/* City */}
                     <div className="relative">
                         <Input
                             ref={cityInputRef}
@@ -108,7 +113,7 @@ export default function MoveInFilters({
                         )}
                     </div>
 
-                    {/* Property Filter */}
+                    {/* Property */}
                     <div className="relative">
                         <Input
                             ref={propertyInputRef}
@@ -142,7 +147,7 @@ export default function MoveInFilters({
                         )}
                     </div>
 
-                    {/* Unit Filter */}
+                    {/* Unit */}
                     <div className="relative">
                         <Input
                             ref={unitInputRef}
@@ -175,29 +180,52 @@ export default function MoveInFilters({
                             </div>
                         )}
                     </div>
-                    {/* Submit Filters */}
-                    <div className="flex gap-2 md:col-span-2">
-                        <Button type="submit" size="sm">
+
+                    {/* ✅ Visible/Hidden toggle */}
+                    <div className="flex items-center">
+                        <div className="w-full flex items-center rounded-md border border-input bg-input p-1 h-10">
+                            <Button
+                                type="button"
+                                variant={tempFilters.is_hidden ? 'outline' : 'default'}
+                                size="sm"
+                                className="flex-1 h-8"
+                                onClick={() => handleTempFilterChange('is_hidden', false)}
+                            >
+                                Visible
+                            </Button>
+                            <Button
+                                type="button"
+                                variant={tempFilters.is_hidden ? 'default' : 'outline'}
+                                size="sm"
+                                className="flex-1 h-8"
+                                onClick={() => handleTempFilterChange('is_hidden', true)}
+                            >
+                                Hidden
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Search */}
+                    <div className="flex gap-2">
+                        <Button type="submit" size="sm" className="w-full lg:w-auto">
                             <Search className="h-4 w-4" />
                         </Button>
                     </div>
 
-                    {/* Clear Filters Button */}
-                    <div className="flex justify-end">
+                    {/* Clear */}
+                    <div className="flex justify-end lg:justify-start">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => {
-                                // Immediately clear local inputs
-                                setTempFilters({ city: '', property: '', unit: '' });
+                                setTempFilters({ city: '', property: '', unit: '', is_hidden: false });
                                 setShowCityDropdown(false);
                                 setShowPropertyDropdown(false);
                                 setShowUnitDropdown(false);
-                                // Trigger parent clear to reload results
                                 onClear();
                             }}
                             size="sm"
-                            className="flex items-center"
+                            className="flex items-center w-full lg:w-auto"
                             disabled={!hasActiveFilters}
                         >
                             <X className="mr-2 h-4 w-4" />

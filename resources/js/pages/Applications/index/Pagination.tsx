@@ -17,7 +17,7 @@ interface PaginationLinkItem {
 }
 
 interface Filters {
-    [key: string]: string | undefined;
+    [key: string]: string | boolean | undefined;
 }
 
 interface PaginationMeta {
@@ -40,13 +40,25 @@ interface PaginationProps {
 const PER_PAGE_OPTIONS = ['15', '30', '50', 'all'];
 
 export default function Pagination({ links, meta, filters, perPage, onPerPageChange }: PaginationProps) {
-
     const buildParams = (extra: Record<string, any> = {}) => {
         const params: Record<string, any> = {};
+
         Object.keys(filters || {}).forEach((k) => {
             const v = filters[k];
-            if (v !== undefined && v !== '') params[k] = v;
+
+            // Special handling: mimic Payments behavior
+            // Only send is_hidden when it's true
+            if (k === 'is_hidden') {
+                if (v === true) params.is_hidden = 'true';
+                return;
+            }
+
+            // Default: include non-empty strings
+            if (typeof v === 'string' && v !== '') {
+                params[k] = v;
+            }
         });
+
         params.per_page = extra.per_page ?? perPage;
         return { ...params, ...extra };
     };
@@ -68,11 +80,16 @@ export default function Pagination({ links, meta, filters, perPage, onPerPageCha
             return;
         }
         if (!url) return;
+
+        // If the link URLs already include query params from Laravel pagination,
+        // you could navigate directly. But to guarantee we keep our filters,
+        // we prefer using route + params when possible.
         router.get(url, {}, { preserveState: true, preserveScroll: true });
     };
 
     const renderLink = (link: PaginationLinkItem, index: number) => {
         const lower = link.label.toLowerCase();
+
         if (lower.includes('previous')) {
             return (
                 <PaginationItem key={`prev-${index}`}>
@@ -81,13 +98,14 @@ export default function Pagination({ links, meta, filters, perPage, onPerPageCha
                         href={link.url || '#'}
                         onClick={(e) => {
                             e.preventDefault();
-                            navigateTo(link.url, (meta.current_page || 2) - 1);
+                            navigateTo(null, (meta.current_page || 2) - 1);
                         }}
                         className={!link.url ? 'pointer-events-none opacity-50' : ''}
                     />
                 </PaginationItem>
             );
         }
+
         if (lower.includes('next')) {
             return (
                 <PaginationItem key={`next-${index}`}>
@@ -96,13 +114,14 @@ export default function Pagination({ links, meta, filters, perPage, onPerPageCha
                         href={link.url || '#'}
                         onClick={(e) => {
                             e.preventDefault();
-                            navigateTo(link.url, (meta.current_page || 1) + 1);
+                            navigateTo(null, (meta.current_page || 1) + 1);
                         }}
                         className={!link.url ? 'pointer-events-none opacity-50' : ''}
                     />
                 </PaginationItem>
             );
         }
+
         if (link.label === '...') {
             return (
                 <PaginationItem key={`ellipsis-${index}`}>
@@ -110,7 +129,9 @@ export default function Pagination({ links, meta, filters, perPage, onPerPageCha
                 </PaginationItem>
             );
         }
+
         const pageNum = Number(link.label);
+
         return (
             <PaginationItem key={`page-${index}`}>
                 <PaginationLink
@@ -139,6 +160,7 @@ export default function Pagination({ links, meta, filters, perPage, onPerPageCha
                     {Array.isArray(links) && links.length > 0 && links.map((l, i) => renderLink(l, i))}
                 </PaginationContent>
             </UiPagination>
+
             <div className="w-32">
                 <Select value={perPage} onValueChange={(value) => handlePerPageChange(value)}>
                     <SelectTrigger className="relative z-50">

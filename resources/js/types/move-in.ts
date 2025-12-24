@@ -17,6 +17,7 @@ export interface MoveIn {
     date_of_move_in_form_filled: string | null;  // ISO string date
     submitted_insurance: 'Yes' | 'No' | null;
     date_of_insurance_expiration: string | null;  // ISO string date
+    is_hidden: boolean; // ✅ NEW
     is_archived: boolean;
     created_at: string;
     updated_at: string;

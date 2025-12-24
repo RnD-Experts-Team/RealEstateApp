@@ -23,6 +23,7 @@ export interface MoveOut {
     renter: 'Yes' | 'No' | null;
     move_out_form: 'filled' | 'not filled' | null;
     utility_type: string | null;
+    is_hidden: boolean;
     created_at: string;
     updated_at: string;
 }

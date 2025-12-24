@@ -20,19 +20,13 @@ interface TaskTableProps {
         unit_name?: string;
         vendor_name?: string;
         status?: string;
+        is_hidden?: string | boolean; // ✅ NEW
         per_page?: string;
         page?: number;
     };
 }
 
-export default function TaskTable({
-    tasks,
-    formatDateOnly,
-    onEdit,
-    onDelete,
-    permissions,
-    filters,
-}: TaskTableProps) {
+export default function TaskTable({ tasks, formatDateOnly, onEdit, onDelete, permissions, filters }: TaskTableProps) {
     return (
         <div className="relative overflow-x-auto">
             <Table className="border-collapse rounded-md border border-border">
@@ -50,28 +44,20 @@ export default function TaskTable({
                         <TableHead className="sticky left-[390px] z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">
                             Vendor Name
                         </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">
-                            Submission Date
-                        </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">
-                            Assigned Tasks
-                        </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">
-                            Scheduled Visits
-                        </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">
-                            Task End Date
-                        </TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground">Submission Date</TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground">Assigned Tasks</TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground">Scheduled Visits</TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground">Task End Date</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Notes</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Status</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Urgent</TableHead>
+
                         {permissions.hasAnyPermission && (
-                            <TableHead className="border border-border bg-muted text-muted-foreground">
-                                Actions
-                            </TableHead>
+                            <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>
                         )}
                     </TableRow>
                 </TableHeader>
+
                 <TableBody>
                     {tasks.map((task) => (
                         <TaskTableRow

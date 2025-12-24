@@ -1,20 +1,23 @@
+// resources/js/Pages/PaymentPlans/index/PaymentPlansTable.tsx
 import { Card, CardContent } from '@/components/ui/card';
-import {
-    Table,
-    TableBody,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PaymentPlan, PaginatedResponse } from '@/types/PaymentPlan';
 import { usePermissions } from '@/hooks/usePermissions';
 import PaymentPlanTableRow from './PaymentPlanTableRow';
 import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
 
+interface Filters {
+    city?: string | null;
+    property?: string | null;
+    unit?: string | null;
+    tenant?: string | null;
+    is_hidden?: boolean | null;
+}
+
 interface PaymentPlansTableProps {
     paymentPlans: PaginatedResponse<PaymentPlan>;
-    filters?: { city?: string | null; property?: string | null; unit?: string | null; tenant?: string | null };
+    filters?: Filters;
     perPage: number | string; // may arrive as '15' or 'all' from backend
     search?: string | null;
     onEdit: (plan: PaymentPlan) => void;
@@ -38,6 +41,8 @@ export default function PaymentPlansTable({ paymentPlans, filters, perPage, sear
         return String(metaPer);
     })();
 
+    const isHiddenParam = filters?.is_hidden ? 'true' : undefined;
+
     const handlePerPageChange = (value: string) => {
         const nextPerPage = value === 'all' ? 'all' : parseInt(value, 10);
         router.get(
@@ -47,9 +52,11 @@ export default function PaymentPlansTable({ paymentPlans, filters, perPage, sear
                 property: filters?.property || undefined,
                 unit: filters?.unit || undefined,
                 tenant: filters?.tenant || undefined,
+                is_hidden: isHiddenParam, // ✅ keep tab
                 per_page: nextPerPage,
+                page: 1,
             },
-            { preserveState: true }
+            { preserveState: true, preserveScroll: true },
         );
     };
 
@@ -62,10 +69,11 @@ export default function PaymentPlansTable({ paymentPlans, filters, perPage, sear
                 property: filters?.property || undefined,
                 unit: filters?.unit || undefined,
                 tenant: filters?.tenant || undefined,
+                is_hidden: isHiddenParam, // ✅ keep tab
                 page,
                 per_page: selectedPerPage,
             },
-            { preserveState: true }
+            { preserveState: true, preserveScroll: true },
         );
     };
 
@@ -94,11 +102,13 @@ export default function PaymentPlansTable({ paymentPlans, filters, perPage, sear
                                 <TableHead className="border border-border bg-muted text-muted-foreground">Status</TableHead>
                                 <TableHead className="border border-border bg-muted text-muted-foreground">Date</TableHead>
                                 <TableHead className="border border-border bg-muted text-muted-foreground">Note</TableHead>
+
                                 {hasAnyPermission(['payment-plans.show', 'payment-plans.edit', 'payment-plans.update', 'payment-plans.destroy']) && (
                                     <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>
                                 )}
                             </TableRow>
                         </TableHeader>
+
                         <TableBody>
                             {paymentPlans.data.map((plan: PaymentPlan) => (
                                 <PaymentPlanTableRow
@@ -123,7 +133,6 @@ export default function PaymentPlansTable({ paymentPlans, filters, perPage, sear
                     </div>
                 )}
 
-                {/* Pagination Footer */}
                 <div className="mt-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div className="text-sm text-muted-foreground">
                         Showing {from ?? 0}-{to ?? paymentPlans.data.length} of {total}

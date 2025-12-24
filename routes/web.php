@@ -122,9 +122,16 @@ Route::middleware(['auth'])->group(function () {
 
     // Vendor Task Tracker
     Route::resource('vendor-task-tracker', VendorTaskTrackerController::class);
+Route::patch('/vendor-task-tracker/{vendorTaskTracker}/hide', [VendorTaskTrackerController::class, 'hide'])
+    ->name('vendor-task-tracker.hide');
+Route::patch('/vendor-task-tracker/{vendorTaskTracker}/unhide', [VendorTaskTrackerController::class, 'unhide'])
+    ->name('vendor-task-tracker.unhide');
 
     // Move In
-    Route::resource('move-in', MoveInController::class)->except(['create', 'edit', 'show']);
+Route::resource('move-in', MoveInController::class)->except(['create', 'edit', 'show']);
+
+Route::patch('/move-in/{moveIn}/hide', [MoveInController::class, 'hide'])->name('move-in.hide');
+Route::patch('/move-in/{moveIn}/unhide', [MoveInController::class, 'unhide'])->name('move-in.unhide');
 
     // Demo route for MoveIn Drawer component
     Route::get('move-in-drawer-demo', function () {
@@ -136,6 +143,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Move Out
     Route::resource('move-out', MoveOutController::class);
+    Route::patch('move-out/{moveOut}/hide', [MoveOutController::class, 'hide'])
+    ->name('move-out.hide');
+    Route::patch('move-out/{moveOut}/unhide', [MoveOutController::class, 'unhide'])
+    ->name('move-out.unhide');
 
     // Offers & Renewals
     Route::resource('offers_and_renewals', OffersAndRenewalController::class);
@@ -145,6 +156,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Applications
     Route::resource('applications', ApplicationController::class);
+    Route::patch('/applications/{application}/hide', [ApplicationController::class, 'hide'])
+    ->name('applications.hide');
+    Route::patch('/applications/{application}/unhide', [ApplicationController::class, 'unhide'])
+    ->name('applications.unhide');
     Route::get('/applications/{application}/download/{index}', [ApplicationController::class, 'downloadAttachment'])
         ->name('applications.download');
 
@@ -153,7 +168,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Payment Plans
     Route::resource('payment-plans', PaymentPlanController::class);
-
+    Route::patch('/payment-plans/{payment_plan}/hide', [PaymentPlanController::class, 'hide'])
+        ->name('payment-plans.hide');
+    Route::patch('/payment-plans/{payment_plan}/unhide', [PaymentPlanController::class, 'unhide'])
+        ->name('payment-plans.unhide');
+        
     // Cities
     Route::get('cities', [CityController::class, 'index'])->name('cities.index');
     Route::post('cities', [CityController::class, 'store'])->name('cities.store');

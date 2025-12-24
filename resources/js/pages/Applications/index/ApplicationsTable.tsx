@@ -1,4 +1,3 @@
-// resources/js/Pages/Applications/index/ApplicationsTable.tsx
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Application } from '@/types/application';
 import ApplicationsTableRow from './ApplicationsTableRow';
@@ -7,9 +6,12 @@ interface ApplicationsTableProps {
     applications: Application[];
     onEdit: (application: Application) => void;
     onDelete: (application: Application) => void;
+    onHide: (application: Application) => void;
+    onUnhide: (application: Application) => void;
     hasViewPermission: boolean;
     hasEditPermission: boolean;
     hasDeletePermission: boolean;
+    hasHidePermission: boolean;
     hasAnyActionPermission: boolean;
     filters?: {
         city: string;
@@ -17,6 +19,7 @@ interface ApplicationsTableProps {
         unit: string;
         name: string;
         applicant_applied_from: string;
+        is_hidden: boolean;
     };
 }
 
@@ -24,9 +27,12 @@ export default function ApplicationsTable({
     applications,
     onEdit,
     onDelete,
+    onHide,
+    onUnhide,
     hasViewPermission,
     hasEditPermission,
     hasDeletePermission,
+    hasHidePermission,
     hasAnyActionPermission,
     filters,
 }: ApplicationsTableProps) {
@@ -52,11 +58,13 @@ export default function ApplicationsTable({
                         <TableHead className="border border-border bg-muted text-muted-foreground">Stage</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Note</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Files</TableHead>
+
                         {hasAnyActionPermission && (
                             <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>
                         )}
                     </TableRow>
                 </TableHeader>
+
                 <TableBody>
                     {applications.map((application) => (
                         <ApplicationsTableRow
@@ -64,9 +72,12 @@ export default function ApplicationsTable({
                             application={application}
                             onEdit={onEdit}
                             onDelete={onDelete}
+                            onHide={onHide}
+                            onUnhide={onUnhide}
                             hasViewPermission={hasViewPermission}
                             hasEditPermission={hasEditPermission}
                             hasDeletePermission={hasDeletePermission}
+                            hasHidePermission={hasHidePermission}
                             filters={filters}
                         />
                     ))}

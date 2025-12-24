@@ -41,6 +41,7 @@ class MoveOut extends Model
         'date_lease_ending_on_buildium' => 'date',
         'date_utility_put_under_our_name' => 'date',
         'is_archived' => 'boolean',
+        'is_hidden' => 'boolean', // ✅ NEW
     ];
 
     /**

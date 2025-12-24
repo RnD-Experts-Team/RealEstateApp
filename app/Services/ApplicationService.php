@@ -22,7 +22,12 @@ class ApplicationService
             ->whereHas('unit', function ($unitQuery) {
                 $unitQuery->where('is_archived', false);
             });
-
+$isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+if ($isHiddenFilter) {
+    $query->where('is_hidden', true);
+} else {
+    $query->where('is_hidden', false);
+}
         // Apply filters using relationships
         if (!empty($filters['city'])) {
             $query->whereHas('unit.property.city', function ($cityQuery) use ($filters) {
@@ -93,6 +98,7 @@ class ApplicationService
 
     public function create(array $data): Application
     {
+        unset($data['is_hidden']); // ✅ prevent mass assignment
         // Handle file uploads if attachments are present
         if (isset($data['attachments']) && is_array($data['attachments'])) {
             $attachmentData = $this->handleFileUploads($data['attachments']);
@@ -115,6 +121,8 @@ class ApplicationService
     // App\Services\ApplicationService.php
     public function update(Application $application, array $data): Application
     {
+        unset($data['is_hidden']); // ✅ prevent mass assignment
+
         Log::info('UPDATE payload', [
             'id' => $application->id,
             'removed' => $data['removed_attachment_indices'],
@@ -374,7 +382,12 @@ class ApplicationService
             ->whereHas('unit', function ($unitQuery) {
                 $unitQuery->where('is_archived', false);
             });
-
+$isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+if ($isHiddenFilter) {
+    $query->where('is_hidden', true);
+} else {
+    $query->where('is_hidden', false);
+}
         if (!empty($filters['city'])) {
             $query->whereHas('unit.property.city', function ($cityQuery) use ($filters) {
                 $cityQuery->where('city', 'like', '%' . $filters['city'] . '%');
@@ -455,4 +468,17 @@ class ApplicationService
             'next_id' => $nextId,
         ];
     }
+
+    public function hideApplication(Application $application): bool
+{
+    $application->is_hidden = true;
+    return $application->save();
+}
+
+public function unhideApplication(Application $application): bool
+{
+    $application->is_hidden = false;
+    return $application->save();
+}
+
 }

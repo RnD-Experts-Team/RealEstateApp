@@ -1,3 +1,4 @@
+// resources/js/Pages/PaymentPlans/index/FiltersCard.tsx
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -16,7 +17,13 @@ interface FiltersCardProps {
     properties: Array<{ id: number; property_name: string }>;
     allUnits: Array<{ id: number; unit_name: string }>;
     tenantsData: TenantData[];
-    initialFilters?: { city?: string | null; property?: string | null; unit?: string | null; tenant?: string | null };
+    initialFilters?: {
+        city?: string | null;
+        property?: string | null;
+        unit?: string | null;
+        tenant?: string | null;
+        is_hidden?: boolean | null;
+    };
     perPage: number | string;
 }
 
@@ -26,22 +33,14 @@ export default function FiltersCard({ cities, properties, allUnits, tenantsData,
         property: initialFilters?.property ?? '',
         unit: initialFilters?.unit ?? '',
         tenant: initialFilters?.tenant ?? '',
+        is_hidden: Boolean(initialFilters?.is_hidden) || false,
     });
 
-    const [, setFilters] = useState({
-        city: '',
-        property: '',
-        unit: '',
-        tenant: '',
-    });
-
-    const handleTempFilterChange = (key: string, value: string) => {
+    const handleTempFilterChange = (key: keyof typeof tempFilters, value: any) => {
         setTempFilters((prev) => ({ ...prev, [key]: value }));
     };
 
     const handleSearchClick = () => {
-        setFilters(tempFilters);
-
         router.get(
             route('payment-plans.index'),
             {
@@ -49,9 +48,11 @@ export default function FiltersCard({ cities, properties, allUnits, tenantsData,
                 property: tempFilters.property || undefined,
                 unit: tempFilters.unit || undefined,
                 tenant: tempFilters.tenant || undefined,
+                is_hidden: tempFilters.is_hidden ? 'true' : undefined, // ✅ only send when true
                 per_page: perPage,
+                page: 1,
             },
-            { preserveState: true },
+            { preserveState: true, preserveScroll: true },
         );
     };
 
@@ -61,88 +62,107 @@ export default function FiltersCard({ cities, properties, allUnits, tenantsData,
             property: '',
             unit: '',
             tenant: '',
-        });
-        setFilters({
-            city: '',
-            property: '',
-            unit: '',
-            tenant: '',
+            is_hidden: false,
         });
 
-        router.get(
-            route('payment-plans.index'),
-            { per_page: 15 },
-            { preserveState: false }
-        );
+        router.get(route('payment-plans.index'), { per_page: 15, page: 1 }, { preserveState: false });
     };
 
-    const filteredCities = cities.filter((city) =>
-        city.city.toLowerCase().includes(tempFilters.city.toLowerCase())
+    const filteredCities = cities.filter((c) => c.city.toLowerCase().includes(tempFilters.city.toLowerCase()));
+    const filteredProperties = properties.filter((p) =>
+        p.property_name.toLowerCase().includes(tempFilters.property.toLowerCase()),
     );
-
-    const filteredProperties = properties.filter((property) =>
-        property.property_name.toLowerCase().includes(tempFilters.property.toLowerCase())
-    );
-
-    const filteredUnits = allUnits.filter(unit =>
-        unit.unit_name.toLowerCase().includes(tempFilters.unit.toLowerCase())
-    );
-
-    const filteredTenants = tenantsData.filter(tenant =>
-        tenant.full_name.toLowerCase().includes(tempFilters.tenant.toLowerCase())
+    const filteredUnits = allUnits.filter((u) => u.unit_name.toLowerCase().includes(tempFilters.unit.toLowerCase()));
+    const filteredTenants = tenantsData.filter((t) =>
+        t.full_name.toLowerCase().includes(tempFilters.tenant.toLowerCase()),
     );
 
     return (
         <Card className="bg-card text-card-foreground shadow-lg">
-            <CardHeader>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-                    <FilterInput
-                        placeholder="City"
-                        value={tempFilters.city}
-                        onChange={(value) => handleTempFilterChange('city', value)}
-                        options={filteredCities.map(city => ({ id: city.id, name: city.city }))}
-                        onSelect={(item) => handleTempFilterChange('city', item.name)}
-                    />
+            <CardHeader className="space-y-4">
+                {/* Row 1: Inputs + toggle (consistent height & alignment) */}
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-6">
+                    <div className="md:col-span-1">
+                        <FilterInput
+                            placeholder="City"
+                            value={tempFilters.city}
+                            onChange={(value) => handleTempFilterChange('city', value)}
+                            options={filteredCities.map((c) => ({ id: c.id, name: c.city }))}
+                            onSelect={(item) => handleTempFilterChange('city', item.name)}
+                        />
+                    </div>
 
-                    <FilterInput
-                        placeholder="Property"
-                        value={tempFilters.property}
-                        onChange={(value) => handleTempFilterChange('property', value)}
-                        options={filteredProperties.map(property => ({ id: property.id, name: property.property_name }))}
-                        onSelect={(item) => handleTempFilterChange('property', item.name)}
-                    />
+                    <div className="md:col-span-1">
+                        <FilterInput
+                            placeholder="Property"
+                            value={tempFilters.property}
+                            onChange={(value) => handleTempFilterChange('property', value)}
+                            options={filteredProperties.map((p) => ({ id: p.id, name: p.property_name }))}
+                            onSelect={(item) => handleTempFilterChange('property', item.name)}
+                        />
+                    </div>
 
-                    <FilterInput
-                        placeholder="Unit"
-                        value={tempFilters.unit}
-                        onChange={(value) => handleTempFilterChange('unit', value)}
-                        options={filteredUnits.map(unit => ({ id: unit.id, name: unit.unit_name }))}
-                        onSelect={(item) => handleTempFilterChange('unit', item.name)}
-                    />
+                    <div className="md:col-span-1">
+                        <FilterInput
+                            placeholder="Unit"
+                            value={tempFilters.unit}
+                            onChange={(value) => handleTempFilterChange('unit', value)}
+                            options={filteredUnits.map((u) => ({ id: u.id, name: u.unit_name }))}
+                            onSelect={(item) => handleTempFilterChange('unit', item.name)}
+                        />
+                    </div>
 
-                    <FilterInput
-                        placeholder="Tenant"
-                        value={tempFilters.tenant}
-                        onChange={(value) => handleTempFilterChange('tenant', value)}
-                        options={filteredTenants.map(tenant => ({ id: tenant.id, name: tenant.full_name }))}
-                        onSelect={(item) => handleTempFilterChange('tenant', item.name)}
-                    />
+                    <div className="md:col-span-1">
+                        <FilterInput
+                            placeholder="Tenant"
+                            value={tempFilters.tenant}
+                            onChange={(value) => handleTempFilterChange('tenant', value)}
+                            options={filteredTenants.map((t) => ({ id: t.id, name: t.full_name }))}
+                            onSelect={(item) => handleTempFilterChange('tenant', item.name)}
+                        />
+                    </div>
 
-                    <div className="hidden md:block"></div>
-
-                    <div className="flex gap-2">
-                        <Button onClick={handleSearchClick} variant="default" className="flex items-center">
-                            <Search className="mr-2 h-4 w-4" />
-                            Search
-                        </Button>
-                        <Button onClick={handleClearFilters} variant="outline" className="flex items-center">
-                            <X className="mr-2 h-4 w-4" />
-                            Clear
-                        </Button>
+                    {/* Visible / Hidden toggle */}
+                    <div className="md:col-span-2 flex items-center">
+                        <div className="w-full flex items-center rounded-md border border-input bg-input p-1 h-10">
+                            <Button
+                                type="button"
+                                variant={tempFilters.is_hidden ? 'outline' : 'default'}
+                                size="sm"
+                                className="flex-1 h-8"
+                                onClick={() => handleTempFilterChange('is_hidden', false)}
+                            >
+                                Visible
+                            </Button>
+                            <Button
+                                type="button"
+                                variant={tempFilters.is_hidden ? 'default' : 'outline'}
+                                size="sm"
+                                className="flex-1 h-8"
+                                onClick={() => handleTempFilterChange('is_hidden', true)}
+                            >
+                                Hidden
+                            </Button>
+                        </div>
                     </div>
                 </div>
+
+                {/* Row 2: Actions (right aligned on desktop, full width on mobile) */}
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <Button onClick={handleSearchClick} variant="default" className="w-full sm:w-auto">
+                        <Search className="mr-2 h-4 w-4" />
+                        Search
+                    </Button>
+
+                    <Button onClick={handleClearFilters} variant="outline" className="w-full sm:w-auto">
+                        <X className="mr-2 h-4 w-4" />
+                        Clear
+                    </Button>
+                </div>
             </CardHeader>
-            <CardContent />
+
+            {/* Keep CardContent for spacing consistency with the rest of your pages */}
+            <CardContent className="pt-0" />
         </Card>
     );
 }

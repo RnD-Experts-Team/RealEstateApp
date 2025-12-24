@@ -19,6 +19,7 @@ export interface PaymentPlan {
   left_to_pay: number;
   status: 'Paid' | 'Paid Partly' | "Didn't Pay" | 'N/A';
   notes: string | null;
+  is_hidden: boolean;
   // Timestamps
   created_at: string;
   updated_at: string;

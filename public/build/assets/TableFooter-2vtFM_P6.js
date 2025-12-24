@@ -1,0 +1,1 @@
+import{j as e}from"./app-DqMOGD98.js";import"./app-Dca6SbuN.js";const i=({filteredCount:r,totalCount:t})=>e.jsx("div",{className:"mt-6 flex justify-between items-center border-t border-border pt-4",children:e.jsxs("div",{className:"text-sm text-muted-foreground",children:["Showing ",r," of ",t," offers"]})});export{i as TableFooter};

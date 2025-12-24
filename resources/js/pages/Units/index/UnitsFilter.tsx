@@ -39,20 +39,19 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
     onClear,
 }) => {
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-8">
-            <CityAutocomplete
-                cities={cities}
-                value={cityInput}
-                onChange={onCityInputChange}
-                onSelect={onCitySelect}
-            />
+        // Key fixes:
+        // - items-end: aligns controls + buttons on the same baseline
+        // - consistent field wrappers and consistent control heights (h-9)
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-8 md:items-end">
+            <div className="space-y-1">
+                <Label>City</Label>
+                <CityAutocomplete cities={cities} value={cityInput} onChange={onCityInputChange} onSelect={onCitySelect} />
+            </div>
 
-            <PropertyAutocomplete
-                properties={properties}
-                value={propertyInput}
-                onChange={onPropertyInputChange}
-                onSelect={onPropertySelect}
-            />
+            <div className="space-y-1">
+                <Label>Property</Label>
+                <PropertyAutocomplete properties={properties} value={propertyInput} onChange={onPropertyInputChange} onSelect={onPropertySelect} />
+            </div>
 
             <div className="space-y-1">
                 <Label htmlFor="unit_name">Unit Name</Label>
@@ -62,7 +61,7 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
                     placeholder="Search by unit name"
                     value={filters.unit_name || ''}
                     onChange={(e) => onFilterChange('unit_name', e.target.value)}
-                    className="text-input-foreground bg-input"
+                    className="h-9 text-input-foreground bg-input"
                 />
             </div>
 
@@ -73,6 +72,7 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
                         <SelectValue placeholder="All Vacant Status" />
                     </SelectTrigger>
                     <SelectContent>
+                        {/* keep EXACT values/behavior */}
                         <SelectItem value="all">All Vacant Status</SelectItem>
                         <SelectItem value="Yes">Vacant</SelectItem>
                         <SelectItem value="No">Occupied</SelectItem>
@@ -87,6 +87,7 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
                         <SelectValue placeholder="All Listed Status" />
                     </SelectTrigger>
                     <SelectContent>
+                        {/* keep EXACT values/behavior */}
                         <SelectItem value="all">All Listed Status</SelectItem>
                         <SelectItem value="Yes">Listed</SelectItem>
                         <SelectItem value="No">Not Listed</SelectItem>
@@ -101,6 +102,7 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
                         <SelectValue placeholder="All New Lease" />
                     </SelectTrigger>
                     <SelectContent>
+                        {/* keep EXACT values/behavior */}
                         <SelectItem value="all">All New Lease</SelectItem>
                         <SelectItem value="Yes">New Lease</SelectItem>
                         <SelectItem value="No">Renewal/Existing</SelectItem>
@@ -108,15 +110,20 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
                 </Select>
             </div>
 
-            <Button onClick={onSearch} variant="default" className="flex items-center">
-                <Search className="mr-2 h-4 w-4" />
-                Search
-            </Button>
+            {/* Buttons: same behavior, fixed alignment/height */}
+            <div className="flex gap-2">
+                <Button onClick={onSearch} variant="default" className="h-9 w-full flex items-center justify-center">
+                    <Search className="mr-2 h-4 w-4" />
+                    Search
+                </Button>
+            </div>
 
-            <Button onClick={onClear} variant="outline" className="flex items-center">
-                <X className="mr-2 h-4 w-4" />
-                Clear
-            </Button>
+            <div className="flex gap-2">
+                <Button onClick={onClear} variant="outline" className="h-9 w-full flex items-center justify-center">
+                    <X className="mr-2 h-4 w-4" />
+                    Clear
+                </Button>
+            </div>
         </div>
     );
 };

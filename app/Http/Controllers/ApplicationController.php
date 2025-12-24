@@ -33,8 +33,13 @@ class ApplicationController extends Controller
     public function index(Request $request): Response
     {
         $perPage = $request->get('per_page', 15);
-        $filters = $request->only(['city', 'property', 'name', 'co_signer', 'unit', 'status', 'applicant_applied_from', 'stage_in_progress', 'date_from', 'date_to', 'per_page', 'page']);
-        $filters['city'] = $request->input('filter_city', $filters['city'] ?? '');
+$filters = $request->only([
+    'city', 'property', 'name', 'co_signer', 'unit', 'status',
+    'applicant_applied_from', 'stage_in_progress', 'date_from', 'date_to',
+    'is_hidden', 'per_page', 'page'
+]);
+
+$filters['is_hidden'] = $request->input('filter_is_hidden', $filters['is_hidden'] ?? false);        $filters['city'] = $request->input('filter_city', $filters['city'] ?? '');
         $filters['property'] = $request->input('filter_property', $filters['property'] ?? '');
         $filters['unit'] = $request->input('filter_unit', $filters['unit'] ?? '');
         $filters['name'] = $request->input('filter_name', $filters['name'] ?? '');
@@ -124,6 +129,7 @@ class ApplicationController extends Controller
                 'applicant_applied_from' => $request->input('filter_applicant_applied_from'),
                 'per_page' => $request->input('per_page', 15),
                 'page' => $request->input('page', 1),
+                'filter_is_hidden' => $request->input('filter_is_hidden'),
             ];
 
             return redirect()->route('applications.index', $preserve)
@@ -159,6 +165,7 @@ class ApplicationController extends Controller
             'stage_in_progress',
             'date_from',
             'date_to',
+            'is_hidden'
         ]);
 
         $adjacent = $this->applicationService->getAdjacentApplicationIds($filters, (int) $id);
@@ -189,6 +196,7 @@ class ApplicationController extends Controller
                 'applicant_applied_from' => $request->input('filter_applicant_applied_from'),
                 'per_page' => $request->input('per_page', 15),
                 'page' => $request->input('page', 1),
+                'filter_is_hidden' => $request->input('filter_is_hidden'),
             ];
 
             return redirect()->route('applications.index', $preserve)
@@ -217,6 +225,7 @@ class ApplicationController extends Controller
                 'applicant_applied_from' => request()->input('filter_applicant_applied_from'),
                 'per_page' => request()->input('per_page', 15),
                 'page' => request()->input('page', 1),
+                'filter_is_hidden' => request()->input('filter_is_hidden'),
             ];
 
             return redirect()->route('applications.index', $preserve)
@@ -325,4 +334,45 @@ class ApplicationController extends Controller
 
         return $attachments;
     }
+
+    public function hide(Request $request, Application $application): RedirectResponse
+{
+    $this->applicationService->hideApplication($application);
+
+    $preserve = [
+        'city' => $request->input('filter_city'),
+        'property' => $request->input('filter_property'),
+        'unit' => $request->input('filter_unit'),
+        'name' => $request->input('filter_name'),
+        'applicant_applied_from' => $request->input('filter_applicant_applied_from'),
+'is_hidden' => $request->input('is_hidden') ?? $request->input('filter_is_hidden'),
+        'per_page' => $request->input('per_page', 15),
+        'page' => $request->input('page', 1),
+    ];
+
+    return redirect()
+        ->route('applications.index', $preserve)
+        ->with('success', 'Application hidden.');
+}
+
+public function unhide(Request $request, Application $application): RedirectResponse
+{
+    $this->applicationService->unhideApplication($application);
+
+    $preserve = [
+        'city' => $request->input('filter_city'),
+        'property' => $request->input('filter_property'),
+        'unit' => $request->input('filter_unit'),
+        'name' => $request->input('filter_name'),
+        'applicant_applied_from' => $request->input('filter_applicant_applied_from'),
+'is_hidden' => $request->input('is_hidden') ?? $request->input('filter_is_hidden'),
+        'per_page' => $request->input('per_page', 15),
+        'page' => $request->input('page', 1),
+    ];
+
+    return redirect()
+        ->route('applications.index', $preserve)
+        ->with('success', 'Application unhidden.');
+}
+
 }

@@ -1,3 +1,4 @@
+// resources/js/Pages/PaymentPlans/Index.tsx
 import AppLayout from '@/layouts/app-layout';
 import { PaymentPlan, PaymentPlanIndexProps } from '@/types/PaymentPlan';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
@@ -15,9 +16,17 @@ interface TenantData {
     tenant_id: number;
 }
 
+interface Filters {
+    city?: string | null;
+    property?: string | null;
+    unit?: string | null;
+    tenant?: string | null;
+    is_hidden?: boolean | null;
+}
+
 interface Props extends PaymentPlanIndexProps {
     search?: string | null;
-    filters?: { city?: string | null; property?: string | null; unit?: string | null; tenant?: string | null };
+    filters?: Filters;
     perPage?: number | string;
     cities: Array<{ id: number; city: string }>;
     properties: PropertyInfoWithoutInsurance[];
@@ -51,21 +60,22 @@ export default function Index({
     };
 
     const handleDelete = (paymentPlan: PaymentPlan) => {
-        if (confirm('Are you sure you want to delete this payment plan?')) {
-            router.delete(`/payment-plans/${paymentPlan.id}`, {
-                preserveState: true,
-                preserveScroll: true,
-                data: {
-                    search: search ?? null,
-                    city: filters?.city ?? null,
-                    property: filters?.property ?? null,
-                    unit: filters?.unit ?? null,
-                    tenant: filters?.tenant ?? null,
-                    per_page: perPage ?? (paymentPlans?.per_page ?? 15),
-                    page: paymentPlans?.current_page ?? undefined,
-                },
-            });
-        }
+        if (!confirm('Are you sure you want to delete this payment plan?')) return;
+
+        router.delete(`/payment-plans/${paymentPlan.id}`, {
+            preserveState: true,
+            preserveScroll: true,
+            data: {
+                search: search ?? null,
+                city: filters?.city ?? null,
+                property: filters?.property ?? null,
+                unit: filters?.unit ?? null,
+                tenant: filters?.tenant ?? null,
+                is_hidden: filters?.is_hidden ? 'true' : null, // ✅ NEW
+                per_page: perPage ?? (paymentPlans?.per_page ?? 15),
+                page: paymentPlans?.current_page ?? undefined,
+            },
+        });
     };
 
     return (
@@ -111,7 +121,7 @@ export default function Index({
                 perPage={perPage ?? (paymentPlans?.per_page ?? 15)}
                 currentPage={paymentPlans?.current_page}
                 onSuccess={() => {
-                    // No reload; rely on redirect + preserve state/scroll
+                    // rely on redirect + preserve state/scroll
                 }}
             />
 

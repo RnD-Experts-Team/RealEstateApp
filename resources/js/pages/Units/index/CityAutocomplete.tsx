@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { ChevronDown } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 
 interface CityAutocompleteProps {
     cities: Array<{ id: number; city: string }>;
@@ -10,78 +12,66 @@ interface CityAutocompleteProps {
 }
 
 const CityAutocomplete: React.FC<CityAutocompleteProps> = ({ cities, value, onChange, onSelect }) => {
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [filteredCities, setFilteredCities] = useState<Array<{ id: number; city: string }>>(cities);
+    const [open, setOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (value.trim() === '') {
-            setFilteredCities(cities);
-        } else {
-            const filtered = cities.filter(city =>
-                city.city.toLowerCase().includes(value.toLowerCase())
-            );
-            setFilteredCities(filtered);
-        }
+    const filteredCities = useMemo(() => {
+        if (value.trim() === '') return cities;
+        return cities.filter((c) => c.city.toLowerCase().includes(value.toLowerCase()));
     }, [value, cities]);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node) &&
-                inputRef.current &&
-                !inputRef.current.contains(event.target as Node)
-            ) {
-                setShowDropdown(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(e.target.value);
-        setShowDropdown(true);
-    };
-
-    const handleCitySelect = (city: string) => {
+    const handleSelect = (city: string) => {
         onSelect(city);
-        setShowDropdown(false);
+        setOpen(false);
+        requestAnimationFrame(() => inputRef.current?.blur());
     };
 
     return (
-        <div className="relative">
-            <Input
-                ref={inputRef}
-                type="text"
-                placeholder="City"
-                value={value}
-                onChange={handleInputChange}
-                onFocus={() => setShowDropdown(true)}
-                className="text-input-foreground bg-input pr-8"
-            />
-            <ChevronDown className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-            {showDropdown && filteredCities.length > 0 && (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
                 <div
-                    ref={dropdownRef}
-                    className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-input bg-popover shadow-lg"
+                    className="relative"
+                    // IMPORTANT: prevent Radix trigger click-toggle from closing on mouseup
+                    onPointerDownCapture={(e) => {
+                        e.preventDefault();
+                        setOpen(true);
+                        requestAnimationFrame(() => inputRef.current?.focus());
+                    }}
+                    onClick={(e) => {
+                        // extra safety: don't let click toggle state
+                        e.preventDefault();
+                    }}
                 >
-                    {filteredCities.map((city) => (
-                        <div
-                            key={city.id}
-                            className="cursor-pointer px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                            onClick={() => handleCitySelect(city.city)}
-                        >
-                            {city.city}
-                        </div>
-                    ))}
+                    <Input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="City"
+                        value={value}
+                        onChange={(e) => {
+                            onChange(e.target.value);
+                            setOpen(true);
+                        }}
+                        onFocus={() => setOpen(true)}
+                        className="h-9 text-input-foreground bg-input pr-8"
+                    />
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 </div>
-            )}
-        </div>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                    {/* no CommandInput => no magnifier icon */}
+                    <CommandEmpty>No city found.</CommandEmpty>
+                    <CommandGroup className="max-h-60 overflow-auto">
+                        {filteredCities.map((c) => (
+                            <CommandItem key={c.id} value={c.city} onSelect={() => handleSelect(c.city)}>
+                                {c.city}
+                            </CommandItem>
+                        ))}
+                    </CommandGroup>
+                </Command>
+            </PopoverContent>
+        </Popover>
     );
 };
 

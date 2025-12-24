@@ -36,6 +36,7 @@ class Application extends Model
         'unit_id' => 'integer',
         'attachment_name' => 'array',
         'attachment_path' => 'array',
+        'is_hidden' => 'boolean',
     ];
 
     /**
@@ -66,7 +67,15 @@ class Application extends Model
                 }
             }
         });
-
+static::saving(function (Application $application) {
+    // Auto-hide rule:
+    // - Approved => hidden
+    // - Not Approved => unhidden
+    // BUT do not override if is_hidden is explicitly being changed in this save
+    if (!$application->isDirty('is_hidden')) {
+        $application->is_hidden = ($application->status === 'Approved');
+    }
+});
         static::deleted(function ($application) {
             if ($application->unit_id) {
                 Unit::updateApplicationCountForUnit($application->unit_id);

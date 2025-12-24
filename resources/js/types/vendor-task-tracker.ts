@@ -50,6 +50,8 @@ export interface VendorTaskTracker {
     is_archived: boolean;
     created_at: string;
     updated_at: string;
+
+    is_hidden: boolean;
     
     // Relationship data (optional, loaded with relationships)
     vendor?: {

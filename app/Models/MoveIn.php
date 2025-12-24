@@ -40,6 +40,7 @@ class MoveIn extends Model
         'date_of_insurance_expiration' => 'date',
         'last_notice_sent' => 'date',
         'is_archived' => 'boolean',
+        'is_hidden' => 'boolean',
     ];
 
     /**

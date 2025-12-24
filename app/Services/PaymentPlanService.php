@@ -10,25 +10,26 @@ use App\Models\Cities;
 
 class PaymentPlanService
 {
-    public function getAllPaymentPlans($perPage = 15)
-    {
-        $perPageValue = ($perPage === 'all')
-            ? PaymentPlan::count()
-            : (int) $perPage;
+    public function getAllPaymentPlans($perPage = 15, bool $isHidden = false)
+{
+    $perPageValue = ($perPage === 'all')
+        ? PaymentPlan::where('is_hidden', $isHidden)->count()
+        : (int) $perPage;
 
-        return PaymentPlan::with(['tenant.unit.property.city'])
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPageValue)
-            ->withQueryString();
-    }
+    return PaymentPlan::with(['tenant.unit.property.city'])
+        ->where('is_hidden', $isHidden) // ✅ NEW
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPageValue)
+        ->withQueryString();
+}
 
     /**
      * Filter payment plans by NAME-based filters for city, property, unit, and tenant.
      * Uses LIKE matching similar to Payments filters.
      */
-    public function filterPaymentPlansByNames(?string $city = null, ?string $property = null, ?string $unit = null, ?string $tenant = null, $perPage = 15)
+    public function filterPaymentPlansByNames(?string $city = null, ?string $property = null, ?string $unit = null, ?string $tenant = null, $perPage = 15, bool $isHidden = false )
     {
-        $query = PaymentPlan::with(['tenant.unit.property.city']);
+        $query = PaymentPlan::with(['tenant.unit.property.city'])->where('is_hidden', $isHidden);
 
         if (!empty($tenant)) {
             $query->whereHas('tenant', function ($q) use ($tenant) {
@@ -67,9 +68,9 @@ class PaymentPlanService
      * Get previous and next payment plan IDs relative to the current record,
      * using the same NAME-based filters and ordering (created_at desc) as the index.
      */
-    public function getAdjacentPaymentPlanIds(int $currentId, ?string $city = null, ?string $property = null, ?string $unit = null, ?string $tenant = null): array
+    public function getAdjacentPaymentPlanIds(int $currentId, ?string $city = null, ?string $property = null, ?string $unit = null, ?string $tenant = null, bool $isHidden = false): array
     {
-        $query = PaymentPlan::with(['tenant.unit.property.city']);
+        $query = PaymentPlan::with(['tenant.unit.property.city'])->where('is_hidden', $isHidden);
 
         if (!empty($tenant)) {
             $query->whereHas('tenant', function ($q) use ($tenant) {
@@ -293,4 +294,17 @@ class PaymentPlanService
             ->values()
             ->toArray();
     }
+
+    public function hidePaymentPlan(PaymentPlan $plan): bool
+{
+    $plan->is_hidden = true;
+    return $plan->save();
+}
+
+public function unhidePaymentPlan(PaymentPlan $plan): bool
+{
+    $plan->is_hidden = false;
+    return $plan->save();
+}
+
 }

@@ -7,9 +7,9 @@ interface MoveOutFiltersProps {
     cities: string[];
     properties: string[];
     allUnits: string[];
-    onSearch: (filters: { city_id: string | null; property_id: string | null; unit_id: string | null }) => void;
+    onSearch: (filters: { city_id: string | null; property_id: string | null; unit_id: string | null; is_hidden: boolean }) => void;
     onClear: () => void;
-    initialFilters?: { city?: string; property?: string; unit?: string };
+    initialFilters?: { city?: string; property?: string; unit?: string; is_hidden?: boolean };
 }
 
 export default function MoveOutFilters({ cities, properties, allUnits, onSearch, onClear, initialFilters }: MoveOutFiltersProps) {
@@ -17,6 +17,7 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
         city: '',
         property: '',
         unit: '',
+        is_hidden: false, // ✅ NEW
     });
 
     const [showCityDropdown, setShowCityDropdown] = useState(false);
@@ -36,6 +37,7 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
                 city: initialFilters.city ?? '',
                 property: initialFilters.property ?? '',
                 unit: initialFilters.unit ?? '',
+                is_hidden: initialFilters.is_hidden ?? false,
             });
         }
 
@@ -82,13 +84,13 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
     const handleCityInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         handleTempFilterChange('city', value);
-        setShowCityDropdown(value.length > 0);
+        setShowCityDropdown(true);
     };
 
     const handlePropertyInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         handleTempFilterChange('property', value);
-        setShowPropertyDropdown(value.length > 0);
+        setShowPropertyDropdown(true);
     };
 
     const handlePropertySelect = (propertyName: string) => {
@@ -99,7 +101,7 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
     const handleUnitInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         handleTempFilterChange('unit', value);
-        setShowUnitDropdown(value.length > 0);
+        setShowUnitDropdown(true);
     };
 
     const handleUnitSelect = (unitName: string) => {
@@ -112,6 +114,7 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
             city_id: tempFilters.city || null,
             property_id: tempFilters.property || null,
             unit_id: tempFilters.unit || null,
+            is_hidden: tempFilters.is_hidden, // ✅ NEW
         });
     };
 
@@ -120,25 +123,20 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
             city: '',
             property: '',
             unit: '',
+            is_hidden: false, // ✅ NEW
         });
         onClear();
     };
 
-    const filteredCities = cities.filter((cityName) => 
-        cityName.toLowerCase().includes(tempFilters.city.toLowerCase())
+    const filteredCities = cities.filter((cityName) => cityName.toLowerCase().includes(tempFilters.city.toLowerCase()));
+    const filteredProperties = properties.filter((propertyName) =>
+        propertyName.toLowerCase().includes(tempFilters.property.toLowerCase()),
     );
-
-    const filteredProperties = properties.filter((propertyName) => 
-        propertyName.toLowerCase().includes(tempFilters.property.toLowerCase())
-    );
-
-    const filteredUnits = allUnits.filter((unitName) =>
-        unitName.toLowerCase().includes(tempFilters.unit.toLowerCase())
-    );
+    const filteredUnits = allUnits.filter((unitName) => unitName.toLowerCase().includes(tempFilters.unit.toLowerCase()));
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            {/* City Filter with Autocomplete */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+            {/* City */}
             <div className="relative">
                 <Input
                     ref={cityInputRef}
@@ -169,7 +167,7 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
                 )}
             </div>
 
-            {/* Property Filter with Autocomplete */}
+            {/* Property */}
             <div className="relative">
                 <Input
                     ref={propertyInputRef}
@@ -200,7 +198,7 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
                 )}
             </div>
 
-            {/* Unit Filter with Autocomplete */}
+            {/* Unit */}
             <div className="relative">
                 <Input
                     ref={unitInputRef}
@@ -231,7 +229,31 @@ export default function MoveOutFilters({ cities, properties, allUnits, onSearch,
                 )}
             </div>
 
-            {/* Search and Clear Buttons */}
+            {/* ✅ Visible/Hidden toggle */}
+            <div className="flex items-center">
+                <div className="w-full flex items-center rounded-md border border-input bg-input p-1 h-10">
+                    <Button
+                        type="button"
+                        variant={tempFilters.is_hidden ? 'outline' : 'default'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => setTempFilters((p) => ({ ...p, is_hidden: false }))}
+                    >
+                        Visible
+                    </Button>
+                    <Button
+                        type="button"
+                        variant={tempFilters.is_hidden ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => setTempFilters((p) => ({ ...p, is_hidden: true }))}
+                    >
+                        Hidden
+                    </Button>
+                </div>
+            </div>
+
+            {/* Search/Clear */}
             <div className="flex gap-2">
                 <Button onClick={handleSearchClick} variant="default" className="flex items-center">
                     <Search className="mr-2 h-4 w-4" />

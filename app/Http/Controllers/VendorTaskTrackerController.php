@@ -27,12 +27,28 @@ class VendorTaskTrackerController extends Controller
 
     public function index(Request $request): Response
     {
-        $filters = $request->only(['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page']);
+        $filters = $request->only([
+            'search',
+            'city',
+            'property',
+            'unit_name',
+            'vendor_name',
+            'status',
+            'per_page',
+            'is_hidden', // ✅ NEW
+        ]);
+
         if (!isset($filters['status']) || empty($filters['status'])) {
             $filters['status'] = 'exclude_completed';
         }
+
         if (!isset($filters['per_page']) || empty($filters['per_page'])) {
             $filters['per_page'] = 15;
+        }
+
+        // ✅ default visible (false)
+        if (!array_key_exists('is_hidden', $filters) || $filters['is_hidden'] === '' || $filters['is_hidden'] === null) {
+            $filters['is_hidden'] = 'false';
         }
 
         $tasksResult = $this->vendorTaskTrackerService->getTasks($filters);
@@ -43,9 +59,12 @@ class VendorTaskTrackerController extends Controller
                 $task->property_name = $task->unit?->property?->property_name ?? '';
                 $task->unit_name = $task->unit?->unit_name ?? '';
                 $task->vendor_name = $task->vendor?->vendor_name ?? '';
+                $task->is_hidden = (bool) ($task->is_hidden ?? false); // ✅ NEW
                 return $task;
             });
+
             $tasksResult->setCollection($collection);
+
             $tasksPayload = [
                 'data' => $tasksResult->items(),
                 'links' => [],
@@ -64,8 +83,10 @@ class VendorTaskTrackerController extends Controller
                 $task->property_name = $task->unit?->property?->property_name ?? '';
                 $task->unit_name = $task->unit?->unit_name ?? '';
                 $task->vendor_name = $task->vendor?->vendor_name ?? '';
+                $task->is_hidden = (bool) ($task->is_hidden ?? false); // ✅ NEW
                 return $task;
             });
+
             $tasksPayload = [
                 'data' => $tasks,
                 'links' => [],
@@ -110,7 +131,7 @@ class VendorTaskTrackerController extends Controller
         $this->vendorTaskTrackerService->createTask($request->validated());
 
         $redirectFilters = (array) $request->input('redirect_filters', []);
-        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page'];
+        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page', 'is_hidden'];
         $filters = [];
         foreach ($allowedKeys as $key) {
             if (isset($redirectFilters[$key]) && $redirectFilters[$key] !== '') {
@@ -130,11 +151,18 @@ class VendorTaskTrackerController extends Controller
         $vendorTaskTracker->property_name = $vendorTaskTracker->unit?->property?->property_name ?? '';
         $vendorTaskTracker->unit_name = $vendorTaskTracker->unit?->unit_name ?? '';
         $vendorTaskTracker->vendor_name = $vendorTaskTracker->vendor?->vendor_name ?? '';
-        $filters = $request->only(['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page']);
+        $vendorTaskTracker->is_hidden = (bool) ($vendorTaskTracker->is_hidden ?? false);
+
+        $filters = $request->only(['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page', 'is_hidden']);
         if (!isset($filters['status']) || empty($filters['status'])) {
             $filters['status'] = 'exclude_completed';
         }
+        if (!array_key_exists('is_hidden', $filters) || $filters['is_hidden'] === '' || $filters['is_hidden'] === null) {
+            $filters['is_hidden'] = 'false';
+        }
+
         $adjacent = $this->vendorTaskTrackerService->getAdjacentTaskIds($filters, $vendorTaskTracker->id);
+
         return Inertia::render('VendorTaskTracker/Show', [
             'task' => $vendorTaskTracker,
             'filters' => $filters,
@@ -148,7 +176,7 @@ class VendorTaskTrackerController extends Controller
         $this->vendorTaskTrackerService->updateTask($vendorTaskTracker, $request->validated());
 
         $redirectFilters = (array) $request->input('redirect_filters', []);
-        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page'];
+        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page', 'is_hidden'];
         $filters = [];
         foreach ($allowedKeys as $key) {
             if (isset($redirectFilters[$key]) && $redirectFilters[$key] !== '') {
@@ -166,7 +194,7 @@ class VendorTaskTrackerController extends Controller
         $this->vendorTaskTrackerService->deleteTask($vendorTaskTracker);
 
         $redirectFilters = (array) request()->input('redirect_filters', []);
-        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page'];
+        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page', 'is_hidden'];
         $filters = [];
         foreach ($allowedKeys as $key) {
             if (isset($redirectFilters[$key]) && $redirectFilters[$key] !== '') {
@@ -179,13 +207,48 @@ class VendorTaskTrackerController extends Controller
             ->with('success', 'Task archived successfully.');
     }
 
+    public function hide(Request $request, VendorTaskTracker $vendorTaskTracker): RedirectResponse
+    {
+        $this->vendorTaskTrackerService->hideTask($vendorTaskTracker);
+
+        $redirectFilters = (array) $request->input('redirect_filters', []);
+        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page', 'is_hidden'];
+        $filters = [];
+        foreach ($allowedKeys as $key) {
+            if (isset($redirectFilters[$key]) && $redirectFilters[$key] !== '') {
+                $filters[$key] = $redirectFilters[$key];
+            }
+        }
+
+        return redirect()
+            ->route('vendor-task-tracker.index', $filters)
+            ->with('success', 'Task hidden.');
+    }
+
+    public function unhide(Request $request, VendorTaskTracker $vendorTaskTracker): RedirectResponse
+    {
+        $this->vendorTaskTrackerService->unhideTask($vendorTaskTracker);
+
+        $redirectFilters = (array) $request->input('redirect_filters', []);
+        $allowedKeys = ['search', 'city', 'property', 'unit_name', 'vendor_name', 'status', 'per_page', 'page', 'is_hidden'];
+        $filters = [];
+        foreach ($allowedKeys as $key) {
+            if (isset($redirectFilters[$key]) && $redirectFilters[$key] !== '') {
+                $filters[$key] = $redirectFilters[$key];
+            }
+        }
+
+        return redirect()
+            ->route('vendor-task-tracker.index', $filters)
+            ->with('success', 'Task unhidden.');
+    }
+
     /**
      * Export tasks data
      */
     public function export()
     {
         $tasks = $this->vendorTaskTrackerService->getTasksForExport();
-        
         return response()->json($tasks);
     }
 }

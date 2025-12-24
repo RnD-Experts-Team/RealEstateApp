@@ -14,70 +14,70 @@ class MoveInService
     public function __construct(
         protected TenantService $tenantService
     ) {}
-    public function getAllMoveIns(string|int $perPage = 15): LengthAwarePaginator
-    {
-        $query = MoveIn::with(['unit.property.city'])
-                     ->orderBy('move_in_date', 'desc')
-                     ->orderBy('created_at', 'desc');
+    public function getAllMoveIns(string|int $perPage = 15, array $filters = []): LengthAwarePaginator
+{
+    $query = MoveIn::with(['unit.property.city'])
+        ->orderBy('move_in_date', 'desc')
+        ->orderBy('created_at', 'desc');
 
-        $perPageValue = ($perPage === 'all') ? $query->count() : (int) $perPage;
+    // ✅ hidden filter (default show visible)
+    $isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $query->where('is_hidden', $isHiddenFilter ? true : false);
 
-        return $query->paginate($perPageValue);
-    }
+    $perPageValue = ($perPage === 'all') ? $query->count() : (int) $perPage;
+    return $query->paginate($perPageValue)->withQueryString();
+}
 
-    public function searchMoveIns(array $filters, string|int $perPage = 15): LengthAwarePaginator
-    {
-        $query = MoveIn::with(['unit.property.city']);
+  public function searchMoveIns(array $filters, string|int $perPage = 15): LengthAwarePaginator
+{
+    $query = MoveIn::with(['unit.property.city']);
 
-        // Handle city filter - convert city name to ID
-        if (!empty($filters['city'])) {
-            $cityName = $filters['city'];
-            $cityIds = Cities::where('city', 'like', "%{$cityName}%")
-                            ->pluck('id')
-                            ->toArray();
-            
-            if (!empty($cityIds)) {
-                $query->whereHas('unit.property', function ($propertyQuery) use ($cityIds) {
-                    $propertyQuery->whereIn('city_id', $cityIds);
-                });
-            } else {
-                // If no matching cities found, return empty result
-                $query->whereRaw('1 = 0');
-            }
-        }
+    // ✅ hidden filter (default show visible)
+    $isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $query->where('is_hidden', $isHiddenFilter ? true : false);
 
-        // Handle property filter - convert property name to ID
-        if (!empty($filters['property'])) {
-            $propertyName = $filters['property'];
-            $propertyIds = PropertyInfoWithoutInsurance::where('property_name', 'like', "%{$propertyName}%")
-                                                      ->pluck('id')
-                                                      ->toArray();
-            
-            if (!empty($propertyIds)) {
-                $query->whereHas('unit', function ($unitQuery) use ($propertyIds) {
-                    $unitQuery->whereIn('property_id', $propertyIds);
-                });
-            } else {
-                // If no matching properties found, return empty result
-                $query->whereRaw('1 = 0');
-            }
-        }
+    // city
+    if (!empty($filters['city'])) {
+        $cityName = $filters['city'];
+        $cityIds = Cities::where('city', 'like', "%{$cityName}%")->pluck('id')->toArray();
 
-        // Handle unit filter - filter by unit name
-        if (!empty($filters['unit'])) {
-            $unitName = $filters['unit'];
-            $query->whereHas('unit', function ($unitQuery) use ($unitName) {
-                $unitQuery->where('unit_name', 'like', "%{$unitName}%");
+        if (!empty($cityIds)) {
+            $query->whereHas('unit.property', function ($propertyQuery) use ($cityIds) {
+                $propertyQuery->whereIn('city_id', $cityIds);
             });
+        } else {
+            $query->whereRaw('1 = 0');
         }
-
-        $query = $query->orderBy('move_in_date', 'desc')
-                       ->orderBy('created_at', 'desc');
-
-        $perPageValue = ($perPage === 'all') ? $query->count() : (int) $perPage;
-
-        return $query->paginate($perPageValue);
     }
+
+    // property
+    if (!empty($filters['property'])) {
+        $propertyName = $filters['property'];
+        $propertyIds = PropertyInfoWithoutInsurance::where('property_name', 'like', "%{$propertyName}%")
+            ->pluck('id')->toArray();
+
+        if (!empty($propertyIds)) {
+            $query->whereHas('unit', function ($unitQuery) use ($propertyIds) {
+                $unitQuery->whereIn('property_id', $propertyIds);
+            });
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+    }
+
+    // unit
+    if (!empty($filters['unit'])) {
+        $unitName = $filters['unit'];
+        $query->whereHas('unit', function ($unitQuery) use ($unitName) {
+            $unitQuery->where('unit_name', 'like', "%{$unitName}%");
+        });
+    }
+
+    $query->orderBy('move_in_date', 'desc')->orderBy('created_at', 'desc');
+
+    $perPageValue = ($perPage === 'all') ? $query->count() : (int) $perPage;
+    return $query->paginate($perPageValue)->withQueryString();
+}
 
     public function createMoveIn(array $data): MoveIn
     {
@@ -223,4 +223,17 @@ class MoveInService
             })
         ];
     }
+
+
+    public function hideMoveIn(MoveIn $moveIn): bool
+{
+    $moveIn->is_hidden = true;
+    return $moveIn->save();
+}
+
+public function unhideMoveIn(MoveIn $moveIn): bool
+{
+    $moveIn->is_hidden = false;
+    return $moveIn->save();
+}
 }

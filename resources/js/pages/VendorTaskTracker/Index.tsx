@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { VendorTaskTracker } from '@/types/vendor-task-tracker';
 import { Head, router } from '@inertiajs/react';
 import { format } from 'date-fns';
-import  { useState } from 'react';
+import { useState } from 'react';
 import EmptyState from './index/EmptyState';
 import FilterBar from './index/FilterBar';
 import PageHeader from './index/PageHeader';
@@ -13,11 +13,6 @@ import TaskTable from './index/TaskTable';
 import VendorTaskTrackerCreateDrawer from './VendorTaskTrackerCreateDrawer';
 import VendorTaskTrackerEditDrawer from './VendorTaskTrackerEditDrawer';
 
-
-/**
- * Always treat the value as a date-only (no time, no TZ).
- * Works for "YYYY-MM-DD" and for ISO strings by grabbing the first 10 chars.
- */
 const formatDateOnly = (value?: string | null, fallback = '-'): string => {
     if (!value) return fallback;
 
@@ -29,8 +24,6 @@ const formatDateOnly = (value?: string | null, fallback = '-'): string => {
     return format(date, 'P');
 };
 
-
-// Export utility function
 const exportToCSV = (data: VendorTaskTracker[], filename: string = 'vendor-tasks.csv') => {
     const headers = [
         'ID',
@@ -81,34 +74,26 @@ const exportToCSV = (data: VendorTaskTracker[], filename: string = 'vendor-tasks
     URL.revokeObjectURL(url);
 };
 
-
 interface CityOption {
     id: number;
     city: string;
 }
-
-
 interface PropertyOption {
     id: number;
     property_name: string;
     city?: string;
 }
-
-
 interface UnitOption {
     id: number;
     unit_name: string;
     property_name?: string;
     city?: string;
 }
-
-
 interface VendorOption {
     id: number;
     vendor_name: string;
     city?: string;
 }
-
 
 interface Props {
     tasks: {
@@ -123,6 +108,7 @@ interface Props {
         unit_name?: string;
         vendor_name?: string;
         status?: string;
+        is_hidden?: string | boolean; // ✅ NEW
         per_page?: string;
         page?: number;
     };
@@ -139,7 +125,6 @@ interface Props {
     drawerUnitsByProperty: Record<string, Record<string, UnitOption[]>>;
     drawerVendorsByCity: Record<string, VendorOption[]>;
 }
-
 
 export default function Index({
     tasks,
@@ -164,9 +149,7 @@ export default function Index({
     const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<VendorTaskTracker | null>(null);
 
-    const handleDrawerSuccess = () => {
-        setIsDrawerOpen(false);
-    };
+    const handleDrawerSuccess = () => setIsDrawerOpen(false);
 
     const handleEditDrawerSuccess = () => {
         setIsEditDrawerOpen(false);
@@ -220,9 +203,11 @@ export default function Index({
                 filterParams[key] = String(value);
             }
         });
+
         if (filters.per_page && filters.per_page !== '') {
             filterParams['per_page'] = String(filters.per_page);
         }
+
         filterParams['page'] = '1';
 
         router.get(route('vendor-task-tracker.index'), filterParams, {
@@ -237,6 +222,7 @@ export default function Index({
             params['per_page'] = String(filters.per_page);
         }
         params['page'] = '1';
+
         router.get(route('vendor-task-tracker.index'), params, {
             preserveState: true,
             preserveScroll: true,
@@ -266,10 +252,7 @@ export default function Index({
                         onAddTask={() => setIsDrawerOpen(true)}
                         isExporting={isExporting}
                         hasExportData={tasks.data.length > 0}
-                        canCreate={hasAllPermissions([
-                            'vendor-task-tracker.create',
-                            'vendor-task-tracker.store',
-                        ])}
+                        canCreate={hasAllPermissions(['vendor-task-tracker.create', 'vendor-task-tracker.store'])}
                     />
 
                     <Card className="bg-card text-card-foreground shadow-lg">
@@ -285,104 +268,107 @@ export default function Index({
                             />
                         </CardHeader>
 
-                    <CardContent>
-                        {tasks.data.length > 0 ? (
-                            <>
-                                <TaskTable
-                                    tasks={tasks.data}
-                                    formatDateOnly={formatDateOnly}
-                                    onEdit={handleEditTask}
-                                    onDelete={handleDelete}
-                                    permissions={permissions}
-                                    filters={filters}
-                                />
-                                <PaginationInfo meta={tasks.meta} />
-                                <div className="mt-4 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm">Per page:</span>
-                                        <select
-                                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                                            value={filters.per_page ?? '15'}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                const params: Record<string, string> = {};
-                                                Object.entries(filters).forEach(([key, value]) => {
-                                                    if (value !== null && value !== undefined && value !== '') {
-                                                        params[key] = String(value);
-                                                    }
-                                                });
-                                                params['per_page'] = value;
-                                                params['page'] = '1';
-                                                router.get(route('vendor-task-tracker.index'), params, {
-                                                    preserveState: true,
-                                                    preserveScroll: true,
-                                                });
-                                            }}
-                                        >
-                                            <option value="15">15</option>
-                                            <option value="30">30</option>
-                                            <option value="50">50</option>
-                                            <option value="all">All</option>
-                                        </select>
+                        <CardContent>
+                            {tasks.data.length > 0 ? (
+                                <>
+                                    <TaskTable
+                                        tasks={tasks.data}
+                                        formatDateOnly={formatDateOnly}
+                                        onEdit={handleEditTask}
+                                        onDelete={handleDelete}
+                                        permissions={permissions}
+                                        filters={filters}
+                                    />
+                                    <PaginationInfo meta={tasks.meta} />
+
+                                    <div className="mt-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm">Per page:</span>
+                                            <select
+                                                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                                                value={filters.per_page ?? '15'}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    const params: Record<string, string> = {};
+                                                    Object.entries(filters).forEach(([key, value]) => {
+                                                        if (value !== null && value !== undefined && value !== '') {
+                                                            params[key] = String(value);
+                                                        }
+                                                    });
+                                                    params['per_page'] = value;
+                                                    params['page'] = '1';
+                                                    router.get(route('vendor-task-tracker.index'), params, {
+                                                        preserveState: true,
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
+                                            >
+                                                <option value="15">15</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="all">All</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
+                                                disabled={(filters.per_page ?? '15') === 'all' || (tasks.meta?.current_page ?? 1) <= 1}
+                                                onClick={() => {
+                                                    const current = Number(tasks.meta?.current_page ?? 1);
+                                                    const target = current - 1;
+                                                    const params: Record<string, string> = {};
+                                                    Object.entries(filters).forEach(([key, value]) => {
+                                                        if (value !== null && value !== undefined && value !== '') {
+                                                            params[key] = String(value);
+                                                        }
+                                                    });
+                                                    params['page'] = String(target);
+                                                    router.get(route('vendor-task-tracker.index'), params, {
+                                                        preserveState: true,
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
+                                            >
+                                                Previous
+                                            </button>
+
+                                            <span className="text-sm">
+                                                Page {tasks.meta?.current_page ?? 1} of {tasks.meta?.last_page ?? 1}
+                                            </span>
+
+                                            <button
+                                                className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
+                                                disabled={(filters.per_page ?? '15') === 'all' || (tasks.meta?.current_page ?? 1) >= (tasks.meta?.last_page ?? 1)}
+                                                onClick={() => {
+                                                    const current = Number(tasks.meta?.current_page ?? 1);
+                                                    const target = current + 1;
+                                                    const params: Record<string, string> = {};
+                                                    Object.entries(filters).forEach(([key, value]) => {
+                                                        if (value !== null && value !== undefined && value !== '') {
+                                                            params[key] = String(value);
+                                                        }
+                                                    });
+                                                    params['page'] = String(target);
+                                                    router.get(route('vendor-task-tracker.index'), params, {
+                                                        preserveState: true,
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <button
-                                            className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
-                                            disabled={(filters.per_page ?? '15') === 'all' || (tasks.meta?.current_page ?? 1) <= 1}
-                                            onClick={() => {
-                                                const current = Number(tasks.meta?.current_page ?? 1);
-                                                const target = current - 1;
-                                                const params: Record<string, string> = {};
-                                                Object.entries(filters).forEach(([key, value]) => {
-                                                    if (value !== null && value !== undefined && value !== '') {
-                                                        params[key] = String(value);
-                                                    }
-                                                });
-                                                params['page'] = String(target);
-                                                router.get(route('vendor-task-tracker.index'), params, {
-                                                    preserveState: true,
-                                                    preserveScroll: true,
-                                                });
-                                            }}
-                                        >
-                                            Previous
-                                        </button>
-                                        <span className="text-sm">
-                                            Page {tasks.meta?.current_page ?? 1} of {tasks.meta?.last_page ?? 1}
-                                        </span>
-                                        <button
-                                            className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
-                                            disabled={(filters.per_page ?? '15') === 'all' || (tasks.meta?.current_page ?? 1) >= (tasks.meta?.last_page ?? 1)}
-                                            onClick={() => {
-                                                const current = Number(tasks.meta?.current_page ?? 1);
-                                                const target = current + 1;
-                                                const params: Record<string, string> = {};
-                                                Object.entries(filters).forEach(([key, value]) => {
-                                                    if (value !== null && value !== undefined && value !== '') {
-                                                        params[key] = String(value);
-                                                    }
-                                                });
-                                                params['page'] = String(target);
-                                                router.get(route('vendor-task-tracker.index'), params, {
-                                                    preserveState: true,
-                                                    preserveScroll: true,
-                                                });
-                                            }}
-                                        >
-                                            Next
-                                        </button>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <EmptyState />
-                        )}
-                    </CardContent>
+                                </>
+                            ) : (
+                                <EmptyState />
+                            )}
+                        </CardContent>
                     </Card>
                 </div>
             </div>
 
-            {/* Vendor Task Tracker Create Drawer */}
             <VendorTaskTrackerCreateDrawer
                 cities={drawerCities}
                 properties={drawerProperties}
@@ -398,7 +384,6 @@ export default function Index({
                 onSuccess={handleDrawerSuccess}
             />
 
-            {/* Vendor Task Tracker Edit Drawer */}
             {selectedTask && (
                 <VendorTaskTrackerEditDrawer
                     task={selectedTask}

@@ -25,7 +25,8 @@ class PaymentPlan extends Model
         'amount' => 'decimal:2',
         'paid' => 'decimal:2',
         'dates' => 'date',
-        'is_archived' => 'boolean'
+        'is_archived' => 'boolean',
+        'is_hidden' => 'boolean',
     ];
 
     protected $appends = ['left_to_pay', 'status'];

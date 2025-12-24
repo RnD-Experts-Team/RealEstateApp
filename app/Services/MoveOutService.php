@@ -13,55 +13,58 @@ use Illuminate\Support\Facades\DB;
 
 class MoveOutService
 {
-    public function getAllMoveOuts(int|string $perPage = 15): LengthAwarePaginator|Collection
+    public function getAllMoveOuts(int|string $perPage = 15, array $filters = []): LengthAwarePaginator|Collection
     {
         $query = MoveOut::with(['unit.property.city'])
-                        ->orderBy('move_out_date', 'desc')
-                        ->orderBy('created_at', 'desc');
+            ->orderBy('move_out_date', 'desc')
+            ->orderBy('created_at', 'desc');
+
+        // ✅ hidden filter (default visible)
+        $isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $query->where('is_hidden', $isHiddenFilter ? true : false);
 
         if (is_string($perPage) && strtolower(trim($perPage)) === 'all') {
             return $query->get();
         }
 
-        return $query->paginate((int) $perPage);
+        return $query->paginate((int) $perPage)->withQueryString();
     }
 
     public function searchMoveOuts(string $search, int $perPage = 15): LengthAwarePaginator
     {
         return MoveOut::with(['unit.property.city'])
-                      ->where(function ($query) use ($search) {
-                          $query->where('lease_status', 'like', "%{$search}%")
-                                ->orWhere('keys_location', 'like', "%{$search}%")
-                                ->orWhere('walkthrough', 'like', "%{$search}%")
-                                ->orWhere('repairs', 'like', "%{$search}%")
-                                ->orWhere('notes', 'like', "%{$search}%")
-                                ->orWhere('send_back_security_deposit', 'like', "%{$search}%")
-                                ->orWhere('list_the_unit', 'like', "%{$search}%")
-                                ->orWhere('tenants', 'like', "%{$search}%")
-                                ->orWhere('utility_type', 'like', "%{$search}%")
-                                ->orWhereHas('unit', function ($unitQuery) use ($search) {
-                                    $unitQuery->where('unit_name', 'like', "%{$search}%");
-                                })
-                                ->orWhereHas('unit.property', function ($propertyQuery) use ($search) {
-                                    $propertyQuery->where('property_name', 'like', "%{$search}%");
-                                })
-                                ->orWhereHas('unit.property.city', function ($cityQuery) use ($search) {
-                                    $cityQuery->where('city', 'like', "%{$search}%");
-                                });
-                      })
-                      ->orderBy('move_out_date', 'desc')
-                      ->paginate($perPage);
+            ->where(function ($query) use ($search) {
+                $query->where('lease_status', 'like', "%{$search}%")
+                    ->orWhere('keys_location', 'like', "%{$search}%")
+                    ->orWhere('walkthrough', 'like', "%{$search}%")
+                    ->orWhere('repairs', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%")
+                    ->orWhere('send_back_security_deposit', 'like', "%{$search}%")
+                    ->orWhere('list_the_unit', 'like', "%{$search}%")
+                    ->orWhere('tenants', 'like', "%{$search}%")
+                    ->orWhere('utility_type', 'like', "%{$search}%")
+                    ->orWhereHas('unit', function ($unitQuery) use ($search) {
+                        $unitQuery->where('unit_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('unit.property', function ($propertyQuery) use ($search) {
+                        $propertyQuery->where('property_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('unit.property.city', function ($cityQuery) use ($search) {
+                        $cityQuery->where('city', 'like', "%{$search}%");
+                    });
+            })
+            ->orderBy('move_out_date', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function createMoveOut(array $data): MoveOut
     {
-        // Remove display-only fields that shouldn't be stored
         unset($data['unit_name'], $data['property_name'], $data['city_name']);
-        
+
         return DB::transaction(function () use ($data) {
             $moveOut = MoveOut::create($data);
 
-            // If lease status ended, mark the related unit as vacant and clear tenants
             $status = isset($data['lease_status']) ? strtolower(trim($data['lease_status'])) : null;
             if ($status === 'ended' && $moveOut->unit_id) {
                 $unit = Unit::find($moveOut->unit_id);
@@ -81,9 +84,8 @@ class MoveOutService
 
     public function updateMoveOut(MoveOut $moveOut, array $data): bool
     {
-        // Remove display-only fields that shouldn't be stored
         unset($data['unit_name'], $data['property_name'], $data['city_name']);
-        
+
         return DB::transaction(function () use ($moveOut, $data) {
             $updated = $moveOut->update($data);
 
@@ -125,23 +127,23 @@ class MoveOutService
     public function getArchivedMoveOuts(int $perPage = 15): LengthAwarePaginator
     {
         return MoveOut::onlyArchived()
-                      ->with(['unit.property.city'])
-                      ->orderBy('move_out_date', 'desc')
-                      ->orderBy('created_at', 'desc')
-                      ->paginate($perPage);
+            ->with(['unit.property.city'])
+            ->orderBy('move_out_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function getDropdownData(): array
     {
         $cities = Cities::orderBy('city')->get();
         $properties = PropertyInfoWithoutInsurance::with('city')
-                     ->orderBy('property_name')
-                     ->get();
+            ->orderBy('property_name')
+            ->get();
         $units = Unit::with(['property.city'])
-                    ->orderBy('unit_name')
-                    ->get();
+            ->orderBy('unit_name')
+            ->get();
 
-        // Create ID-keyed lookup maps for cascading
         $propertiesByCityId = $properties->groupBy('city_id')->map(function ($cityProperties) {
             return $cityProperties->map(function ($property) {
                 return [
@@ -160,13 +162,11 @@ class MoveOutService
             })->values();
         });
 
-        // Get tenants with their relationships
         $tenants = Tenant::with(['unit.property.city'])
-                         ->orderBy('first_name')
-                         ->orderBy('last_name')
-                         ->get();
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
 
-        // Group tenants by unit ID
         $tenantsByUnitId = $tenants->groupBy('unit_id')->map(function ($unitTenants) {
             return $unitTenants->map(function ($tenant) {
                 return [
@@ -176,7 +176,6 @@ class MoveOutService
             })->values();
         });
 
-        // Get all units with their complete information for edit drawer
         $allUnits = $units->map(function ($unit) {
             return [
                 'id' => $unit->id,
@@ -186,7 +185,6 @@ class MoveOutService
             ];
         });
 
-        // Format tenants data for frontend with ID-based mapping
         $tenantsData = $tenants->map(function ($tenant) {
             return [
                 'id' => $tenant->id,
@@ -215,20 +213,18 @@ class MoveOutService
         ];
     }
 
-    /**
-     * Get move-out with proper relationships for display
-     */
     public function getMoveOutWithRelations(int $id): ?MoveOut
     {
         return MoveOut::with(['unit.property.city'])->find($id);
     }
 
-    /**
-     * Search move-outs with filters using ID-based filtering
-     */
     public function searchMoveOutsWithFilters(array $filters, int|string $perPage = 15): LengthAwarePaginator|Collection
     {
         $query = MoveOut::with(['unit.property.city']);
+
+        // ✅ hidden filter (default visible)
+        $isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $query->where('is_hidden', $isHiddenFilter ? true : false);
 
         if (!empty($filters['unit'])) {
             $value = trim($filters['unit']);
@@ -252,18 +248,22 @@ class MoveOutService
         }
 
         $query = $query->orderBy('move_out_date', 'desc')
-                       ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc');
 
         if (is_string($perPage) && strtolower(trim($perPage)) === 'all') {
             return $query->get();
         }
 
-        return $query->paginate((int) $perPage);
+        return $query->paginate((int) $perPage)->withQueryString();
     }
 
     public function getAdjacentMoveOutIds(int $currentId, array $filters): array
     {
         $query = MoveOut::with(['unit.property.city']);
+
+        // ✅ hidden filter (default visible)
+        $isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $query->where('is_hidden', $isHiddenFilter ? true : false);
 
         if (!empty($filters['unit'])) {
             $value = trim($filters['unit']);
@@ -287,9 +287,9 @@ class MoveOutService
         }
 
         $items = $query->orderBy('move_out_date', 'desc')
-                       ->orderBy('created_at', 'desc')
-                       ->orderBy('id', 'desc')
-                       ->get(['id', 'move_out_date', 'created_at']);
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->get(['id', 'move_out_date', 'created_at']);
 
         $ids = $items->pluck('id')->values()->all();
         $index = array_search($currentId, $ids, true);
@@ -300,5 +300,19 @@ class MoveOutService
         $nextId = $index < count($ids) - 1 ? $ids[$index + 1] : null;
 
         return ['prevId' => $prevId, 'nextId' => $nextId];
+    }
+
+    // ✅ NEW
+    public function hideMoveOut(MoveOut $moveOut): bool
+    {
+        $moveOut->is_hidden = true;
+        return $moveOut->save();
+    }
+
+    // ✅ NEW
+    public function unhideMoveOut(MoveOut $moveOut): bool
+    {
+        $moveOut->is_hidden = false;
+        return $moveOut->save();
     }
 }

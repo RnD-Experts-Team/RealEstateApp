@@ -26,6 +26,7 @@ interface Props {
 }
 
 export default function Show({ property, previous_id, next_id, filters }: Props) {
+    const TZ = 'America/New_York';
   const buildShowRoute = (id: number) => {
     const params: Record<string, any> = { properties_info: id };
     if (filters) {
@@ -58,11 +59,35 @@ export default function Show({ property, previous_id, next_id, filters }: Props)
 
   const formatDate = (date: string | null) => {
     if (!date) return 'Not Set';
-    return new Date(date).toLocaleDateString('en-US', {
+
+    const raw = String(date).trim();
+
+    // If it starts with YYYY-MM-DD (covers ISO strings too)
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+      const ymd = raw.slice(0, 10);
+      const [y, m, d] = ymd.split('-').map(Number);
+
+      // local noon avoids DST edge cases and prevents UTC rollbacks
+      const localSafe = new Date(y, m - 1, d, 12, 0, 0);
+
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: TZ,
+      }).format(localSafe);
+    }
+
+    // Fallback
+    const dt = new Date(raw);
+    if (Number.isNaN(dt.getTime())) return 'Invalid Date';
+
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    });
+      timeZone: TZ,
+    }).format(dt);
   };
 
   const InfoItem = ({ icon: Icon, label, value, className = '' }: {

@@ -8,9 +8,14 @@ interface MoveOutTableProps {
     hasPermission: (permission: string) => boolean;
     hasAnyPermission: (permissions: string[]) => boolean;
     hasAllPermissions: (permissions: string[]) => boolean;
+
+    onHide: (moveOut: MoveOut) => void;
+    onUnhide: (moveOut: MoveOut) => void;
+
     onEdit: (moveOut: MoveOut) => void;
     onDelete: (moveOut: MoveOut) => void;
-    filters?: { city?: string | null; property?: string | null; unit?: string | null; perPage?: string };
+
+    filters?: { city?: string | null; property?: string | null; unit?: string | null; is_hidden?: string; perPage?: string };
 }
 
 export default function MoveOutTable({
@@ -19,10 +24,14 @@ export default function MoveOutTable({
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
+    onHide,
+    onUnhide,
     onEdit,
     onDelete,
     filters,
 }: MoveOutTableProps) {
+    const showActions = hasAnyPermission(['move-out.show', 'move-out.edit', 'move-out.update', 'move-out.destroy', 'move-out.hide', 'move-out.unhide']);
+
     return (
         <div className="relative overflow-x-auto">
             <Table className="border-collapse rounded-md border border-border">
@@ -58,11 +67,10 @@ export default function MoveOutTable({
                         <TableHead className="border border-border bg-muted text-center text-muted-foreground">Renter</TableHead>
                         <TableHead className="border border-border bg-muted text-center text-muted-foreground">Move Out Form</TableHead>
 
-                        {hasAnyPermission(['move-out.show', 'move-out.edit', 'move-out.update', 'move-out.destroy']) && (
-                            <TableHead className="border border-border bg-muted text-center text-muted-foreground">Actions</TableHead>
-                        )}
+                        {showActions && <TableHead className="border border-border bg-muted text-center text-muted-foreground">Actions</TableHead>}
                     </TableRow>
                 </TableHeader>
+
                 <TableBody>
                     {moveOuts.map((moveOut) => (
                         <MoveOutTableRow
@@ -72,6 +80,8 @@ export default function MoveOutTable({
                             hasPermission={hasPermission}
                             hasAnyPermission={hasAnyPermission}
                             hasAllPermissions={hasAllPermissions}
+                            onHide={onHide}
+                            onUnhide={onUnhide}
                             onEdit={onEdit}
                             onDelete={onDelete}
                             filters={filters}

@@ -57,7 +57,8 @@ export interface Application {
     // Computed properties
     formatted_date?: string | null;
     attachment_url?: string | null;
-    
+    is_hidden?: boolean;
+
     // Relationship data (when loaded with relationships)
     unit?: {
         id: number;

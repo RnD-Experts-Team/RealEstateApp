@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { ChevronDown } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 
 interface PropertyAutocompleteProps {
     properties: PropertyInfoWithoutInsurance[];
@@ -11,74 +13,68 @@ interface PropertyAutocompleteProps {
 }
 
 const PropertyAutocomplete: React.FC<PropertyAutocompleteProps> = ({ properties, value, onChange, onSelect }) => {
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [filteredProperties, setFilteredProperties] = useState<PropertyInfoWithoutInsurance[]>(properties);
+    const [open, setOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const filtered = properties.filter(property =>
-            property.property_name.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredProperties(filtered);
+    const filteredProperties = useMemo(() => {
+        return properties.filter((p) => p.property_name.toLowerCase().includes(value.toLowerCase()));
     }, [value, properties]);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node) &&
-                inputRef.current &&
-                !inputRef.current.contains(event.target as Node)
-            ) {
-                setShowDropdown(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(e.target.value);
-        setShowDropdown(e.target.value.length > 0);
-    };
-
-    const handlePropertySelect = (property: PropertyInfoWithoutInsurance) => {
+    const handleSelect = (property: PropertyInfoWithoutInsurance) => {
         onSelect(property);
-        setShowDropdown(false);
+        setOpen(false);
+        requestAnimationFrame(() => inputRef.current?.blur());
     };
 
     return (
-        <div className="relative">
-            <Input
-                ref={inputRef}
-                type="text"
-                placeholder="Property"
-                value={value}
-                onChange={handleInputChange}
-                onFocus={() => setShowDropdown(true)}
-                className="text-input-foreground bg-input pr-8"
-            />
-            <ChevronDown className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-            {showDropdown && filteredProperties.length > 0 && (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
                 <div
-                    ref={dropdownRef}
-                    className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-input bg-popover shadow-lg"
+                    className="relative"
+                    onPointerDownCapture={(e) => {
+                        // Fix the “open then instantly close on release” toggle problem
+                        e.preventDefault();
+                        setOpen(true);
+                        requestAnimationFrame(() => inputRef.current?.focus());
+                    }}
+                    onClick={(e) => {
+                        e.preventDefault();
+                    }}
                 >
-                    {filteredProperties.map((property) => (
-                        <div
-                            key={property.id}
-                            className="cursor-pointer px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                            onClick={() => handlePropertySelect(property)}
-                        >
-                            {property.property_name}
-                        </div>
-                    ))}
+                    <Input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="Property"
+                        value={value}
+                        onChange={(e) => {
+                            const next = e.target.value;
+                            onChange(next);
+
+                            // KEEP your original behavior exactly:
+                            // showDropdown(e.target.value.length > 0)
+                            setOpen(next.length > 0);
+                        }}
+                        onFocus={() => setOpen(true)}
+                        className="h-9 text-input-foreground bg-input pr-8"
+                    />
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 </div>
-            )}
-        </div>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                    {/* no CommandInput => no magnifier icon */}
+                    <CommandEmpty>No property found.</CommandEmpty>
+                    <CommandGroup className="max-h-60 overflow-auto">
+                        {filteredProperties.map((p) => (
+                            <CommandItem key={p.id} value={p.property_name} onSelect={() => handleSelect(p)}>
+                                {p.property_name}
+                            </CommandItem>
+                        ))}
+                    </CommandGroup>
+                </Command>
+            </PopoverContent>
+        </Popover>
     );
 };
 

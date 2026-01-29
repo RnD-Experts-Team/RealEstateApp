@@ -43,7 +43,7 @@ class UpdateTenantRequest extends FormRequest
             'alternate_email' => 'nullable|email|max:255',
             'mobile' => 'nullable|string|max:20',
             'emergency_phone' => 'nullable|string|max:20',
-            'cash_or_check' => 'nullable|in:Cash,Check',
+            'cash_or_check' => 'nullable|in:Cash,Check,EFT',
             'has_insurance' => 'nullable|in:Yes,No',
             'sensitive_communication' => 'nullable|in:Yes,No',
             'has_assistance' => 'nullable|in:Yes,No',

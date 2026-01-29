@@ -81,15 +81,15 @@ export default function TenantInformation({ tenants, selectedUnitId }: Props) {
     return (
         <Card className="w-full">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Tenant Information</CardTitle>
-                        <CardDescription>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="text-xl sm:text-2xl font-bold">Tenant Information</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">
                             Complete details for {tenants.length} tenant{tenants.length !== 1 ? 's' : ''}
                         </CardDescription>
                     </div>
                     {tenants.length === 0 && (
-                        <Badge variant="secondary" className="px-4 py-2">
+                        <Badge variant="secondary" className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm flex-shrink-0">
                             No tenants found
                         </Badge>
                     )}
@@ -111,30 +111,30 @@ export default function TenantInformation({ tenants, selectedUnitId }: Props) {
                                         className="w-full p-0 h-auto hover:bg-transparent"
                                     >
                                         <CardHeader className="w-full">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="p-2 rounded-full bg-blue-100">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                    <div className="p-2 rounded-full bg-blue-100 flex-shrink-0">
                                                         <User className="h-5 w-5 text-blue-600" />
                                                     </div>
-                                                    <div className="text-left">
-                                                        <CardTitle className="text-xl">
+                                                    <div className="text-left min-w-0 flex-1">
+                                                        <CardTitle className="text-lg sm:text-xl truncate">
                                                             {tenant.full_name}
                                                         </CardTitle>
-                                                        <CardDescription className="flex items-center space-x-4">
-                                                            <span className="flex items-center">
-                                                                <Mail className="h-4 w-4 mr-1" />
-                                                                {tenant.login_email}
+                                                        <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm">
+                                                            <span className="flex items-center min-w-0">
+                                                                <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                                                                <span className="truncate">{tenant.login_email}</span>
                                                             </span>
                                                             {tenant.mobile && (
                                                                 <span className="flex items-center">
-                                                                    <Phone className="h-4 w-4 mr-1" />
-                                                                    {formatPhoneNumber(tenant.mobile)}
+                                                                    <Phone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                                                                    <span className="truncate">{formatPhoneNumber(tenant.mobile)}</span>
                                                                 </span>
                                                             )}
                                                         </CardDescription>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center space-x-3">
+                                                <div className="flex items-center space-x-3 flex-shrink-0">
                                                     <div className="flex flex-col items-end space-y-1">
                                                         <Badge 
                                                             variant={tenant.is_archived ? "destructive" : "default"}

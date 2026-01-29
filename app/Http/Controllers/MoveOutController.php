@@ -87,6 +87,7 @@ class MoveOutController extends Controller
                     'move_out_form' => $moveOut->move_out_form,
                     'tenants' => $moveOut->tenants,
                     'utility_type' => $moveOut->utility_type,
+                    'got_pics' => (bool) $moveOut->got_pics,
 
                     // ✅ NEW
                     'is_hidden' => (bool) $moveOut->is_hidden,
@@ -137,6 +138,7 @@ class MoveOutController extends Controller
                     'move_out_form' => $moveOut->move_out_form,
                     'tenants' => $moveOut->tenants,
                     'utility_type' => $moveOut->utility_type,
+                    'got_pics' => (bool) $moveOut->got_pics,
 
                     // ✅ NEW
                     'is_hidden' => (bool) $moveOut->is_hidden,
@@ -208,6 +210,7 @@ class MoveOutController extends Controller
             'list_the_unit' => 'nullable|string|max:255',
             'renter' => 'nullable|in:Yes,No',
             'move_out_form' => 'nullable|in:filled,not filled',
+            'got_pics' => 'nullable|boolean',
             'tenants' => 'nullable|string|max:255',
             'utility_type' => 'nullable|string',
         ]);
@@ -265,6 +268,7 @@ class MoveOutController extends Controller
             'move_out_form' => $moveOutWithRelations->move_out_form,
             'tenants' => $moveOutWithRelations->tenants,
             'utility_type' => $moveOutWithRelations->utility_type,
+            'got_pics' => (bool) $moveOutWithRelations->got_pics,
 
             // ✅ NEW
             'is_hidden' => (bool) $moveOutWithRelations->is_hidden,
@@ -321,6 +325,7 @@ class MoveOutController extends Controller
             'list_the_unit' => 'nullable|string|max:255',
             'renter' => 'nullable|in:Yes,No',
             'move_out_form' => 'nullable|in:filled,not filled',
+            'got_pics' => 'nullable|boolean',
             'tenants' => 'nullable|string|max:255',
             'utility_type' => 'nullable|string',
         ]);

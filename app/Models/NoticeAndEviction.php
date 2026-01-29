@@ -28,7 +28,8 @@ class NoticeAndEviction extends Model
         'if_left',
         'writ_date',
         'other_tenants',
-        'is_archived'
+        'is_archived',
+        'is_hidden'
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class NoticeAndEviction extends Model
         'hearing_dates' => 'date',
         'writ_date' => 'date',
         'is_archived' => 'boolean',
+        'is_hidden' => 'boolean',
     ];
 
     /**

@@ -23,6 +23,7 @@ export interface MoveOut {
     renter: 'Yes' | 'No' | null;
     move_out_form: 'filled' | 'not filled' | null;
     utility_type: string | null;
+    got_pics: boolean;
     is_hidden: boolean;
     created_at: string;
     updated_at: string;
@@ -48,6 +49,7 @@ export type MoveOutFormData = {
     renter: 'Yes' | 'No' | '';
     move_out_form: 'filled' | 'not filled' | '';
     utility_type: string;
+    got_pics: boolean;
 } & Record<string, any>;
 
 // Updated to match the actual backend data structure

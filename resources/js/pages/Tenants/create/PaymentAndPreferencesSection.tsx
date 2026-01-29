@@ -38,7 +38,8 @@ export function PaymentAndPreferencesSection({
                 onChange={onCashOrCheckChange}
                 options={[
                     { value: 'Cash', label: 'Cash' },
-                    { value: 'Check', label: 'Check' }
+                    { value: 'Check', label: 'Check' },
+                    { value: 'EFT', label: 'EFT' }
                 ]}
                 borderColor="red"
                 error={cashOrCheckError}

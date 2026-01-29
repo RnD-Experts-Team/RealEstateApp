@@ -128,7 +128,7 @@ export interface Tenant {
     alternate_email?: string;
     mobile?: string;
     emergency_phone?: string;
-    cash_or_check?: 'Cash' | 'Check';
+    cash_or_check?: 'Cash' | 'Check' | 'EFT';
     has_insurance?: 'Yes' | 'No';
     sensitive_communication?: 'Yes' | 'No';
     has_assistance?: 'Yes' | 'No';

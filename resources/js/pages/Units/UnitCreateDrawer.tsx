@@ -37,6 +37,8 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
     const [unitNameValidationError, setUnitNameValidationError] = useState<string>('');
     const [availableProperties, setAvailableProperties] = useState<PropertyInfoWithoutInsurance[]>([]);
     const [selectedCityId, setSelectedCityId] = useState<string>('');
+    const [newPropertyData, setNewPropertyData] = useState<{ city_id: string; property_name: string } | null>(null);
+    const [newTenantData, setNewTenantData] = useState<any | null>(null);
     
     const [calendarStates, setCalendarStates] = useState({
         lease_start: false,
@@ -64,6 +66,10 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
         account_number: '',
         insurance: '',
         insurance_expiration_date: '',
+        // New property data (optional)
+        new_property: null as { city_id: string; property_name: string } | null,
+        // New tenant data (optional)
+        new_tenant: null as any | null,
     });
 
     // Filter properties when city is selected
@@ -93,6 +99,25 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
     const handlePropertyChange = (propertyId: string) => {
         setData('property_id', propertyId);
         setPropertyValidationError('');
+        // Clear new property data if user selects existing property
+        setNewPropertyData(null);
+        setData('new_property', null);
+    };
+
+    const handleNewPropertyCreate = (cityId: string, propertyName: string) => {
+        const newProp = { city_id: cityId, property_name: propertyName };
+        setNewPropertyData(newProp);
+        setData('new_property', newProp);
+        // Clear existing property selection
+        setData('property_id', '');
+        setPropertyValidationError('');
+    };
+
+    const handleNewTenantCreate = (tenantData: any) => {
+        setNewTenantData(tenantData);
+        setData('new_tenant', tenantData);
+        // Clear existing tenant name
+        setData('tenants', '');
     };
 
     const handleUnitNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,9 +143,9 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
         
         let hasValidationErrors = false;
         
-        // Validate property_id is not empty
-        if (!data.property_id || data.property_id.trim() === '') {
-            setPropertyValidationError('Please select a property before submitting the form.');
+        // Validate property_id OR new_property is provided
+        if (!data.property_id && !data.new_property) {
+            setPropertyValidationError('Please select a property or create a new one before submitting the form.');
             if (propertyRef.current) {
                 propertyRef.current.focus();
                 propertyRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -147,15 +172,31 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
             setData('insurance_expiration_date', '');
         }
 
+        // Log data being sent
+        console.log('UnitCreateDrawer - Submitting data:', {
+            property_id: data.property_id,
+            new_property: data.new_property,
+            unit_name: data.unit_name,
+            tenants: data.tenants,
+            new_tenant: data.new_tenant,
+            full_data: data,
+        });
+
         // Add redirect state into payload via transform to avoid typing issues
-        transform((payload: UnitFormData) => ({
-            ...payload,
-            redirect: {
-                filters: redirectState.filters,
-                per_page: redirectState.per_page,
-                page: redirectState.page,
-            },
-        }) as any);
+        transform((payload: UnitFormData) => {
+            const transformedData = {
+                ...payload,
+                redirect: {
+                    filters: redirectState.filters,
+                    per_page: redirectState.per_page,
+                    page: redirectState.page,
+                },
+            };
+            
+            console.log('UnitCreateDrawer - Transformed data:', transformedData);
+            
+            return transformedData as any;
+        });
 
         post(route('units.store'), {
             preserveState: true,
@@ -167,6 +208,8 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
                 setUnitNameValidationError('');
                 setAvailableProperties([]);
                 setSelectedCityId('');
+                setNewPropertyData(null);
+                setNewTenantData(null);
                 setCalendarStates({
                     lease_start: false,
                     lease_end: false,
@@ -185,6 +228,8 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
         setUnitNameValidationError('');
         setAvailableProperties([]);
         setSelectedCityId('');
+        setNewPropertyData(null);
+        setNewTenantData(null);
         setCalendarStates({
             lease_start: false,
             lease_end: false,
@@ -214,6 +259,9 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
                                 onPropertyChange={handlePropertyChange}
                                 error={errors.property_id}
                                 validationError={propertyValidationError}
+                                cities={cities}
+                                newPropertyData={newPropertyData}
+                                onNewPropertyCreate={handleNewPropertyCreate}
                             />
 
                             <UnitDetails
@@ -228,6 +276,8 @@ export default function UnitCreateDrawer({ cities, properties, open, onOpenChang
                                 tenants={data.tenants}
                                 onTenantsChange={(value) => setData('tenants', value)}
                                 error={errors.tenants}
+                                newTenantData={newTenantData}
+                                onNewTenantCreate={handleNewTenantCreate}
                             />
 
                             <LeaseDates

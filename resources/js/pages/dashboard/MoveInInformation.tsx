@@ -54,15 +54,15 @@ export default function MoveInInformation({ moveIns, selectedUnitId }: Props) {
     return (
         <Card className="w-full">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Move-In Information</CardTitle>
-                        <CardDescription>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="text-xl sm:text-2xl font-bold">Move-In Information</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">
                             Complete move-in records for {moveIns.length} record{moveIns.length !== 1 ? 's' : ''}
                         </CardDescription>
                     </div>
                     {moveIns.length === 0 && (
-                        <Badge variant="secondary" className="px-4 py-2">
+                        <Badge variant="secondary" className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm flex-shrink-0">
                             No move-in records found
                         </Badge>
                     )}
@@ -84,28 +84,28 @@ export default function MoveInInformation({ moveIns, selectedUnitId }: Props) {
                                         className="w-full p-0 h-auto hover:bg-transparent"
                                     >
                                         <CardHeader className="w-full">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="p-2 rounded-full bg-indigo-100">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                    <div className="p-2 rounded-full bg-indigo-100 flex-shrink-0">
                                                         <FileText className="h-5 w-5 text-indigo-600" />
                                                     </div>
-                                                    <div className="text-left">
-                                                        <CardTitle className="text-xl">
+                                                    <div className="text-left min-w-0 flex-1">
+                                                        <CardTitle className="text-lg sm:text-xl truncate">
                                                             Move-In Record #{moveIn.id}
                                                         </CardTitle>
-                                                        <CardDescription className="flex items-center space-x-4">
+                                                        <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm">
                                                             <span className="flex items-center">
-                                                                <Home className="h-4 w-4 mr-1" />
-                                                                Unit: {moveIn.unit_name}
+                                                                <Home className="h-4 w-4 mr-1 flex-shrink-0" />
+                                                                <span className="truncate">Unit: {moveIn.unit_name}</span>
                                                             </span>
                                                             <span className="flex items-center">
-                                                                <Calendar className="h-4 w-4 mr-1" />
-                                                                Created: {moveIn.created_at_formatted}
+                                                                <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
+                                                                <span className="truncate">Created: {moveIn.created_at_formatted}</span>
                                                             </span>
                                                         </CardDescription>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center space-x-3">
+                                                <div className="flex items-center space-x-3 flex-shrink-0">
                                                     <Badge 
                                                         variant={moveIn.is_archived ? "destructive" : "default"}
                                                         className="px-3 py-1"

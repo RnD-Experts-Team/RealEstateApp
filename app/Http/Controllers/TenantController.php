@@ -192,7 +192,6 @@ class TenantController extends Controller
     public function update(UpdateTenantRequest $request, Tenant $tenant): RedirectResponse
     {
         $this->tenantService->updateTenant($tenant, $request->validated());
-
         // Preserve filters and pagination by redirecting with the original query params
         $redirectParams = [
             'search' => $request->get('search'),

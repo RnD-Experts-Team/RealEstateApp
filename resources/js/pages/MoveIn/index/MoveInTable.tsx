@@ -51,6 +51,8 @@ export default function MoveInTable({
                         <TableHead className="border border-border bg-muted text-muted-foreground">Date of move in form filled in</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Submitted Insurance</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Date of Insurance expiration</TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground">Delisted</TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground">Utilities Under Their Name</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Last Notice Sent</TableHead>
 
                         {showActions && (

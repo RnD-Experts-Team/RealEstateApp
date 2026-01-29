@@ -79,6 +79,7 @@ export default function MoveOutCreateDrawer({
         renter: '',
         move_out_form: '',
         utility_type: '',
+        got_pics: false,
     });
 
     const handleCityChange = (cityId: string) => {

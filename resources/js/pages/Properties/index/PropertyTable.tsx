@@ -1,11 +1,4 @@
 // resources/js/Pages/Properties/index/PropertyTable.tsx
-import {
-    Table,
-    TableBody,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import { Property } from '@/types/property';
 import PropertyTableRow from './PropertyTableRow';
 
@@ -35,51 +28,51 @@ export default function PropertyTable({
     hasAnyActionPermission,
 }: PropertyTableProps) {
     return (
-        <div className="overflow-x-auto relative">
-            <Table className="border-collapse border border-border rounded-md">
-                <TableHeader>
-                    <TableRow className="border-border">
-                        {/* Sticky City column at the start */}
-                        <TableHead className="text-muted-foreground border border-border bg-muted sticky left-0 z-20 min-w-[120px]">
+        <div className="relative max-h-[600px] overflow-auto border border-border rounded-md">
+            <table className="w-full caption-bottom text-sm border-collapse">
+                <thead style={{ position: 'sticky', top: 0, zIndex: 20 }} className="[&_tr]:border-b bg-background">
+                    <tr className="border-border bg-muted">
+                        {/* Sticky City column at the start - also sticky vertically */}
+                        <th className="text-foreground border border-border bg-muted sticky left-0 z-30 min-w-[120px] h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             City
-                        </TableHead>
-                        {/* Property Name becomes the second sticky column */}
-                        <TableHead className="text-muted-foreground border border-border bg-muted sticky left-[120px] z-10 min-w-[160px]">
+                        </th>
+                        {/* Property Name becomes the second sticky column - also sticky vertically */}
+                        <th className="text-foreground border border-border bg-muted sticky left-[120px] z-30 min-w-[160px] h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Property Name
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Insurance Company
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Amount
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Effective Date
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Policy Number
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Expiration Date
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Days Left
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Notes
-                        </TableHead>
-                        <TableHead className="text-muted-foreground border border-border bg-muted">
+                        </th>
+                        <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Status
-                        </TableHead>
+                        </th>
                         {/* Only show Actions column if user has any action permission */}
                         {hasAnyActionPermission && (
-                            <TableHead className="text-muted-foreground border border-border bg-muted">
+                            <th className="text-foreground border border-border bg-muted h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                                 Actions
-                            </TableHead>
+                            </th>
                         )}
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
+                    </tr>
+                </thead>
+                <tbody className="[&_tr:last-child]:border-0">
                     {properties.map((property) => (
                         <PropertyTableRow
                             key={property.id}
@@ -93,8 +86,8 @@ export default function PropertyTable({
                             hasAnyActionPermission={hasAnyActionPermission}
                         />
                     ))}
-                </TableBody>
-            </Table>
+                </tbody>
+            </table>
         </div>
     );
 }

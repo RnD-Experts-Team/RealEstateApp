@@ -17,7 +17,9 @@ export interface MoveIn {
     date_of_move_in_form_filled: string | null;  // ISO string date
     submitted_insurance: 'Yes' | 'No' | null;
     date_of_insurance_expiration: string | null;  // ISO string date
-    is_hidden: boolean; // ✅ NEW
+    delisted: boolean;
+    utilities_under_their_name: boolean;
+    is_hidden: boolean;
     is_archived: boolean;
     created_at: string;
     updated_at: string;
@@ -36,6 +38,8 @@ export type MoveInFormData = {
     date_of_move_in_form_filled: string;
     submitted_insurance: 'Yes' | 'No' | '';
     date_of_insurance_expiration: string;
+    delisted: boolean;
+    utilities_under_their_name: boolean;
 } & Record<string, any>;
 
 // Additional interface for unit objects used in dropdowns

@@ -82,6 +82,21 @@ export default function MoveOutTableRow({
         );
     };
 
+    const getBooleanBadge = (value: boolean) => {
+        return (
+            <Badge
+                variant={value ? 'default' : 'secondary'}
+                className={
+                    value
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                }
+            >
+                {value ? 'Yes' : 'No'}
+            </Badge>
+        );
+    };
+
     const showActions = hasAnyPermission(['move-out.show', 'move-out.edit', 'move-out.update', 'move-out.destroy', 'move-out.hide', 'move-out.unhide']);
 
     return (
@@ -181,6 +196,8 @@ export default function MoveOutTableRow({
             <TableCell className="border border-border text-center">{getYesNoBadge(moveOut.renter)}</TableCell>
 
             <TableCell className="border border-border text-center">{getFormBadge(moveOut.move_out_form)}</TableCell>
+
+            <TableCell className="border border-border text-center">{getBooleanBadge(moveOut.got_pics)}</TableCell>
 
             {showActions && (
                 <TableCell className="border border-border text-center">

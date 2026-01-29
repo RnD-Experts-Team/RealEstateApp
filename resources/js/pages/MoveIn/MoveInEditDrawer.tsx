@@ -63,6 +63,8 @@ type MoveInFormData = {
     date_of_move_in_form_filled: string | null;
     submitted_insurance: 'Yes' | 'No' | '';
     date_of_insurance_expiration: string | null;
+    delisted: boolean;
+    utilities_under_their_name: boolean;
     first_name: string;
     last_name: string;
     last_notice_sent: string;
@@ -185,6 +187,8 @@ export default function MoveInEditDrawer({
         date_of_move_in_form_filled: normalizeDateOrNull(moveIn.date_of_move_in_form_filled),
         submitted_insurance: moveIn.submitted_insurance ?? 'No',
         date_of_insurance_expiration: normalizeDateOrNull(moveIn.date_of_insurance_expiration),
+        delisted: (moveIn as any).delisted ?? false,
+        utilities_under_their_name: (moveIn as any).utilities_under_their_name ?? false,
         first_name: splitTenantName(moveIn.tenant_name).first,
         last_name: splitTenantName(moveIn.tenant_name).last,
         last_notice_sent: normalizeDateString(moveIn.last_notice_sent),
@@ -205,6 +209,8 @@ export default function MoveInEditDrawer({
             date_of_move_in_form_filled: normalizeDateOrNull(moveIn.date_of_move_in_form_filled),
             submitted_insurance: moveIn.submitted_insurance ?? 'No',
             date_of_insurance_expiration: normalizeDateOrNull(moveIn.date_of_insurance_expiration),
+            delisted: (moveIn as any).delisted ?? false,
+            utilities_under_their_name: (moveIn as any).utilities_under_their_name ?? false,
             first_name: splitTenantName(moveIn.tenant_name).first,
             last_name: splitTenantName(moveIn.tenant_name).last,
             last_notice_sent: normalizeDateString(moveIn.last_notice_sent),
@@ -365,6 +371,8 @@ export default function MoveInEditDrawer({
             date_of_move_in_form_filled: normalizeDateOrNull(moveIn.date_of_move_in_form_filled),
             submitted_insurance: moveIn.submitted_insurance ?? 'No',
             date_of_insurance_expiration: normalizeDateOrNull(moveIn.date_of_insurance_expiration),
+            delisted: (moveIn as any).delisted ?? false,
+            utilities_under_their_name: (moveIn as any).utilities_under_their_name ?? false,
             first_name: splitTenantName(moveIn.tenant_name).first,
             last_name: splitTenantName(moveIn.tenant_name).last,
             last_notice_sent: normalizeDateString(moveIn.last_notice_sent),
@@ -479,6 +487,37 @@ export default function MoveInEditDrawer({
                                 submittedError={errors.submitted_insurance}
                                 dateError={errors.date_of_insurance_expiration}
                             />
+
+                            {/* Additional Move-In Fields */}
+                            <FormSection label="Delisted" borderColor="border-l-blue-500" error={(errors as any).delisted}>
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="delisted"
+                                        checked={data.delisted}
+                                        onChange={(e) => setData('delisted', e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                    />
+                                    <label htmlFor="delisted" className="text-sm cursor-pointer">
+                                        Unit has been delisted
+                                    </label>
+                                </div>
+                            </FormSection>
+
+                            <FormSection label="Utilities Under Their Name" borderColor="border-l-blue-500" error={(errors as any).utilities_under_their_name}>
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="utilities_under_their_name"
+                                        checked={data.utilities_under_their_name}
+                                        onChange={(e) => setData('utilities_under_their_name', e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                    />
+                                    <label htmlFor="utilities_under_their_name" className="text-sm cursor-pointer">
+                                        Utilities are under tenant's name
+                                    </label>
+                                </div>
+                            </FormSection>
 
                             {/* Tenant & Notice Information */}
                             <FormSection label="First Name" borderColor="border-l-blue-500" error={errors.first_name}>

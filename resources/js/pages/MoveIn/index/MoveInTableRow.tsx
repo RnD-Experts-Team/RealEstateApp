@@ -48,6 +48,21 @@ export default function MoveInTableRow({
         );
     };
 
+    const getBooleanBadge = (value: boolean) => {
+        return (
+            <Badge
+                variant={value ? 'default' : 'secondary'}
+                className={
+                    value
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                }
+            >
+                {value ? 'Yes' : 'No'}
+            </Badge>
+        );
+    };
+
     return (
         <TableRow className="border-border hover:bg-muted/50">
             <TableCell className="sticky left-0 z-10 border border-border bg-muted text-center font-medium text-foreground">
@@ -72,6 +87,8 @@ export default function MoveInTableRow({
             <TableCell className="border border-border text-center text-foreground">{formatDateUTC(moveIn.date_of_move_in_form_filled)}</TableCell>
             <TableCell className="border border-border text-center">{getYesNoBadge(moveIn.submitted_insurance)}</TableCell>
             <TableCell className="border border-border text-center text-foreground">{formatDateUTC(moveIn.date_of_insurance_expiration)}</TableCell>
+            <TableCell className="border border-border text-center">{getBooleanBadge(moveIn.delisted)}</TableCell>
+            <TableCell className="border border-border text-center">{getBooleanBadge(moveIn.utilities_under_their_name)}</TableCell>
             <TableCell className="border border-border text-center text-foreground">{formatDateUTC(moveIn.last_notice_sent)}</TableCell>
 
             {(canEdit || canDelete || canHide) && (

@@ -27,6 +27,8 @@ class MoveIn extends Model
         'date_of_insurance_expiration',
         'tenant_name',
         'last_notice_sent',
+        'delisted',
+        'utilities_under_their_name',
         'is_archived',
     ];
 
@@ -39,6 +41,8 @@ class MoveIn extends Model
         'date_of_move_in_form_filled' => 'date',
         'date_of_insurance_expiration' => 'date',
         'last_notice_sent' => 'date',
+        'delisted' => 'boolean',
+        'utilities_under_their_name' => 'boolean',
         'is_archived' => 'boolean',
         'is_hidden' => 'boolean',
     ];

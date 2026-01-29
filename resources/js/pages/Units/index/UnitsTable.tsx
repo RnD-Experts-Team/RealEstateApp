@@ -1,7 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Unit } from '@/types/unit';
 import { Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -42,108 +41,108 @@ const UnitsTable: React.FC<UnitsTableProps> = ({ units, hasEditPermission, hasDe
     };
 
     return (
-        <div className="relative overflow-x-auto">
-            <Table className="border-collapse rounded-md border border-border">
-                <TableHeader>
-                    <TableRow className="border-border">
-                        <TableHead className="sticky left-0 z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">
+        <div className="relative max-h-[600px] overflow-auto border border-border rounded-md">
+            <table className="w-full caption-bottom text-sm border-collapse">
+                <thead style={{ position: 'sticky', top: 0, zIndex: 20 }} className="[&_tr]:border-b bg-background">
+                    <tr className="border-border bg-background">
+                        <th className="sticky left-0 z-30 min-w-[120px] border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             City
-                        </TableHead>
-                        <TableHead className="sticky left-[120px] z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">
+                        </th>
+                        <th className="sticky left-[120px] z-30 min-w-[120px] border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Property
-                        </TableHead>
-                        <TableHead className="sticky left-[240px] z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">
+                        </th>
+                        <th className="sticky left-[240px] z-30 min-w-[120px] border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Unit Name
-                        </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Tenants</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Lease Start</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Lease End</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Beds</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Baths</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Lease Status</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">New Lease</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Monthly Rent</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">
+                        </th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Tenants</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Lease Start</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Lease End</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Beds</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Baths</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Lease Status</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">New Lease</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Monthly Rent</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">
                             Recurring Transaction
-                        </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Utility Status</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Account Number</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Insurance</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Insurance Exp.</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Vacant</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Listed</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Applications</TableHead>
+                        </th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Utility Status</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Account Number</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Insurance</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Insurance Exp.</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Vacant</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Listed</th>
+                        <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Applications</th>
                         {(hasEditPermission || hasDeletePermission) && (
-                            <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>
+                            <th className="border border-border bg-muted text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap">Actions</th>
                         )}
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
+                    </tr>
+                </thead>
+                <tbody className="[&_tr:last-child]:border-0">
                     {units.map((unit) => (
-                        <TableRow key={unit.id} className="border-border hover:bg-muted/50">
-                            <TableCell className="sticky left-0 z-10 min-w-[120px] border border-border bg-muted text-center font-medium text-foreground">
+                        <tr key={unit.id} className="border-border hover:bg-muted/50 border-b transition-colors">
+                            <td className="sticky left-0 z-10 min-w-[120px] border border-border bg-muted text-center font-medium text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.city}
-                            </TableCell>
-                            <TableCell className="sticky left-[120px] z-10 min-w-[120px] border border-border bg-muted text-center font-medium text-foreground">
+                            </td>
+                            <td className="sticky left-[120px] z-10 min-w-[120px] border border-border bg-muted text-center font-medium text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.property}
-                            </TableCell>
-                            <TableCell className="sticky left-[240px] z-10 min-w-[120px] border border-border bg-muted text-center font-medium text-foreground">
+                            </td>
+                            <td className="sticky left-[240px] z-10 min-w-[120px] border border-border bg-muted text-center font-medium text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.unit_name}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.tenants || '-'}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {formatDateOnly(unit.lease_start)}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {formatDateOnly(unit.lease_end)}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.count_beds || '-'}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.count_baths || '-'}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.lease_status || '-'}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.is_new_lease || '-'}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 <span className="font-medium">{unit.formatted_monthly_rent}</span>
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 <div className="max-w-32 truncate" title={unit.recurring_transaction || ''}>
                                     {unit.recurring_transaction || '-'}
                                 </div>
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 <div className="max-w-24 truncate" title={unit.utility_status || ''}>
                                     {unit.utility_status || '-'}
                                 </div>
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 <div className="max-w-24 truncate" title={unit.account_number || ''}>
                                     {unit.account_number || '-'}
                                 </div>
-                            </TableCell>
-                            <TableCell className="border border-border text-center">
+                            </td>
+                            <td className="border border-border text-center p-2 align-middle whitespace-nowrap">
                                 {getInsuranceBadge(unit.insurance)}
-                            </TableCell>
-                            <TableCell className="border border-border text-center text-foreground">
+                            </td>
+                            <td className="border border-border text-center text-foreground p-2 align-middle whitespace-nowrap">
                                 {unit.insurance_expiration_date ? formatDateOnly(unit.insurance_expiration_date) : '-'}
-                            </TableCell>
-                            <TableCell className="border border-border text-center">{getVacantBadge(unit.vacant)}</TableCell>
-                            <TableCell className="border border-border text-center">{getListedBadge(unit.listed)}</TableCell>
-                            <TableCell className="border border-border text-center">
+                            </td>
+                            <td className="border border-border text-center p-2 align-middle whitespace-nowrap">{getVacantBadge(unit.vacant)}</td>
+                            <td className="border border-border text-center p-2 align-middle whitespace-nowrap">{getListedBadge(unit.listed)}</td>
+                            <td className="border border-border text-center p-2 align-middle whitespace-nowrap">
                                 <Badge variant="secondary" className="bg-secondary text-secondary-foreground">
                                     {unit.total_applications}
                                 </Badge>
-                            </TableCell>
+                            </td>
                             {(hasEditPermission || hasDeletePermission) && (
-                                <TableCell className="border border-border text-center">
+                                <td className="border border-border text-center p-2 align-middle whitespace-nowrap">
                                     <div className="flex gap-1">
                                         {hasEditPermission && (
                                             <Button variant="outline" size="sm" onClick={() => onEdit(unit)}>
@@ -161,12 +160,12 @@ const UnitsTable: React.FC<UnitsTableProps> = ({ units, hasEditPermission, hasDe
                                             </Button>
                                         )}
                                     </div>
-                                </TableCell>
+                                </td>
                             )}
-                        </TableRow>
+                        </tr>
                     ))}
-                </TableBody>
-            </Table>
+                </tbody>
+            </table>
         </div>
     );
 };

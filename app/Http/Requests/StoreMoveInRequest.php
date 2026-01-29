@@ -31,6 +31,8 @@ class StoreMoveInRequest extends FormRequest
             'date_of_move_in_form_filled' => ['nullable', 'date'],
             'submitted_insurance' => ['nullable', 'string', Rule::in(['Yes', 'No'])],
             'date_of_insurance_expiration' => ['nullable', 'date'],
+            'delisted' => ['nullable', 'boolean'],
+            'utilities_under_their_name' => ['nullable', 'boolean'],
             'tenant_name' => ['nullable', 'string'],
             'last_notice_sent' => ['nullable', 'date'],
             'first_name' => ['nullable', 'string', 'max:255'],

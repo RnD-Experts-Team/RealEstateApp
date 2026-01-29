@@ -14,7 +14,7 @@ export interface Tenant {
     alternate_email?: string | null;
     mobile?: string | null;
     emergency_phone?: string | null;
-    cash_or_check?: 'Cash' | 'Check' | null;
+    cash_or_check?: 'Cash' | 'Check' | 'EFT' | null;
     has_insurance?: 'Yes' | 'No' | null;
     sensitive_communication?: 'Yes' | 'No' | null;
     has_assistance?: 'Yes' | 'No' | null;

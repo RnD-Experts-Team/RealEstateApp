@@ -62,8 +62,10 @@ class MoveInController extends Controller
             'date_of_insurance_expiration' => $moveIn->submitted_insurance === 'No' ? 'N/A' : $moveIn->date_of_insurance_expiration,
             'tenant_name' => $moveIn->tenant_name,
             'last_notice_sent' => $moveIn->last_notice_sent,
+            'delisted' => (bool) $moveIn->delisted,
+            'utilities_under_their_name' => (bool) $moveIn->utilities_under_their_name,
             'is_archived' => $moveIn->is_archived,
-            'is_hidden' => (bool) $moveIn->is_hidden, // ✅ add
+            'is_hidden' => (bool) $moveIn->is_hidden,
             'created_at' => $moveIn->created_at,
             'updated_at' => $moveIn->updated_at,
         ];

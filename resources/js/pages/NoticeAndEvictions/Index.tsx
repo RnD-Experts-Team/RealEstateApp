@@ -187,6 +187,7 @@ const Index = ({
         property: '',
         unit: '',
         tenant: '',
+        is_hidden: false,
     });
 
     const [, setFilters] = useState({
@@ -194,6 +195,7 @@ const Index = ({
         property: '',
         unit: '',
         tenant: '',
+        is_hidden: false,
     });
 
     const [showCityDropdown, setShowCityDropdown] = useState(false);
@@ -287,6 +289,10 @@ const Index = ({
             params.tenant_name = tempFilters.tenant.trim();
         }
 
+        if (tempFilters.is_hidden) {
+            params.is_hidden = 'true';
+        }
+
         return params;
     };
 
@@ -318,12 +324,14 @@ const Index = ({
             property: '',
             unit: '',
             tenant: '',
+            is_hidden: false,
         });
         setFilters({
             city: '',
             property: '',
             unit: '',
             tenant: '',
+            is_hidden: false,
         });
 
         setShowCityDropdown(false);
@@ -467,6 +475,7 @@ const Index = ({
                                 onPropertySelect={handlePropertySelect}
                                 onUnitSelect={handleUnitSelect}
                                 onTenantSelect={handleTenantSelect}
+                                onIsHiddenChange={(isHidden) => setTempFilters((prev) => ({ ...prev, is_hidden: isHidden }))}
                                 onSearch={handleSearchClick}
                                 onClear={handleClearFilters}
                             />

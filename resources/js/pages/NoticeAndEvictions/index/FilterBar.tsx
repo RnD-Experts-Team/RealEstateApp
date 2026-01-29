@@ -11,6 +11,7 @@ interface FilterBarProps {
         property: string;
         unit: string;
         tenant: string;
+        is_hidden: boolean;
     };
     cities: City[];
     properties: ExtendedProperty[];
@@ -32,6 +33,7 @@ interface FilterBarProps {
     onPropertySelect: (property: ExtendedProperty) => void;
     onUnitSelect: (unit: Unit) => void;
     onTenantSelect: (tenant: ExtendedTenant) => void;
+    onIsHiddenChange: (isHidden: boolean) => void;
     onSearch: () => void;
     onClear: () => void;
 }
@@ -58,6 +60,7 @@ export function FilterBar({
     onPropertySelect,
     onUnitSelect,
     onTenantSelect,
+    onIsHiddenChange,
     onSearch,
     onClear,
 }: FilterBarProps) {
@@ -127,8 +130,29 @@ export function FilterBar({
                 setShowDropdown={setShowTenantDropdown}
             />
 
-            {/* Placeholder column for responsive grid */}
-            <div className="hidden md:block"></div>
+            {/* Visible/Hidden toggle */}
+            <div className="flex items-center">
+                <div className="w-full flex items-center rounded-md border border-input bg-input p-1 h-10">
+                    <Button
+                        type="button"
+                        variant={tempFilters.is_hidden ? 'outline' : 'default'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => onIsHiddenChange(false)}
+                    >
+                        Visible
+                    </Button>
+                    <Button
+                        type="button"
+                        variant={tempFilters.is_hidden ? 'default' : 'outline'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => onIsHiddenChange(true)}
+                    >
+                        Hidden
+                    </Button>
+                </div>
+            </div>
 
             {/* Search and Clear Buttons */}
             <div className="flex gap-2">

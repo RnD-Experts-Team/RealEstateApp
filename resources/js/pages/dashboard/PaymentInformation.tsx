@@ -116,15 +116,15 @@ export default function PaymentInformation({ payments, selectedUnitId }: Props) 
     return (
         <Card className="w-full">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Payment Information</CardTitle>
-                        <CardDescription>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="text-xl sm:text-2xl font-bold">Payment Information</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">
                             Payment records and transaction history for {payments.length} record{payments.length !== 1 ? 's' : ''}
                         </CardDescription>
                     </div>
                     {payments.length === 0 && (
-                        <Badge variant="secondary" className="px-4 py-2">
+                        <Badge variant="secondary" className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm flex-shrink-0">
                             No payments found
                         </Badge>
                     )}

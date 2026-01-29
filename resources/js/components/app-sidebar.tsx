@@ -70,6 +70,19 @@ const mainNavCategories: NavCategory[] = [
         permissions: ['cities.index','properties.index','units.index']
     },
     {
+        title: 'Vacant Units',
+        icon: LayoutGrid,
+        items: [
+            {
+                title: 'Vacant Units',
+                href: '/units/vacant',
+                icon: LayoutGrid,
+                permission: 'units.index'
+            },
+        ],
+        permissions: ['units.index']
+    },
+    {
         title: 'People',
         icon: Users,
         items: [

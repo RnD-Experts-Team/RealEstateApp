@@ -108,15 +108,15 @@ export default function PaymentPlanInformation({ paymentPlans, selectedUnitId }:
     return (
         <Card className="w-full">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Payment Plans</CardTitle>
-                        <CardDescription>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="text-xl sm:text-2xl font-bold">Payment Plans</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">
                             Payment plan arrangements for {paymentPlans.length} plan{paymentPlans.length !== 1 ? 's' : ''}
                         </CardDescription>
                     </div>
                     {paymentPlans.length === 0 && (
-                        <Badge variant="secondary" className="px-4 py-2">
+                        <Badge variant="secondary" className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm flex-shrink-0">
                             No payment plans found
                         </Badge>
                     )}
@@ -141,26 +141,26 @@ export default function PaymentPlanInformation({ paymentPlans, selectedUnitId }:
                                             className="w-full p-0 h-auto hover:bg-transparent"
                                         >
                                             <CardHeader className="w-full">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className="p-2 rounded-full bg-purple-100">
+                                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                    <div className="flex items-start space-x-3 min-w-0 flex-1 w-full">
+                                                        <div className="p-2 rounded-full bg-purple-100 flex-shrink-0">
                                                             <PiggyBank className="h-5 w-5 text-purple-600" />
                                                         </div>
-                                                        <div className="text-left">
-                                                            <CardTitle className="text-xl">
+                                                        <div className="text-left min-w-0 flex-1">
+                                                            <CardTitle className="text-lg sm:text-xl truncate">
                                                                 Payment Plan #{paymentPlan.id}
                                                             </CardTitle>
-                                                            <CardDescription className="flex items-center space-x-4">
+                                                            <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm">
                                                                 {paymentPlan.tenant_name && (
                                                                     <span className="flex items-center">
-                                                                        <User className="h-4 w-4 mr-1" />
-                                                                        {paymentPlan.tenant_name}
+                                                                        <User className="h-4 w-4 mr-1 flex-shrink-0" />
+                                                                        <span className="truncate">{paymentPlan.tenant_name}</span>
                                                                     </span>
                                                                 )}
                                                                 {paymentPlan.dates_formatted && (
                                                                     <span className="flex items-center">
-                                                                        <Calendar className="h-4 w-4 mr-1" />
-                                                                        Due: {paymentPlan.dates_formatted}
+                                                                        <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
+                                                                        <span className="truncate">Due: {paymentPlan.dates_formatted}</span>
                                                                     </span>
                                                                 )}
                                                             </CardDescription>
@@ -168,7 +168,7 @@ export default function PaymentPlanInformation({ paymentPlans, selectedUnitId }:
                                                             <div className="mt-2 w-full">
                                                                 <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
                                                                     <span>Progress: {progressPercentage.toFixed(0)}%</span>
-                                                                    <span>{paymentPlan.formatted_paid} / {paymentPlan.formatted_amount}</span>
+                                                                    <span className="truncate ml-2">{paymentPlan.formatted_paid} / {paymentPlan.formatted_amount}</span>
                                                                 </div>
                                                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                                                     <div 
@@ -179,7 +179,7 @@ export default function PaymentPlanInformation({ paymentPlans, selectedUnitId }:
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center space-x-3">
+                                                    <div className="flex items-center space-x-3 flex-shrink-0">
                                                         <div className="flex flex-col items-end space-y-2">
                                                             <Badge 
                                                                 variant={paymentPlan.is_archived ? "destructive" : "default"}

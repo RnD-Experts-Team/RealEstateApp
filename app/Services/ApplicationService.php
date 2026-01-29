@@ -123,11 +123,7 @@ if ($isHiddenFilter) {
     {
         unset($data['is_hidden']); // ✅ prevent mass assignment
 
-        Log::info('UPDATE payload', [
-            'id' => $application->id,
-            'removed' => $data['removed_attachment_indices'],
-            'files_count' => is_array($data['attachments']) ? count($data['attachments']) : 0,
-        ]);
+       
         if (!empty($data['removed_attachment_indices'])) {
             $this->removeAttachmentsByIndices($application, $data['removed_attachment_indices']);
             unset($data['removed_attachment_indices']);

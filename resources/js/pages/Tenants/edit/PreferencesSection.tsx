@@ -39,7 +39,8 @@ export default function PreferencesSection({
                     name="cash_or_check"
                     options={[
                         { value: 'Cash', label: 'Cash' },
-                        { value: 'Check', label: 'Check' }
+                        { value: 'Check', label: 'Check' },
+                        { value: 'EFT', label: 'EFT' }
                     ]}
                 />
                 {errors.cash_or_check && <p className="mt-1 text-sm text-red-600">{errors.cash_or_check}</p>}

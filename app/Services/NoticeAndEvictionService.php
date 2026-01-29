@@ -33,6 +33,10 @@ class NoticeAndEvictionService
      */
     public function applyFilters(Builder $query, array $filters = []): Builder
     {
+        // ✅ hidden filter (default visible)
+        $isHiddenFilter = filter_var($filters['is_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $query->where('is_hidden', $isHiddenFilter ? true : false);
+
         // Handle individual filter parameters (ID-based filtering)
         if (isset($filters['city_id']) && $filters['city_id']) {
             $query->whereHas('tenant.unit.property.city', function ($q) use ($filters) {
@@ -120,7 +124,9 @@ class NoticeAndEvictionService
     public function listAll($filters = [])
     {
         $query = NoticeAndEviction::with(['tenant.unit.property.city']);
-        return $this->applyFilters($query, $filters)->get();
+        return $this->applyFilters($query, $filters)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function findById(int $id)
@@ -143,8 +149,8 @@ class NoticeAndEvictionService
             $query = $this->applyFilters($query, $filters);
         }
 
-        // Get all filtered record IDs ordered
-        $filteredIds = $query->pluck('id')->toArray();
+        // Get all filtered record IDs ordered by newest first
+        $filteredIds = $query->orderBy('created_at', 'desc')->pluck('id')->toArray();
         $currentPosition = array_search($currentRecordId, $filteredIds);
 
         return [
@@ -169,5 +175,23 @@ class NoticeAndEvictionService
             'tenant_name' => $record->tenant ? $record->tenant->first_name . ' ' . $record->tenant->last_name : 'N/A',
             'unit_name' => $record->tenant?->unit?->unit_name ?? 'N/A',
         ];
+    }
+
+    /**
+     * Hide a notice and eviction record (set is_hidden to true)
+     */
+    public function hideNoticeAndEviction(NoticeAndEviction $noticeAndEviction): bool
+    {
+        $noticeAndEviction->is_hidden = true;
+        return $noticeAndEviction->save();
+    }
+
+    /**
+     * Unhide a notice and eviction record (set is_hidden to false)
+     */
+    public function unhideNoticeAndEviction(NoticeAndEviction $noticeAndEviction): bool
+    {
+        $noticeAndEviction->is_hidden = false;
+        return $noticeAndEviction->save();
     }
 }

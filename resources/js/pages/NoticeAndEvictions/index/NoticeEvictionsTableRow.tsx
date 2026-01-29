@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { NoticeAndEviction } from '@/types/NoticeAndEviction';
-import { Link } from '@inertiajs/react';
-import { Edit, Eye, Trash2 } from 'lucide-react';
+import { Link, router } from '@inertiajs/react';
+import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import { YesNoBadge } from './YesNoBadge';
 import { format } from 'date-fns';
@@ -37,6 +37,28 @@ export function NoticeEvictionsTableRow({
     onDelete,
     filterQueryString,
 }: NoticeEvictionsTableRowProps) {
+    const handleHide = () => {
+        router.patch(
+            route('notice_and_evictions.hide', record.id) + filterQueryString,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+            }
+        );
+    };
+
+    const handleUnhide = () => {
+        router.patch(
+            route('notice_and_evictions.unhide', record.id) + filterQueryString,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+            }
+        );
+    };
+
     return (
         <TableRow className="border-border hover:bg-muted/50">
             <TableCell className="sticky left-0 z-10 border border-border bg-muted text-center font-medium text-foreground">
@@ -101,16 +123,42 @@ export function NoticeEvictionsTableRow({
             </TableCell>
             {(hasShowPermission || hasEditPermission || hasDeletePermission) && (
                 <TableCell className="border border-border text-center">
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 justify-center">
                         {hasShowPermission && (
                             <Link href={`/notice_and_evictions/${record.id}${filterQueryString}`}>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" title="View">
                                     <Eye className="h-4 w-4" />
                                 </Button>
                             </Link>
                         )}
+                        
+                        {/* Hide/Unhide buttons */}
+                        {!record.is_hidden && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleHide}
+                                className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-900 dark:text-yellow-400 dark:hover:bg-yellow-950"
+                                title="Hide"
+                            >
+                                <EyeOff className="h-4 w-4" />
+                            </Button>
+                        )}
+
+                        {record.is_hidden && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleUnhide}
+                                className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-950"
+                                title="Unhide"
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                        )}
+
                         {hasEditPermission && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(record)}>
+                            <Button variant="outline" size="sm" onClick={() => onEdit(record)} title="Edit">
                                 <Edit className="h-4 w-4" />
                             </Button>
                         )}
@@ -120,6 +168,7 @@ export function NoticeEvictionsTableRow({
                                 size="sm"
                                 onClick={() => onDelete(record)}
                                 className="border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                title="Delete"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>

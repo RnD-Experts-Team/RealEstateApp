@@ -1,0 +1,96 @@
+HOW TO VERIFY IF YOUR LOCAL DATABASE MATCHES PRODUCTION
+========================================================
+
+You said you copied production data to local, but the test shows only 8-224 records.
+Let's verify if you actually have the FULL production data:
+
+STEP 1: Check Production Database Size
+---------------------------------------
+Option A - If you have SSH access to production:
+  1. SSH into production server
+  2. Run: mysql -u username -p database_name
+  3. Run these queries:
+
+SELECT 'Properties' as table_name, COUNT(*) as count FROM property_info_without_insurance
+UNION ALL SELECT 'Units', COUNT(*) FROM units
+UNION ALL SELECT 'Tenants', COUNT(*) FROM tenants WHERE is_archived = 0
+UNION ALL SELECT 'Move-Ins', COUNT(*) FROM move_ins WHERE is_archived = 0
+UNION ALL SELECT 'Move-Outs', COUNT(*) FROM move_outs WHERE is_archived = 0
+UNION ALL SELECT 'Vendor Tasks', COUNT(*) FROM vendors_tasks_tracker WHERE is_archived = 0
+UNION ALL SELECT 'Payments', COUNT(*) FROM payments
+UNION ALL SELECT 'Payment Plans', COUNT(*) FROM payment_plans WHERE is_archived = 0
+UNION ALL SELECT 'Applications', COUNT(*) FROM applications WHERE is_archived = 0
+UNION ALL SELECT 'Notice & Evictions', COUNT(*) FROM notice_and_evictions WHERE is_archived = 0;
+
+Option B - If you have database access tool (phpMyAdmin, etc):
+  1. Login to production database
+  2. Run the SQL query above
+  3. Compare results with your local test
+
+Option C - Ask your manager/DBA:
+  "How many records are in the notice_and_evictions table on production?"
+
+
+STEP 2: Compare with Your Local Database
+-----------------------------------------
+Your local test showed:
+  Properties:           48 records
+  Units:               173 records
+  Tenants:             224 records
+  Move-Ins:             22 records
+  Move-Outs:            23 records
+  Vendor Tasks:         11 records
+  Payments:             68 records
+  Notice & Evictions:    8 records
+
+If production shows DIFFERENT numbers (especially if HIGHER), then:
+  → You DON'T have the full production data locally
+  → The performance issue WILL happen on production
+  → This IS the cause of ERR_HTTP2_PROTOCOL_ERROR
+
+
+STEP 3: Interpret the Results
+------------------------------
+Scenario A: Production has SAME numbers as local
+  → The data is the same
+  → Performance is NOT the issue
+  → Look for other causes (server config, network, etc.)
+
+Scenario B: Production has 2-5x MORE records
+  → Might cause slowness but probably won't timeout
+  → Monitor production performance
+
+Scenario C: Production has 10x+ MORE records
+  → WILL cause timeout on production
+  → This IS the problem
+  → Need to apply performance optimization
+
+Scenario D: Production has 100x+ MORE records
+  → DEFINITELY the problem
+  → Critical performance issue
+  → Must fix before deploying
+
+
+EXAMPLE INTERPRETATION:
+-----------------------
+If production shows:
+  Notice & Evictions: 800 records (vs your local 8)
+  Tenants: 2,500 records (vs your local 224)
+  Payments: 15,000 records (vs your local 68)
+
+Then:
+  → Production has 100x more data
+  → Estimated load time: 40-120 seconds
+  → Server timeout: 30 seconds
+  → Result: ERR_HTTP2_PROTOCOL_ERROR ✅ CONFIRMED
+
+
+QUICK TEST:
+-----------
+If you can't access production database, try this:
+  1. Ask a colleague to open https://realestate.pnehomes.com/notice_and_evictions
+  2. Open browser DevTools (F12) → Network tab
+  3. Try to load the page
+  4. Look at the request timing:
+     - If it shows "pending" for 30+ seconds → TIMEOUT (data too large)
+     - If it loads in < 5 seconds → NOT a data size issue

@@ -38,32 +38,7 @@ class NoticeAndEvictionController extends Controller
 
     public function index(Request $request)
     {
-        // Get all non-archived records and update their evictions status
-        $recordsToUpdate = NoticeAndEviction::with(['tenant.unit.property.city'])
-            ->where('is_archived', false)
-            ->get();
-
-        foreach ($recordsToUpdate as $record) {
-            if ($record->have_an_exception === 'Yes') {
-                $record->evictions = 'Have An Exception';
-            } elseif ($record->type_of_notice && $record->date) {
-                $notice = Notice::where('notice_name', $record->type_of_notice)->first();
-                if ($notice) {
-                    $days = $notice->days;
-                    $alertDate = \Carbon\Carbon::parse($record->date)->addDays($days);
-                    if ($alertDate->lessThanOrEqualTo(now())) {
-                        $record->evictions = 'Alert';
-                    } else {
-                        $record->evictions = '';
-                    }
-                }
-            }
-            $record->save();
-        }
-
-
         // Prepare filters array from request
-        // Check query parameters first, then fallback to request body for flexibility
         $filters = [
             'city_id' => $request->query('city_id') ?? $request->input('city_id'),
             'property_id' => $request->query('property_id') ?? $request->input('property_id'),
@@ -74,23 +49,27 @@ class NoticeAndEvictionController extends Controller
             'unit_name' => $request->query('unit_name') ?? $request->input('unit_name'),
             'tenant_name' => $request->query('tenant_name') ?? $request->input('tenant_name'),
             'search' => $request->query('search') ?? $request->input('search'),
+            'is_hidden' => $request->query('is_hidden') ?? $request->input('is_hidden'),
         ];
 
-
-        // Get pagination parameters from query string or request body
+        // Get pagination parameters
         $perPage = $request->query('per_page') ?? $request->input('per_page') ?? 15;
         $page = $request->query('page') ?? $request->input('page') ?? 1;
 
-
-        // Get filtered records - explicitly exclude archived records
+        // Get filtered records with pagination
         $query = NoticeAndEviction::with(['tenant.unit.property.city'])
             ->where('is_archived', false);
         $query = $this->service->applyFilters($query, $filters);
 
-
-        // Handle pagination
+        // Update evictions status ONLY for paginated records (not all records)
         if ($perPage === 'all') {
             $paginatedRecords = $query->get();
+            
+            // Update status for visible records only
+            foreach ($paginatedRecords as $record) {
+                $this->updateEvictionStatus($record);
+            }
+            
             $records = $paginatedRecords->map(fn($record) => $this->mapRecordToArray($record));
             $paginationData = [
                 'data' => $records,
@@ -104,6 +83,12 @@ class NoticeAndEvictionController extends Controller
         } else {
             $perPageInt = (int) $perPage;
             $paginatedRecords = $query->paginate($perPageInt, ['*'], 'page', $page);
+            
+            // Update status for visible records only
+            foreach ($paginatedRecords as $record) {
+                $this->updateEvictionStatus($record);
+            }
+            
             $records = $paginatedRecords->map(fn($record) => $this->mapRecordToArray($record))->toArray();
             $paginationData = [
                 'data' => $records,
@@ -116,65 +101,15 @@ class NoticeAndEvictionController extends Controller
             ];
         }
 
-
-        // Get data for dropdowns
+        // Get minimal dropdown data (only IDs and names, no relationships)
         $cities = Cities::select('id', 'city')->get();
-        $properties = PropertyInfoWithoutInsurance::with('city:id,city')
-            ->select('id', 'city_id', 'property_name')
-            ->get()
-            ->map(function ($property) {
-                return [
-                    'id' => $property->id,
-                    'city_id' => $property->city_id,
-                    'property_name' => $property->property_name,
-                    'city_name' => $property->city?->city ?? 'N/A',
-                ];
-            });
-
-
-        $units = Unit::with(['property.city:id,city'])
-            ->select('id', 'property_id', 'unit_name')
-            ->get()
-            ->map(function ($unit) {
-                return [
-                    'id' => $unit->id,
-                    'property_id' => $unit->property_id,
-                    'unit_name' => $unit->unit_name,
-                    'property_name' => $unit->property?->property_name ?? 'N/A',
-                    'city_name' => $unit->property?->city?->city ?? 'N/A',
-                ];
-            });
-
-
-        $tenants = Tenant::with(['unit.property.city'])
-            ->select('id', 'unit_id', 'first_name', 'last_name')
-            ->where('is_archived', false)
-            ->get()
-            ->map(function ($tenant) {
-                return [
-                    'id' => $tenant->id,
-                    'unit_id' => $tenant->unit_id,
-                    'first_name' => $tenant->first_name,
-                    'last_name' => $tenant->last_name,
-                    'full_name' => $tenant->first_name . ' ' . $tenant->last_name,
-                    'unit_name' => $tenant->unit?->unit_name ?? 'N/A',
-                    'property_name' => $tenant->unit?->property?->property_name ?? 'N/A',
-                    'city_name' => $tenant->unit?->property?->city?->city ?? 'N/A',
-                ];
-            });
-
-
         $notices = Notice::select('id', 'notice_name', 'days')
             ->where('is_archived', false)
             ->get();
 
-
         return Inertia::render('NoticeAndEvictions/Index', [
             'paginatedRecords' => $paginationData,
             'cities' => $cities,
-            'properties' => $properties,
-            'units' => $units,
-            'tenants' => $tenants,
             'notices' => $notices,
             'filters' => $filters,
             'pagination' => [
@@ -183,7 +118,46 @@ class NoticeAndEvictionController extends Controller
                 'total' => $paginationData['total'],
                 'last_page' => $paginationData['last_page'],
             ],
+            // Use Inertia lazy loading for heavy dropdown data
+            'properties' => Inertia::lazy(fn () => 
+                PropertyInfoWithoutInsurance::select('id', 'city_id', 'property_name')
+                    ->orderBy('property_name')
+                    ->get()
+            ),
+            'units' => Inertia::lazy(fn () => 
+                Unit::select('id', 'property_id', 'unit_name')
+                    ->orderBy('unit_name')
+                    ->get()
+            ),
+            'tenants' => Inertia::lazy(fn () => 
+                Tenant::select('id', 'unit_id', 'first_name', 'last_name')
+                    ->where('is_archived', false)
+                    ->orderBy('first_name')
+                    ->get()
+            ),
         ]);
+    }
+
+    /**
+     * Update eviction status for a single record
+     */
+    private function updateEvictionStatus(NoticeAndEviction $record): void
+    {
+        if ($record->have_an_exception === 'Yes') {
+            $record->evictions = 'Have An Exception';
+        } elseif ($record->type_of_notice && $record->date) {
+            $notice = Notice::where('notice_name', $record->type_of_notice)->first();
+            if ($notice) {
+                $days = $notice->days;
+                $alertDate = \Carbon\Carbon::parse($record->date)->addDays($days);
+                if ($alertDate->lessThanOrEqualTo(now())) {
+                    $record->evictions = 'Alert';
+                } else {
+                    $record->evictions = '';
+                }
+            }
+        }
+        $record->save();
     }
 
 
@@ -299,6 +273,7 @@ class NoticeAndEvictionController extends Controller
             'if_left' => $record->if_left,
             'writ_date' => $record->writ_date,
             'other_tenants' => $record->other_tenants,
+            'is_hidden' => (bool) $record->is_hidden,
             'created_at' => $record->created_at,
             'updated_at' => $record->updated_at,
         ];
@@ -323,6 +298,31 @@ class NoticeAndEvictionController extends Controller
             'unit_name' => $request->query('unit_name'),
             'tenant_name' => $request->query('tenant_name'),
             'search' => $request->query('search'),
+            'is_hidden' => $request->query('is_hidden'),
         ]);
+    }
+
+    /**
+     * Hide a notice and eviction record
+     */
+    public function hide(Request $request, NoticeAndEviction $notice_and_eviction)
+    {
+        $notice_and_eviction->is_hidden = true;
+        $notice_and_eviction->save();
+
+        return redirect()->route('notice_and_evictions.index', $this->getRedirectParams($request))
+            ->with('success', 'Record hidden successfully.');
+    }
+
+    /**
+     * Unhide a notice and eviction record
+     */
+    public function unhide(Request $request, NoticeAndEviction $notice_and_eviction)
+    {
+        $notice_and_eviction->is_hidden = false;
+        $notice_and_eviction->save();
+
+        return redirect()->route('notice_and_evictions.index', $this->getRedirectParams($request))
+            ->with('success', 'Record unhidden successfully.');
     }
 }

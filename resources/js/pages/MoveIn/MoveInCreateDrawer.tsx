@@ -33,6 +33,8 @@ type MoveInFormData = {
     date_of_move_in_form_filled: string;
     submitted_insurance: 'Yes' | 'No' | '';
     date_of_insurance_expiration: string;
+    delisted: boolean;
+    utilities_under_their_name: boolean;
     first_name: string;
     last_name: string;
     last_notice_sent: string;
@@ -79,6 +81,8 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
         date_of_move_in_form_filled: '',
         submitted_insurance: 'No',
         date_of_insurance_expiration: '',
+        delisted: false,
+        utilities_under_their_name: false,
         first_name: '',
         last_name: '',
         last_notice_sent: '',
@@ -330,6 +334,43 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
                                 onDateOfInsuranceExpirationChange={(value) => setData('date_of_insurance_expiration', value)}
                                 errors={errors}
                             />
+
+                            {/* Additional Move-In Fields */}
+                            <div className="rounded-lg border-l-4 border-l-blue-500 p-4">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="delisted"
+                                        checked={data.delisted}
+                                        onChange={(e) => setData('delisted', e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                    />
+                                    <Label htmlFor="delisted" className="text-base font-semibold cursor-pointer">
+                                        Delisted
+                                    </Label>
+                                </div>
+                                {errors.delisted && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.delisted}</p>
+                                )}
+                            </div>
+
+                            <div className="rounded-lg border-l-4 border-l-blue-500 p-4">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="utilities_under_their_name"
+                                        checked={data.utilities_under_their_name}
+                                        onChange={(e) => setData('utilities_under_their_name', e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                    />
+                                    <Label htmlFor="utilities_under_their_name" className="text-base font-semibold cursor-pointer">
+                                        Utilities Under Their Name
+                                    </Label>
+                                </div>
+                                {errors.utilities_under_their_name && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.utilities_under_their_name}</p>
+                                )}
+                            </div>
 
                             {/* Tenant & Notice Information */}
                             <div className="rounded-lg border-l-4 border-l-blue-500 p-4">

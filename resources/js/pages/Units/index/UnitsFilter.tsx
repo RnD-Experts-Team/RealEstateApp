@@ -22,6 +22,7 @@ interface UnitsFilterProps {
     onPropertySelect: (property: PropertyInfoWithoutInsurance) => void;
     onSearch: () => void;
     onClear: () => void;
+    hideVacantFilter?: boolean;
 }
 
 const UnitsFilter: React.FC<UnitsFilterProps> = ({
@@ -37,12 +38,13 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
     onPropertySelect,
     onSearch,
     onClear,
+    hideVacantFilter = false,
 }) => {
     return (
         // Key fixes:
         // - items-end: aligns controls + buttons on the same baseline
         // - consistent field wrappers and consistent control heights (h-9)
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-8 md:items-end">
+        <div className={`grid grid-cols-1 gap-4 ${hideVacantFilter ? 'md:grid-cols-7' : 'md:grid-cols-8'} md:items-end`}>
             <div className="space-y-1">
                 <Label>City</Label>
                 <CityAutocomplete cities={cities} value={cityInput} onChange={onCityInputChange} onSelect={onCitySelect} />
@@ -65,20 +67,22 @@ const UnitsFilter: React.FC<UnitsFilterProps> = ({
                 />
             </div>
 
-            <div className="space-y-1">
-                <Label>Vacant Status</Label>
-                <Select value={filters.vacant || ''} onValueChange={(val) => onFilterChange('vacant', val)}>
-                    <SelectTrigger className="h-9">
-                        <SelectValue placeholder="All Vacant Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {/* keep EXACT values/behavior */}
-                        <SelectItem value="all">All Vacant Status</SelectItem>
-                        <SelectItem value="Yes">Vacant</SelectItem>
-                        <SelectItem value="No">Occupied</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+            {!hideVacantFilter && (
+                <div className="space-y-1">
+                    <Label>Vacant Status</Label>
+                    <Select value={filters.vacant || ''} onValueChange={(val) => onFilterChange('vacant', val)}>
+                        <SelectTrigger className="h-9">
+                            <SelectValue placeholder="All Vacant Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {/* keep EXACT values/behavior */}
+                            <SelectItem value="all">All Vacant Status</SelectItem>
+                            <SelectItem value="Yes">Vacant</SelectItem>
+                            <SelectItem value="No">Occupied</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
 
             <div className="space-y-1">
                 <Label>Listed Status</Label>

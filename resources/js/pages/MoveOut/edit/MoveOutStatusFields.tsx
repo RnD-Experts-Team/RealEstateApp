@@ -84,6 +84,28 @@ export function MoveOutStatusFields({ data, errors, onDataChange }: MoveOutStatu
                 />
                 {errors.move_out_form && <p className="mt-1 text-sm text-red-600">{errors.move_out_form}</p>}
             </div>
+
+            {/* Got Pics */}
+            <div className="rounded-lg border-l-4 border-l-emerald-500 p-4">
+                <div className="mb-2">
+                    <Label htmlFor="got_pics" className="text-base font-semibold">
+                        Got Pics
+                    </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        id="got_pics"
+                        checked={data.got_pics}
+                        onChange={(e) => onDataChange('got_pics', e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <label htmlFor="got_pics" className="text-sm cursor-pointer">
+                        Pictures taken of the unit
+                    </label>
+                </div>
+                {(errors as any).got_pics && <p className="mt-1 text-sm text-red-600">{(errors as any).got_pics}</p>}
+            </div>
         </>
     );
 }

@@ -96,6 +96,8 @@ class UnitController extends Controller
     public function store(StoreUnitRequest $request): RedirectResponse
     {
         try {
+          
+            
             $this->unitService->create($request->validated());
 
             // Preserve filters and pagination by redirecting with query parameters
@@ -115,6 +117,11 @@ class UnitController extends Controller
             return redirect()->route('units.index', $query)
                 ->with('success', 'Unit created successfully');
         } catch (\Exception $e) {
+            \Log::error('UnitController::store - Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
             return redirect()->back()
                 ->with('error', 'Failed to create unit: ' . $e->getMessage())
                 ->withInput();
@@ -174,6 +181,71 @@ class UnitController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to delete unit: ' . $e->getMessage());
         }
+    }
+
+    public function vacant(Request $request): Response
+    {
+        $perPage = $request->get('per_page', 15);
+        $filters = $request->only(['city', 'property', 'unit_name', 'listed', 'insurance', 'is_new_lease']);
+
+        // Force vacant filter to 'Yes'
+        $filters['vacant'] = 'Yes';
+
+        // Normalize 'all' options from frontend selects to be treated as no filter
+        foreach (['listed', 'is_new_lease'] as $key) {
+            if (array_key_exists($key, $filters) && is_string($filters[$key]) && strtolower($filters[$key]) === 'all') {
+                unset($filters[$key]);
+            }
+        }
+        
+        $unitsResult = $this->unitService->getAllPaginated($perPage, $filters);
+        $statistics = $this->unitService->getStatistics();
+
+        // Transform units data and build a consistent response structure
+        if ($unitsResult instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+            // Paginated
+            $transformedUnits = $unitsResult->toArray();
+            $transformedUnits['data'] = array_map(function ($unit) {
+                return array_merge($unit, [
+                    'city' => $unit['property']['city']['city'] ?? 'Unknown',
+                    'property' => $unit['property']['property_name'] ?? 'Unknown'
+                ]);
+            }, $transformedUnits['data']);
+        } else {
+            // 'All' (no pagination): build a pseudo-paginated structure for frontend consistency
+            $data = $unitsResult->map(function ($unit) {
+                return array_merge($unit->toArray(), [
+                    'city' => $unit->property->city->city ?? 'Unknown',
+                    'property' => $unit->property->property_name ?? 'Unknown'
+                ]);
+            })->toArray();
+
+            $count = $unitsResult->count();
+            $transformedUnits = [
+                'data' => $data,
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => is_string($perPage) ? $perPage : $count,
+                'total' => $count,
+                'from' => $count > 0 ? 1 : 0,
+                'to' => $count,
+                'links' => [],
+            ];
+        }
+
+        // Get cities data for drawer component
+        $cities = Cities::all();
+
+        // Get properties data for filter dropdown
+        $properties = PropertyInfoWithoutInsurance::with('city')->get();
+
+        return Inertia::render('Units/Vacant', [
+            'units' => $transformedUnits,
+            'statistics' => $statistics,
+            'filters' => array_merge($filters, ['per_page' => $perPage]),
+            'cities' => $cities,
+            'properties' => $properties,
+        ]);
     }
 
     public function dashboard(): Response

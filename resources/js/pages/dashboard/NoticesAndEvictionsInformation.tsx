@@ -98,15 +98,15 @@ export default function NoticesAndEvictionsInformation({ noticesAndEvictions, se
     return (
         <Card className="w-full">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Notices and Evictions Information</CardTitle>
-                        <CardDescription>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="text-xl sm:text-2xl font-bold">Notices and Evictions Information</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">
                             Legal proceedings and notices for {noticesAndEvictions.length} record{noticesAndEvictions.length !== 1 ? 's' : ''}
                         </CardDescription>
                     </div>
                     {noticesAndEvictions.length === 0 && (
-                        <Badge variant="secondary" className="px-4 py-2">
+                        <Badge variant="secondary" className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm flex-shrink-0">
                             No notices or evictions found
                         </Badge>
                     )}
@@ -128,30 +128,30 @@ export default function NoticesAndEvictionsInformation({ noticesAndEvictions, se
                                         className="w-full p-0 h-auto hover:bg-transparent"
                                     >
                                         <CardHeader className="w-full">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="p-2 rounded-full bg-red-100">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                    <div className="p-2 rounded-full bg-red-100 flex-shrink-0">
                                                         {getNoticeTypeIcon(noticeEviction.type_of_notice)}
                                                     </div>
-                                                    <div className="text-left">
-                                                        <CardTitle className="text-xl">
+                                                    <div className="text-left min-w-0 flex-1">
+                                                        <CardTitle className="text-lg sm:text-xl truncate">
                                                             {noticeEviction.type_of_notice || 'Notice/Eviction'} #{noticeEviction.id}
                                                         </CardTitle>
-                                                        <CardDescription className="flex items-center space-x-4">
+                                                        <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm">
                                                             <span className="flex items-center">
-                                                                <User className="h-4 w-4 mr-1" />
-                                                                Tenant: {noticeEviction.tenant_name || 'N/A'}
+                                                                <User className="h-4 w-4 mr-1 flex-shrink-0" />
+                                                                <span className="truncate">Tenant: {noticeEviction.tenant_name || 'N/A'}</span>
                                                             </span>
                                                             {noticeEviction.date_formatted && (
                                                                 <span className="flex items-center">
-                                                                    <Calendar className="h-4 w-4 mr-1" />
-                                                                    {noticeEviction.date_formatted}
+                                                                    <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
+                                                                    <span className="truncate">{noticeEviction.date_formatted}</span>
                                                                 </span>
                                                             )}
                                                         </CardDescription>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center space-x-3">
+                                                <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                                                     <div className="flex items-center space-x-2">
                                                         {getStatusIcon(noticeEviction.status)}
                                                         <Badge 

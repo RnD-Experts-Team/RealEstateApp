@@ -35,6 +35,7 @@ class StoreMoveOutRequest extends FormRequest
             'list_the_unit' => ['nullable', 'string', 'max:255'],
             'renter' => ['nullable', Rule::in(['Yes', 'No'])],
             'move_out_form' => ['nullable', Rule::in(['filled', 'not filled'])],
+            'got_pics' => ['nullable', 'boolean'],
             'tenants' => ['nullable', 'string', 'max:255'],
             'utility_type' => ['nullable', 'string'],
         ];

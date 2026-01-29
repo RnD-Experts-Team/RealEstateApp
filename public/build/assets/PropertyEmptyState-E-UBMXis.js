@@ -1,1 +1,0 @@
-import{j as t}from"./app-DqMOGD98.js";import"./app-Dca6SbuN.js";function s(){return t.jsxs("div",{className:"text-center py-8 text-muted-foreground",children:[t.jsx("p",{className:"text-lg",children:"No properties found."}),t.jsx("p",{className:"text-sm",children:"Try adjusting your search criteria."})]})}export{s as default};

@@ -29,6 +29,8 @@ class UpdateMoveInRequest extends FormRequest
             'move_in_form_sent_date' => ['nullable', 'date'],
             'filled_move_in_form' => ['nullable', 'string', Rule::in(['Yes', 'No'])],
             'submitted_insurance' => ['nullable', 'string', Rule::in(['Yes', 'No'])],
+            'delisted' => ['nullable', 'boolean'],
+            'utilities_under_their_name' => ['nullable', 'boolean'],
             'tenant_name' => ['nullable', 'string'],
             'last_notice_sent' => ['nullable', 'date'],
             'first_name' => ['nullable', 'string', 'max:255'],

@@ -101,15 +101,15 @@ export default function OffersAndRenewalsInformation({ offersAndRenewals, select
     return (
         <Card className="w-full">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Offers and Renewals</CardTitle>
-                        <CardDescription>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="text-xl sm:text-2xl font-bold">Offers and Renewals</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">
                             Lease offers and renewal records for {offersAndRenewals.length} record{offersAndRenewals.length !== 1 ? 's' : ''}
                         </CardDescription>
                     </div>
                     {offersAndRenewals.length === 0 && (
-                        <Badge variant="secondary" className="px-4 py-2">
+                        <Badge variant="secondary" className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm flex-shrink-0">
                             No offers and renewals found
                         </Badge>
                     )}
@@ -131,36 +131,36 @@ export default function OffersAndRenewalsInformation({ offersAndRenewals, select
                                         className="w-full p-0 h-auto hover:bg-transparent"
                                     >
                                         <CardHeader className="w-full">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="p-2 rounded-full bg-blue-100">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                    <div className="p-2 rounded-full bg-blue-100 flex-shrink-0">
                                                         <Handshake className="h-5 w-5 text-blue-600" />
                                                     </div>
-                                                    <div className="text-left">
-                                                        <CardTitle className="text-xl">
+                                                    <div className="text-left min-w-0 flex-1">
+                                                        <CardTitle className="text-lg sm:text-xl truncate">
                                                             {offerRenewal.tenant_name || 'Unknown Tenant'}
                                                         </CardTitle>
-                                                        <CardDescription className="flex items-center space-x-4">
+                                                        <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm">
                                                             {offerRenewal.date_of_acceptance_formatted && (
                                                                 <span className="flex items-center">
-                                                                    <Calendar className="h-4 w-4 mr-1" />
-                                                                    Accepted: {offerRenewal.date_of_acceptance_formatted}
+                                                                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                                                                    <span className="truncate">Accepted: {offerRenewal.date_of_acceptance_formatted}</span>
                                                                 </span>
                                                             )}
                                                             {offerRenewal.how_many_days_left !== undefined && (
                                                                 <span className={`flex items-center ${getDaysLeftColor(offerRenewal.how_many_days_left)}`}>
                                                                     {getDaysLeftIcon(offerRenewal.how_many_days_left)}
-                                                                    <span className="ml-1">{offerRenewal.how_many_days_left} days left</span>
+                                                                    <span className="ml-1 truncate">{offerRenewal.how_many_days_left} days left</span>
                                                                 </span>
                                                             )}
                                                         </CardDescription>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center space-x-3">
+                                                <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                                                     <div className="flex flex-col items-end space-y-2">
                                                         <Badge 
                                                             variant={offerRenewal.is_archived ? "destructive" : "default"}
-                                                            className="px-3 py-1"
+                                                            className="px-2 py-1 sm:px-3 text-xs sm:text-sm"
                                                         >
                                                             {offerRenewal.is_archived ? 'Archived' : 'Active'}
                                                         </Badge>
@@ -177,15 +177,15 @@ export default function OffersAndRenewalsInformation({ offersAndRenewals, select
                                                                 variant={offerRenewal.expired === 'Yes' ? "destructive" : "default"}
                                                                 className="text-xs"
                                                             >
-                                                                <CalendarX className="h-3 w-3 mr-1" />
+                                                                <CalendarX className="h-3 w-3 mr-1 flex-shrink-0" />
                                                                 {offerRenewal.expired === 'Yes' ? 'Expired' : 'Valid'}
                                                             </Badge>
                                                         )}
                                                     </div>
                                                     {openOffers[offerRenewal.id] ? (
-                                                        <ChevronUp className="h-5 w-5 text-gray-500" />
+                                                        <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
                                                     ) : (
-                                                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                                                        <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
                                                     )}
                                                 </div>
                                             </div>

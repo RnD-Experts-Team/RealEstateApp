@@ -76,6 +76,7 @@ export default function MoveOutEditDrawer({
         list_the_unit: moveOut.list_the_unit || '',
         renter: moveOut.renter || '',
         move_out_form: moveOut.move_out_form || '',
+        got_pics: moveOut.got_pics || false,
         utility_type: moveOut.utility_type || '',
     });
 
@@ -230,6 +231,7 @@ export default function MoveOutEditDrawer({
             list_the_unit: moveOut.list_the_unit || '',
             renter: moveOut.renter || '',
             move_out_form: moveOut.move_out_form || '',
+            got_pics: moveOut.got_pics || false,
             utility_type: moveOut.utility_type || '',
         });
         

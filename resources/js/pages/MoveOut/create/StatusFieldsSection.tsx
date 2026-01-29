@@ -56,6 +56,21 @@ export default function StatusFieldsSection({ data, errors, onDataChange }: Prop
                     ]}
                 />
             </FormField>
+
+            <FormField label="Got Pics" borderColor="emerald" error={(errors as any).got_pics}>
+                <div className="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        id="got_pics"
+                        checked={data.got_pics}
+                        onChange={(e) => onDataChange('got_pics', e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <label htmlFor="got_pics" className="text-sm cursor-pointer">
+                        Pictures taken of the unit
+                    </label>
+                </div>
+            </FormField>
         </>
     );
 }

@@ -111,9 +111,38 @@ class MoveInService
                 'first_name' => $firstName,
                 'last_name' => $lastName,
             ]);
+        } else {
+            // Even if no tenant names provided, mark unit as habited (not vacant)
+            $this->markUnitAsHabited($data['unit_id'] ?? null);
         }
 
         return $moveIn;
+    }
+
+    /**
+     * Mark a unit as habited (not vacant) when a move-in occurs
+     */
+    protected function markUnitAsHabited(?int $unitId): void
+    {
+        if (!$unitId) {
+            return;
+        }
+
+        $unit = Unit::withArchived()->find($unitId);
+        if (!$unit) {
+            return;
+        }
+
+        // Mark unit as not vacant and not listed
+        if ($unit->vacant === 'Yes') {
+            $unit->vacant = 'No';
+        }
+        if ($unit->listed === 'Yes') {
+            $unit->listed = 'No';
+        }
+
+        // Save quietly to avoid triggering calculateFields() which would override vacant
+        $unit->saveQuietly();
     }
 
     public function updateMoveIn(MoveIn $moveIn, array $data): bool
@@ -147,6 +176,9 @@ class MoveInService
                 'first_name' => $firstName,
                 'last_name' => $lastName,
             ]);
+        } else {
+            // Even if no tenant names provided, mark unit as habited (not vacant)
+            $this->markUnitAsHabited($data['unit_id'] ?? null);
         }
 
         return $updated;

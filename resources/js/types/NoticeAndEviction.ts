@@ -19,6 +19,7 @@ export interface NoticeAndEviction {
     writ_date?: string;
     other_tenants?: string;
     is_archived?: boolean;
+    is_hidden?: boolean;
     created_at?: string;
     updated_at?: string;
 }
@@ -33,7 +34,7 @@ export interface Tenant {
     alternate_email?: string;
     mobile?: string;
     emergency_phone?: string;
-    cash_or_check?: 'Cash' | 'Check';
+    cash_or_check?: 'Cash' | 'Check' | 'EFT';
     has_insurance?: 'Yes' | 'No';
     sensitive_communication?: 'Yes' | 'No';
     has_assistance?: 'Yes' | 'No';

@@ -1,6 +1,5 @@
 // resources/js/Pages/Properties/index/PropertyTableRow.tsx
 import { Button } from '@/components/ui/button';
-import { TableCell, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Property } from '@/types/property';
 import PropertyStatusBadge from './PropertyStatusBadge';
@@ -55,59 +54,59 @@ export default function PropertyTableRow({
     };
 
     return (
-        <TableRow className="hover:bg-muted/50 border-border">
+        <tr className="hover:bg-muted/50 border-border border-b transition-colors">
             {/* City - first sticky column */}
-            <TableCell className="text-center text-foreground border border-border bg-muted sticky left-0 z-20 min-w-[120px]">
+            <td className="text-center text-foreground border border-border bg-muted sticky left-0 z-10 min-w-[120px] p-2 align-middle whitespace-nowrap">
                 {property.property?.city?.city || 'N/A'}
-            </TableCell>
+            </td>
             {/* Property Name - second sticky column for horizontal scrolling */}
-            <TableCell className="font-medium text-center text-foreground border border-border bg-muted sticky left-[120px] z-10 min-w-[160px]">
+            <td className="font-medium text-center text-foreground border border-border bg-muted sticky left-[120px] z-10 min-w-[160px] p-2 align-middle whitespace-nowrap">
                 {property.property?.property_name || 'N/A'}
-            </TableCell>
+            </td>
             
             {/* Insurance Company Name */}
-            <TableCell className="text-center text-foreground border border-border">
+            <td className="text-center text-foreground border border-border p-2 align-middle whitespace-nowrap">
                 {property.insurance_company_name || 'N/A'}
-            </TableCell>
+            </td>
             
             {/* Amount - formatted currency */}
-            <TableCell className="text-center text-foreground border border-border">
+            <td className="text-center text-foreground border border-border p-2 align-middle whitespace-nowrap">
                 {property.formatted_amount || 'N/A'}
-            </TableCell>
+            </td>
             
             {/* Effective Date */}
-            <TableCell className="text-center text-foreground border border-border">
+            <td className="text-center text-foreground border border-border p-2 align-middle whitespace-nowrap">
                 {property.effective_date || 'N/A'}
-            </TableCell>
+            </td>
             
             {/* Policy Number */}
-            <TableCell className="text-center text-foreground border border-border">
+            <td className="text-center text-foreground border border-border p-2 align-middle whitespace-nowrap">
                 {property.policy_number || 'N/A'}
-            </TableCell>
+            </td>
             
             {/* Expiration Date */}
-            <TableCell className="text-center text-foreground border border-border">
+            <td className="text-center text-foreground border border-border p-2 align-middle whitespace-nowrap">
                 {property.expiration_date || 'N/A'}
-            </TableCell>
+            </td>
             
             {/* Days Left - colored badge based on urgency */}
-            <TableCell className="text-center border border-border">
+            <td className="text-center border border-border p-2 align-middle whitespace-nowrap">
                 <PropertyDaysLeftBadge daysLeft={calculateDaysLeft(property.expiration_date)} />
-            </TableCell>
+            </td>
             
             {/* Notes - optional text */}
-            <TableCell className="text-left text-foreground border border-border max-w-[240px] break-words">
+            <td className="text-left text-foreground border border-border max-w-[240px] break-words p-2 align-middle whitespace-nowrap">
                 {truncateText(property.notes)}
-            </TableCell>
+            </td>
             
             {/* Status - Active/Expired badge */}
-            <TableCell className="text-center border border-border">
+            <td className="text-center border border-border p-2 align-middle whitespace-nowrap">
                 <PropertyStatusBadge status={property.status} />
-            </TableCell>
+            </td>
             
             {/* Action Buttons - only shown if user has any permission */}
             {hasAnyActionPermission && (
-                <TableCell className="text-center border border-border">
+                <td className="text-center border border-border p-2 align-middle whitespace-nowrap">
                     <div className="flex gap-1 justify-center">
                         {/* Show/View button */}
                         {canShow && (
@@ -146,8 +145,8 @@ export default function PropertyTableRow({
                             </Button>
                         )}
                     </div>
-                </TableCell>
+                </td>
             )}
-        </TableRow>
+        </tr>
     );
 }

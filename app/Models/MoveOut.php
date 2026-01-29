@@ -30,6 +30,7 @@ class MoveOut extends Model
         'list_the_unit',
         'renter',
         'move_out_form',
+        'got_pics',
         'is_archived',
         'tenants',
         'utility_type',
@@ -40,8 +41,9 @@ class MoveOut extends Model
         'move_out_date' => 'date',
         'date_lease_ending_on_buildium' => 'date',
         'date_utility_put_under_our_name' => 'date',
+        'got_pics' => 'boolean',
         'is_archived' => 'boolean',
-        'is_hidden' => 'boolean', // ✅ NEW
+        'is_hidden' => 'boolean',
     ];
 
     /**
@@ -144,6 +146,7 @@ class MoveOut extends Model
             'list_the_unit' => 'nullable|string|max:255',
             'renter' => 'nullable|in:Yes,No',
             'move_out_form' => 'nullable|in:filled,not filled',
+            'got_pics' => 'nullable|boolean',
             'tenants' => 'nullable|string|max:255',
             'utility_type' => 'nullable|string',
         ];

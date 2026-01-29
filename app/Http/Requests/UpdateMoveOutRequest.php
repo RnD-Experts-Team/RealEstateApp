@@ -36,6 +36,7 @@ class UpdateMoveOutRequest extends FormRequest
             'list_the_unit' => ['sometimes', 'nullable', 'string', 'max:255'],
             'renter' => ['sometimes', 'nullable', Rule::in(['Yes', 'No'])],
             'move_out_form' => ['sometimes', 'nullable', Rule::in(['filled', 'not filled'])],
+            'got_pics' => ['sometimes', 'nullable', 'boolean'],
             'tenants' => ['sometimes', 'nullable', 'string', 'max:255'],
             'utility_type' => ['sometimes', 'nullable', 'string'],
         ];

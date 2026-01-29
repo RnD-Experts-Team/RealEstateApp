@@ -43,6 +43,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Notice & Evictions
     Route::resource('notice_and_evictions', NoticeAndEvictionController::class)->except(['create', 'edit']);
+    Route::patch('/notice_and_evictions/{notice_and_eviction}/hide', [NoticeAndEvictionController::class, 'hide'])
+        ->name('notice_and_evictions.hide');
+    Route::patch('/notice_and_evictions/{notice_and_eviction}/unhide', [NoticeAndEvictionController::class, 'unhide'])
+        ->name('notice_and_evictions.unhide');
 
     /**
      * Applications filters
@@ -109,6 +113,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('tenants.import.template');
 
     // Units
+    Route::get('/units/vacant', [UnitController::class, 'vacant'])->name('units.vacant');
     Route::resource('units', UnitController::class);
 
     // Payments

@@ -1,0 +1,127 @@
+/* Dashboard Responsive Styles */
+
+/* Mobile-first responsive adjustments for all dashboard pages */
+
+/* Card headers - make them stack on mobile */
+@media (max-width: 640px) {
+  /* Header flex containers */
+  .dashboard-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Title sections */
+  .dashboard-title-section {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Badge containers */
+  .dashboard-badge-container {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Text truncation for long content */
+  .dashboard-title {
+    font-size: 1.125rem !important; /* 18px */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dashboard-description {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+    font-size: 0.75rem !important; /* 12px */
+  }
+
+  /* Grid layouts - force single column on mobile */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ensure icons don't shrink */
+  .dashboard-icon {
+    flex-shrink: 0 !important;
+  }
+
+  /* Progress bars and status indicators */
+  .dashboard-progress-text {
+    font-size: 0.75rem !important;
+  }
+
+  /* Card content padding */
+  .dashboard-card-content {
+    padding: 1rem !important;
+  }
+
+  /* Collapsible trigger buttons */
+  .dashboard-collapsible-trigger {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* 2-column grid on tablets */
+  .dashboard-grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .dashboard-title {
+    font-size: 1.25rem !important; /* 20px */
+  }
+
+  .dashboard-description {
+    font-size: 0.875rem !important; /* 14px */
+  }
+}
+
+/* Utility classes for responsive text */
+.truncate-mobile {
+  @media (max-width: 640px) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.stack-mobile {
+  @media (max-width: 640px) {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
+
+.hide-mobile {
+  @media (max-width: 640px) {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: none !important;
+  @media (max-width: 640px) {
+    display: block !important;
+  }
+}
+
+/* Ensure proper spacing on all screen sizes */
+.dashboard-spacing {
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .dashboard-spacing {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-spacing {
+    padding: 2rem;
+  }
+}

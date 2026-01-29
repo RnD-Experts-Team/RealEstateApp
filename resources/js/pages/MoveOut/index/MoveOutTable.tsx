@@ -64,8 +64,9 @@ export default function MoveOutTable({
                         <TableHead className="border border-border bg-muted text-center text-muted-foreground">Notes</TableHead>
                         <TableHead className="border border-border bg-muted text-center text-muted-foreground">Cleaning</TableHead>
                         <TableHead className="border border-border bg-muted text-center text-muted-foreground">List the Unit</TableHead>
-                        <TableHead className="border border-border bg-muted text-center text-muted-foreground">Renter</TableHead>
+                        <TableHead className="border border-border bg-muted text-center text-muted-foreground">Rented</TableHead>
                         <TableHead className="border border-border bg-muted text-center text-muted-foreground">Move Out Form</TableHead>
+                        <TableHead className="border border-border bg-muted text-center text-muted-foreground">Got Pics</TableHead>
 
                         {showActions && <TableHead className="border border-border bg-muted text-center text-muted-foreground">Actions</TableHead>}
                     </TableRow>

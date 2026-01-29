@@ -10,15 +10,7 @@ class StoreUnitRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Log incoming request data
-        \Log::info('StoreUnitRequest - Raw Request Data:', [
-            'all_data' => $this->all(),
-            'has_new_property' => $this->has('new_property'),
-            'has_new_tenant' => $this->has('new_tenant'),
-            'property_id' => $this->input('property_id'),
-            'unit_name' => $this->input('unit_name'),
-        ]);
-        
+       
         return true;
     }
 
@@ -27,10 +19,7 @@ class StoreUnitRequest extends FormRequest
      */
     protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
-        \Log::error('StoreUnitRequest - Validation Failed:', [
-            'errors' => $validator->errors()->toArray(),
-            'data' => $this->all(),
-        ]);
+        
         
         parent::failedValidation($validator);
     }

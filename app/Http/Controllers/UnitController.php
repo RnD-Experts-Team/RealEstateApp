@@ -96,10 +96,7 @@ class UnitController extends Controller
     public function store(StoreUnitRequest $request): RedirectResponse
     {
         try {
-            // Log validated data
-            \Log::info('UnitController::store - Validated Data:', [
-                'validated' => $request->validated(),
-            ]);
+          
             
             $this->unitService->create($request->validated());
 

@@ -70,19 +70,12 @@ class UnitService
 
     public function create(array $data): Unit
     {
-        // Log incoming data to service
-        \Log::info('UnitService::create - Incoming Data:', [
-            'data' => $data,
-            'has_new_property' => isset($data['new_property']),
-            'has_new_tenant' => isset($data['new_tenant']),
-        ]);
+        
         
         return DB::transaction(function () use ($data) {
             // Step 1: Check if we need to create a new property
             if (isset($data['new_property']) && is_array($data['new_property'])) {
-                \Log::info('UnitService::create - Creating new property:', [
-                    'property_data' => $data['new_property'],
-                ]);
+               
                 
                 // Create the new property
                 $property = PropertyInfoWithoutInsurance::create([
@@ -90,10 +83,7 @@ class UnitService
                     'property_name' => $data['new_property']['property_name'],
                 ]);
                 
-                \Log::info('UnitService::create - Property created:', [
-                    'property_id' => $property->id,
-                ]);
-                
+              
                 // Use the newly created property's ID
                 $data['property_id'] = $property->id;
                 
@@ -104,9 +94,7 @@ class UnitService
             // Step 2: Store new tenant data temporarily (we'll create it after the unit)
             $newTenantData = null;
             if (isset($data['new_tenant']) && is_array($data['new_tenant'])) {
-                \Log::info('UnitService::create - Storing tenant data for later:', [
-                    'tenant_data' => $data['new_tenant'],
-                ]);
+               
                 
                 $newTenantData = $data['new_tenant'];
                 // Remove new_tenant from data as it's not a unit field
@@ -116,20 +104,15 @@ class UnitService
             // Step 3: Clean empty strings to null for nullable fields
             $data = $this->cleanEmptyStringsForNullableFields($data);
             
-            \Log::info('UnitService::create - Creating unit with data:', [
-                'unit_data' => $data,
-            ]);
+           
             
             // Step 4: Create the unit
             $unit = Unit::create($data);
             
-            \Log::info('UnitService::create - Unit created:', [
-                'unit_id' => $unit->id,
-            ]);
+           
             
             // Step 5: Create the tenant if new tenant data was provided
             if ($newTenantData) {
-                \Log::info('UnitService::create - Creating tenant');
                 
                 // Clean empty strings for tenant data
                 $tenantData = $this->cleanEmptyStringsForTenantFields($newTenantData);
@@ -137,26 +120,20 @@ class UnitService
                 // Add the unit_id to tenant data
                 $tenantData['unit_id'] = $unit->id;
                 
-                \Log::info('UnitService::create - Tenant data prepared:', [
-                    'tenant_data' => $tenantData,
-                ]);
+              
                 
                 // Create the tenant
                 $tenant = Tenant::create($tenantData);
                 
-                \Log::info('UnitService::create - Tenant created:', [
-                    'tenant_id' => $tenant->id,
-                ]);
+               
                 
                 // Update the unit's tenants field with the new tenant's name
                 $unit->update([
                     'tenants' => $tenant->first_name . ' ' . $tenant->last_name
                 ]);
                 
-                \Log::info('UnitService::create - Unit tenants field updated');
             }
             
-            \Log::info('UnitService::create - Transaction complete, returning unit');
             
             return $unit->fresh(['property.city']);
         });

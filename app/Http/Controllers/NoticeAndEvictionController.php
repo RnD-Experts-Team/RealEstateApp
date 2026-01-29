@@ -273,6 +273,7 @@ class NoticeAndEvictionController extends Controller
             'if_left' => $record->if_left,
             'writ_date' => $record->writ_date,
             'other_tenants' => $record->other_tenants,
+            'is_hidden' => (bool) $record->is_hidden,
             'created_at' => $record->created_at,
             'updated_at' => $record->updated_at,
         ];

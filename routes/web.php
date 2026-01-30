@@ -96,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/tenants/{tenant}/archive', [TenantController::class, 'archive'])
         ->name('tenants.archive')
         ->middleware('permission:tenants.destroy');
-    
+
     /**
      * Additional tenant helper & import routes
      */
@@ -114,11 +114,29 @@ Route::middleware(['auth'])->group(function () {
 
     // Units
     Route::get('/units/vacant', [UnitController::class, 'vacant'])->name('units.vacant');
-    Route::resource('units', UnitController::class);
+    Route::get('/units', [UnitController::class, 'index'])
+        ->name('units.index');
 
+    Route::get('/units/create', [UnitController::class, 'create'])
+        ->name('units.create');
+
+    Route::post('/units', [UnitController::class, 'store'])
+        ->name('units.store');
+
+    Route::get('/units/{unit}', [UnitController::class, 'show'])
+        ->name('units.show');
+
+    Route::get('/units/{unit}/edit', [UnitController::class, 'edit'])
+        ->name('units.edit');
+
+    Route::put('/units/{unit}', [UnitController::class, 'update'])
+        ->name('units.update');
+
+    Route::delete('/units/{unit}', [UnitController::class, 'destroy'])
+        ->name('units.destroy');
     // Payments
     Route::resource('payments', PaymentController::class);
-    
+
     // Payment hide/unhide actions - separate routes similar to archive pattern
     Route::patch('/payments/{payment}/hide', [PaymentController::class, 'hide'])
         ->name('payments.hide');
@@ -127,16 +145,16 @@ Route::middleware(['auth'])->group(function () {
 
     // Vendor Task Tracker
     Route::resource('vendor-task-tracker', VendorTaskTrackerController::class);
-Route::patch('/vendor-task-tracker/{vendorTaskTracker}/hide', [VendorTaskTrackerController::class, 'hide'])
-    ->name('vendor-task-tracker.hide');
-Route::patch('/vendor-task-tracker/{vendorTaskTracker}/unhide', [VendorTaskTrackerController::class, 'unhide'])
-    ->name('vendor-task-tracker.unhide');
+    Route::patch('/vendor-task-tracker/{vendorTaskTracker}/hide', [VendorTaskTrackerController::class, 'hide'])
+        ->name('vendor-task-tracker.hide');
+    Route::patch('/vendor-task-tracker/{vendorTaskTracker}/unhide', [VendorTaskTrackerController::class, 'unhide'])
+        ->name('vendor-task-tracker.unhide');
 
     // Move In
-Route::resource('move-in', MoveInController::class)->except(['create', 'edit', 'show']);
+    Route::resource('move-in', MoveInController::class)->except(['create', 'edit', 'show']);
 
-Route::patch('/move-in/{moveIn}/hide', [MoveInController::class, 'hide'])->name('move-in.hide');
-Route::patch('/move-in/{moveIn}/unhide', [MoveInController::class, 'unhide'])->name('move-in.unhide');
+    Route::patch('/move-in/{moveIn}/hide', [MoveInController::class, 'hide'])->name('move-in.hide');
+    Route::patch('/move-in/{moveIn}/unhide', [MoveInController::class, 'unhide'])->name('move-in.unhide');
 
     // Demo route for MoveIn Drawer component
     Route::get('move-in-drawer-demo', function () {
@@ -149,9 +167,9 @@ Route::patch('/move-in/{moveIn}/unhide', [MoveInController::class, 'unhide'])->n
     // Move Out
     Route::resource('move-out', MoveOutController::class);
     Route::patch('move-out/{moveOut}/hide', [MoveOutController::class, 'hide'])
-    ->name('move-out.hide');
+        ->name('move-out.hide');
     Route::patch('move-out/{moveOut}/unhide', [MoveOutController::class, 'unhide'])
-    ->name('move-out.unhide');
+        ->name('move-out.unhide');
 
     // Offers & Renewals
     Route::resource('offers_and_renewals', OffersAndRenewalController::class);
@@ -162,9 +180,9 @@ Route::patch('/move-in/{moveIn}/unhide', [MoveInController::class, 'unhide'])->n
     // Applications
     Route::resource('applications', ApplicationController::class);
     Route::patch('/applications/{application}/hide', [ApplicationController::class, 'hide'])
-    ->name('applications.hide');
+        ->name('applications.hide');
     Route::patch('/applications/{application}/unhide', [ApplicationController::class, 'unhide'])
-    ->name('applications.unhide');
+        ->name('applications.unhide');
     Route::get('/applications/{application}/download/{index}', [ApplicationController::class, 'downloadAttachment'])
         ->name('applications.download');
 
@@ -177,7 +195,7 @@ Route::patch('/move-in/{moveIn}/unhide', [MoveInController::class, 'unhide'])->n
         ->name('payment-plans.hide');
     Route::patch('/payment-plans/{payment_plan}/unhide', [PaymentPlanController::class, 'unhide'])
         ->name('payment-plans.unhide');
-        
+
     // Cities
     Route::get('cities', [CityController::class, 'index'])->name('cities.index');
     Route::post('cities', [CityController::class, 'store'])->name('cities.store');

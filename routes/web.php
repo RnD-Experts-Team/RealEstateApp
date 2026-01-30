@@ -114,26 +114,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Units
     Route::get('/units/vacant', [UnitController::class, 'vacant'])->name('units.vacant');
-    Route::get('/units', [UnitController::class, 'index'])
-        ->name('units.index');
+    Route::resource('units', UnitController::class);
 
-    Route::get('/units/create', [UnitController::class, 'create'])
-        ->name('units.create');
-
-    Route::post('/units', [UnitController::class, 'store'])
-        ->name('units.store');
-
-    Route::get('/units/{unit}', [UnitController::class, 'show'])
-        ->name('units.show');
-
-    Route::get('/units/{unit}/edit', [UnitController::class, 'edit'])
-        ->name('units.edit');
-
-    Route::put('/units/{unit}', [UnitController::class, 'update'])
-        ->name('units.update');
-
-    Route::delete('/units/{unit}', [UnitController::class, 'destroy'])
-        ->name('units.destroy');
     // Payments
     Route::resource('payments', PaymentController::class);
 

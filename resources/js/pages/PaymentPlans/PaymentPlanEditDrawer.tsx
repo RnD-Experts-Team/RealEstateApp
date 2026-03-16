@@ -262,18 +262,11 @@ export default function PaymentPlanEditDrawer({
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value) || 0;
         setData('amount', value);
-        
-        // Auto-adjust paid amount if it exceeds the new total
-        if (data.paid > value) {
-            setData('paid', value);
-        }
     };
 
     const handlePaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value) || 0;
-        // Ensure paid amount doesn't exceed total amount
-        const maxPaid = Math.min(value, data.amount || 0);
-        setData('paid', maxPaid);
+        setData('paid', value);
     };
 
     return (

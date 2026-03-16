@@ -25,6 +25,10 @@ class UpdateUnitRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
+                // Unique within the same property, excluding the current unit
+                Rule::unique('units', 'unit_name')
+                    ->where('property_id', (int) $this->property_id)
+                    ->ignore($this->route('unit')),
             ],
             'tenants' => 'nullable|string|max:255',
             'lease_start' => 'nullable|date',
@@ -49,6 +53,7 @@ class UpdateUnitRequest extends FormRequest
             'property_id.required' => 'Property is required.',
             'property_id.exists' => 'The selected property is not valid. Please choose from available properties.',
             'unit_name.required' => 'Unit name is required.',
+            'unit_name.unique' => 'A unit with this name already exists in the selected property.',
             'lease_end.after_or_equal' => 'Lease end date must be after or equal to lease start date.',
             'count_beds.numeric' => 'Count beds must be a valid number.',
             'count_beds.regex' => 'Count beds must have at most 1 decimal place.',

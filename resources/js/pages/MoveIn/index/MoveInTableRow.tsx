@@ -90,6 +90,11 @@ export default function MoveInTableRow({
             <TableCell className="border border-border text-center">{getBooleanBadge(moveIn.delisted)}</TableCell>
             <TableCell className="border border-border text-center">{getBooleanBadge(moveIn.utilities_under_their_name)}</TableCell>
             <TableCell className="border border-border text-center text-foreground">{formatDateUTC(moveIn.last_notice_sent)}</TableCell>
+            <TableCell className="border border-border text-center text-foreground">
+                {moveIn.notes ? (
+                    <div className="max-w-[160px] truncate" title={moveIn.notes}>{moveIn.notes}</div>
+                ) : 'N/A'}
+            </TableCell>
 
             {(canEdit || canDelete || canHide) && (
                 <TableCell className="border border-border text-center">

@@ -29,6 +29,7 @@ class MoveIn extends Model
         'last_notice_sent',
         'delisted',
         'utilities_under_their_name',
+        'notes',
         'is_archived',
     ];
 

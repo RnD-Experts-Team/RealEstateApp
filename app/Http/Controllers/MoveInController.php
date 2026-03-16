@@ -64,6 +64,7 @@ class MoveInController extends Controller
             'last_notice_sent' => $moveIn->last_notice_sent,
             'delisted' => (bool) $moveIn->delisted,
             'utilities_under_their_name' => (bool) $moveIn->utilities_under_their_name,
+            'notes' => $moveIn->notes,
             'is_archived' => $moveIn->is_archived,
             'is_hidden' => (bool) $moveIn->is_hidden,
             'created_at' => $moveIn->created_at,
@@ -86,6 +87,7 @@ class MoveInController extends Controller
 
     public function store(StoreMoveInRequest $request): RedirectResponse
     {
+        // dd($request);
         $this->moveInService->createMoveIn($request->validated());
         // Preserve filters and pagination context from query params
         $params = [];

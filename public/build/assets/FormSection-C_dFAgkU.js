@@ -1,0 +1,1 @@
+import{j as t}from"./app-BX_xZ066.js";import"./app-Df5NA4jO.js";function i({children:r,borderColor:o}){return t.jsx("div",{className:`rounded-lg border-l-4 ${o} p-4`,children:r})}export{i as default};

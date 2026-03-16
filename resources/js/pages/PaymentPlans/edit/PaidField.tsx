@@ -22,13 +22,18 @@ export function PaidField({ paid, amount, error, onChange }: Props) {
                 type="number"
                 step="0.01"
                 min="0"
-                max={amount || undefined}
                 value={paid || ''}
                 onChange={onChange}
                 placeholder="0.00"
             />
+            <p className="mt-1 text-xs text-muted-foreground">Can exceed amount (overpayment allowed)</p>
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-            {amount > 0 && (
+            {amount > 0 && paid > amount && (
+                <p className="mt-1 text-xs text-amber-600">
+                    Overpaid by: ${((paid || 0) - (amount || 0)).toFixed(2)}
+                </p>
+            )}
+            {amount > 0 && paid <= amount && (
                 <p className="mt-1 text-xs text-muted-foreground">
                     Remaining: ${((amount || 0) - (paid || 0)).toFixed(2)}
                 </p>

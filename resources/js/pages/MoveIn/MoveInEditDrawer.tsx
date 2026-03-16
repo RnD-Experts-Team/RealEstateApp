@@ -68,6 +68,7 @@ type MoveInFormData = {
     first_name: string;
     last_name: string;
     last_notice_sent: string;
+    notes: string;
 };
 
 interface Props {
@@ -192,6 +193,7 @@ export default function MoveInEditDrawer({
         first_name: splitTenantName(moveIn.tenant_name).first,
         last_name: splitTenantName(moveIn.tenant_name).last,
         last_notice_sent: normalizeDateString(moveIn.last_notice_sent),
+        notes: (moveIn as any).notes ?? '',
     });
 
     // Reinitialize form when switching to a different record to avoid stale data
@@ -214,6 +216,7 @@ export default function MoveInEditDrawer({
             first_name: splitTenantName(moveIn.tenant_name).first,
             last_name: splitTenantName(moveIn.tenant_name).last,
             last_notice_sent: normalizeDateString(moveIn.last_notice_sent),
+            notes: (moveIn as any).notes ?? '',
         });
         setSelectedCityId(initialCityId);
         setSelectedPropertyId(initialPropertyId);
@@ -546,6 +549,17 @@ export default function MoveInEditDrawer({
                                     onChange={(date) => setData('last_notice_sent', date?? '')}
                                     isOpen={calendarStates.last_notice_sent}
                                     onOpenChange={(open) => setCalendarOpen('last_notice_sent', open)}
+                                />
+                            </FormSection>
+
+                            <FormSection label="Notes" borderColor="border-l-slate-400" error={errors.notes}>
+                                <textarea
+                                    id="notes"
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    rows={3}
+                                    value={data.notes}
+                                    onChange={(e) => setData('notes', e.target.value)}
+                                    placeholder="Enter any additional notes..."
                                 />
                             </FormSection>
                         </form>

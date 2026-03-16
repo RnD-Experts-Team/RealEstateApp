@@ -19,6 +19,7 @@ export interface MoveIn {
     date_of_insurance_expiration: string | null;  // ISO string date
     delisted: boolean;
     utilities_under_their_name: boolean;
+    notes: string | null;
     is_hidden: boolean;
     is_archived: boolean;
     created_at: string;

@@ -38,6 +38,7 @@ type MoveInFormData = {
     first_name: string;
     last_name: string;
     last_notice_sent: string;
+    notes: string;
 };
 
 interface Props {
@@ -86,6 +87,7 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
         first_name: '',
         last_name: '',
         last_notice_sent: '',
+        notes: '',
     });
 
     const resetFormState = () => {
@@ -416,6 +418,21 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
                                 error={errors.last_notice_sent}
                                 borderColor="border-l-blue-500"
                             />
+
+                            <div className="rounded-lg border-l-4 border-l-slate-400 p-4">
+                                <div className="mb-2">
+                                    <Label htmlFor="notes" className="text-base font-semibold">Notes</Label>
+                                </div>
+                                <textarea
+                                    id="notes"
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    rows={3}
+                                    value={data.notes}
+                                    onChange={(e) => setData('notes', e.target.value)}
+                                    placeholder="Enter any additional notes..."
+                                />
+                                {errors.notes && <p className="mt-1 text-sm text-red-600">{errors.notes}</p>}
+                            </div>
                         </form>
                     </div>
 

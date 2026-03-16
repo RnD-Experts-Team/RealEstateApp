@@ -1,0 +1,1 @@
+import{j as i}from"./app-BX_xZ066.js";import{I as m}from"./input-2b1dtA-j.js";import"./app-Df5NA4jO.js";import"./utils-CBfrqCZ4.js";function x({id:t,value:r,onChange:o,placeholder:p}){return i.jsx(m,{id:t,value:r,onChange:o,placeholder:p})}export{x as default};

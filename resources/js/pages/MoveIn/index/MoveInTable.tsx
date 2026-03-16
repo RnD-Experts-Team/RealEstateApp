@@ -54,6 +54,7 @@ export default function MoveInTable({
                         <TableHead className="border border-border bg-muted text-muted-foreground">Delisted</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Utilities Under Their Name</TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground">Last Notice Sent</TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground">Notes</TableHead>
 
                         {showActions && (
                             <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>

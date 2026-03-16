@@ -34,11 +34,20 @@ class StoreUnitRequest extends FormRequest
                 Rule::exists('property_info_without_insurance', 'id')
             ],
             // New property data (optional, but required if property_id is not provided)
-            'new_property' => 'required_without:property_id|array',
+            'new_property' => 'nullable|required_without:property_id|array',
             'new_property.city_id' => 'required_with:new_property|integer|exists:cities,id',
             'new_property.property_name' => 'required_with:new_property|string|max:255',
             
-            'unit_name' => 'required|string|max:255|unique:units,unit_name',
+            // Unique only within the same property; skip when creating a brand-new property
+            // (new property has no existing units, so duplicates are impossible)
+            'unit_name' => array_filter([
+                'required',
+                'string',
+                'max:255',
+                $this->filled('property_id')
+                    ? Rule::unique('units', 'unit_name')->where('property_id', (int) $this->property_id)
+                    : null,
+            ]),
             'tenants' => 'nullable|string|max:255',
             
             // New tenant data (optional)
@@ -87,7 +96,7 @@ class StoreUnitRequest extends FormRequest
             'new_tenant.login_email.email' => 'Login email must be a valid email address.',
             'new_tenant.alternate_email.email' => 'Alternate email must be a valid email address.',
             'unit_name.required' => 'Unit name is required.',
-            'unit_name.unique' => 'Unit name already exists.',
+            'unit_name.unique' => 'A unit with this name already exists in the selected property.',
             'lease_end.after_or_equal' => 'Lease end date must be after or equal to lease start date.',
             'count_beds.numeric' => 'Count beds must be a valid number.',
             'count_beds.regex' => 'Count beds must have at most 1 decimal place.',

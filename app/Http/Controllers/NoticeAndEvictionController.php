@@ -106,7 +106,6 @@ class NoticeAndEvictionController extends Controller
         $notices = Notice::select('id', 'notice_name', 'days')
             ->where('is_archived', false)
             ->get();
-
         return Inertia::render('NoticeAndEvictions/Index', [
             'paginatedRecords' => $paginationData,
             'cities' => $cities,
@@ -118,23 +117,17 @@ class NoticeAndEvictionController extends Controller
                 'total' => $paginationData['total'],
                 'last_page' => $paginationData['last_page'],
             ],
-            // Use Inertia lazy loading for heavy dropdown data
-            'properties' => Inertia::lazy(fn () => 
-                PropertyInfoWithoutInsurance::select('id', 'city_id', 'property_name')
-                    ->orderBy('property_name')
-                    ->get()
-            ),
-            'units' => Inertia::lazy(fn () => 
-                Unit::select('id', 'property_id', 'unit_name')
-                    ->orderBy('unit_name')
-                    ->get()
-            ),
-            'tenants' => Inertia::lazy(fn () => 
-                Tenant::select('id', 'unit_id', 'first_name', 'last_name')
-                    ->where('is_archived', false)
-                    ->orderBy('first_name')
-                    ->get()
-            ),
+            'properties' => PropertyInfoWithoutInsurance::select('id', 'city_id', 'property_name')
+                ->orderBy('property_name')
+                ->get(),
+            'units' => Unit::select('id', 'property_id', 'unit_name')
+                ->orderBy('unit_name')
+                ->get(),
+            'tenants' => Tenant::select('id', 'unit_id', 'first_name', 'last_name')
+                ->where('is_archived', false)
+                ->orderBy('first_name')
+                ->get()
+                ->map(fn($t) => array_merge($t->toArray(), ['full_name' => $t->first_name . ' ' . $t->last_name])),
         ]);
     }
 

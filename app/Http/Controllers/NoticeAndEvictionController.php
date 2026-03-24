@@ -157,14 +157,7 @@ class NoticeAndEvictionController extends Controller
     public function store(NoticeAndEvictionRequest $request)
     {
         // Create the record using only validated entity data
-        try {
-            $nev = $this->service->create($request->getValidatedData());
-            \Log::info('[NoticeAndEviction] Created successfully, ID: ' . $nev->id);
-        } catch (\Throwable $e) {
-            \Log::error('[NoticeAndEviction] Create failed: ' . $e->getMessage());
-            \Log::error('[NoticeAndEviction] Stack trace: ' . $e->getTraceAsString());
-            throw $e;
-        }
+        $nev = $this->service->create($request->getValidatedData());
 
         // Get pagination/filter parameters for redirect
         $redirectParams = $this->getRedirectParams($request);

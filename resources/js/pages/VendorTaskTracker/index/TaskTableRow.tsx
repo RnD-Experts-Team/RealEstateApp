@@ -41,9 +41,9 @@ export default function TaskTableRow({ task, formatDateOnly, onEdit, onDelete, p
 
         const variant = normalizedStatus.toLowerCase().includes('completed')
             ? 'default'
-            : normalizedStatus.toLowerCase().includes('pending')
-            ? 'secondary'
-            : 'outline';
+            : normalizedStatus.toLowerCase().includes('24H')
+              ? 'secondary'
+              : 'outline';
 
         return <Badge variant={variant}>{normalizedStatus}</Badge>;
     };

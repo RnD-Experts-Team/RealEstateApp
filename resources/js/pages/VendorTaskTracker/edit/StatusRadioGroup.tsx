@@ -9,20 +9,16 @@ interface StatusRadioGroupProps {
 
 export default function StatusRadioGroup({ value, onChange, error }: StatusRadioGroupProps) {
     return (
-        <FormSection
-            label="Status"
-            borderColor="border-l-red-500"
-            error={error}
-        >
+        <FormSection label="Status" borderColor="border-l-red-500" error={error}>
             <RadioGroup
                 value={value}
                 onValueChange={onChange}
                 name="status"
                 options={[
-                    { value: 'Pending', label: 'Pending' },
+                    { value: '24H', label: '24H' },
                     { value: 'In Progress', label: 'In Progress' },
                     { value: 'Completed', label: 'Completed' },
-                    { value: 'On Hold', label: 'On Hold' }
+                    { value: 'On Hold', label: 'On Hold' },
                 ]}
                 className="flex-wrap"
             />

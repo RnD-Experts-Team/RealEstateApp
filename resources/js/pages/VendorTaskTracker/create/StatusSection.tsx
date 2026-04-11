@@ -5,14 +5,9 @@ interface StatusSectionProps {
     status: string;
     onStatusChange: (value: string) => void;
     errors: Partial<Record<string, string>>; // Changed from Record<string, string>
-
 }
 
-export default function StatusSection({
-    status,
-    onStatusChange,
-    errors
-}: StatusSectionProps) {
+export default function StatusSection({ status, onStatusChange, errors }: StatusSectionProps) {
     return (
         <div className="rounded-lg border-l-4 border-l-red-500 p-4">
             <div className="mb-2">
@@ -25,10 +20,10 @@ export default function StatusSection({
                 onValueChange={onStatusChange}
                 name="status"
                 options={[
-                    { value: 'Pending', label: 'Pending' },
+                    { value: '24H', label: '24H' },
                     { value: 'In Progress', label: 'In Progress' },
                     { value: 'Completed', label: 'Completed' },
-                    { value: 'On Hold', label: 'On Hold' }
+                    { value: 'On Hold', label: 'On Hold' },
                 ]}
                 className="flex-wrap"
             />

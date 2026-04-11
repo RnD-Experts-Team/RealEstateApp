@@ -50,7 +50,7 @@ const STATUS_OPTIONS = [
     { value: 'all', label: 'Show All' },
     { value: 'Completed', label: 'Completed' },
     { value: 'In Progress', label: 'In Progress' },
-    { value: 'Pending', label: 'Pending' },
+    { value: '24H', label: '24H' },
 ];
 
 export default function FilterBar({ filters, cities, properties, units, vendors, onSearch, onClear }: FilterBarProps) {
@@ -110,11 +110,9 @@ export default function FilterBar({ filters, cities, properties, units, vendors,
         }
     }, [cityInput, cities]);
 
-    const filteredProperties =
-        properties?.filter((property) => property.property_name.toLowerCase().includes(propertyInput.toLowerCase())) || [];
+    const filteredProperties = properties?.filter((property) => property.property_name.toLowerCase().includes(propertyInput.toLowerCase())) || [];
 
-    const filteredVendors =
-        vendors?.filter((vendor) => vendor.vendor_name.toLowerCase().includes(vendorInput.toLowerCase())) || [];
+    const filteredVendors = vendors?.filter((vendor) => vendor.vendor_name.toLowerCase().includes(vendorInput.toLowerCase())) || [];
 
     const filteredUnits = units?.filter((unit) => unit.unit_name.toLowerCase().includes(unitInput.toLowerCase())) || [];
 
@@ -354,7 +352,7 @@ export default function FilterBar({ filters, cities, properties, units, vendors,
                     setStatusInput(e.target.value);
                     handleTempFilterChange('status', e.target.value);
                 }}
-                className="rounded-md border border-input bg-input px-3 py-2 text-sm text-input-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="text-input-foreground rounded-md border border-input bg-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
             >
                 {STATUS_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -365,12 +363,12 @@ export default function FilterBar({ filters, cities, properties, units, vendors,
 
             {/* ✅ Visible/Hidden toggle */}
             <div className="flex items-center">
-                <div className="w-full flex items-center rounded-md border border-input bg-input p-1 h-10">
+                <div className="flex h-10 w-full items-center rounded-md border border-input bg-input p-1">
                     <Button
                         type="button"
                         variant={!tempFilters.is_hidden ? 'default' : 'outline'}
                         size="sm"
-                        className="flex-1 h-8"
+                        className="h-8 flex-1"
                         onClick={() => handleTempFilterChange('is_hidden', false)}
                     >
                         Visible
@@ -379,7 +377,7 @@ export default function FilterBar({ filters, cities, properties, units, vendors,
                         type="button"
                         variant={tempFilters.is_hidden ? 'default' : 'outline'}
                         size="sm"
-                        className="flex-1 h-8"
+                        className="h-8 flex-1"
                         onClick={() => handleTempFilterChange('is_hidden', true)}
                     >
                         Hidden

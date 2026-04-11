@@ -58,18 +58,18 @@ class NoticeAndEvictionController extends Controller
 
         // Get filtered records with pagination
         $query = NoticeAndEviction::with(['tenant.unit.property.city'])
-            ->where('is_archived', false);
+            ->where('is_archived', false)->orderBy('date', 'desc');
         $query = $this->service->applyFilters($query, $filters);
 
         // Update evictions status ONLY for paginated records (not all records)
         if ($perPage === 'all') {
             $paginatedRecords = $query->get();
-            
+
             // Update status for visible records only
             foreach ($paginatedRecords as $record) {
                 $this->updateEvictionStatus($record);
             }
-            
+
             $records = $paginatedRecords->map(fn($record) => $this->mapRecordToArray($record));
             $paginationData = [
                 'data' => $records,
@@ -83,12 +83,12 @@ class NoticeAndEvictionController extends Controller
         } else {
             $perPageInt = (int) $perPage;
             $paginatedRecords = $query->paginate($perPageInt, ['*'], 'page', $page);
-            
+
             // Update status for visible records only
             foreach ($paginatedRecords as $record) {
                 $this->updateEvictionStatus($record);
             }
-            
+
             $records = $paginatedRecords->map(fn($record) => $this->mapRecordToArray($record))->toArray();
             $paginationData = [
                 'data' => $records,

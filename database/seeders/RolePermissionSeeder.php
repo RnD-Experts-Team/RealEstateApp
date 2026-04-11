@@ -61,9 +61,12 @@ class RolePermissionSeeder extends Seeder
 
             //vendor-task-tracker
             'vendor-task-tracker.index',
-            'vendor-task-tracker.create','vendor-task-tracker.store',
+            'vendor-task-tracker.create',
+            'vendor-task-tracker.store',
             'vendor-task-tracker.show',
-            'vendor-task-tracker.edit','vendor-task-tracker.update','vendor-task-tracker.destroy',
+            'vendor-task-tracker.edit',
+            'vendor-task-tracker.update',
+            'vendor-task-tracker.destroy',
 
             //move-in
             'move-in.index',
@@ -163,6 +166,23 @@ class RolePermissionSeeder extends Seeder
             'all-properties.update',
             'all-properties.destroy',
             'all-properties.import',
+
+            //tours
+            'tour.index',
+            'tour.create',
+            'tour.edit',
+            'tour.destroy',
+
+            //representatives
+            'representative.create',
+            'representative.edit',
+            'representative.destroy',
+
+            //Units Payments
+            'unit-payment.index',
+            'unit-payment.create',
+            'unit-payment.edit',
+            'unit-payment.destroy',
         ];
 
         // Create permissions

@@ -20,6 +20,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
 use Inertia\Inertia;
+use App\Http\Controllers\TourController;
+use App\Http\Controllers\UnitPaymentController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -185,6 +187,29 @@ Route::middleware(['auth'])->group(function () {
 
     // Users
     Route::resource('users', UserController::class);
+
+
+    Route::get('tours', [TourController::class, 'index'])->name('tours.index');
+
+    Route::post('tours', [TourController::class, 'storeTour'])->name('tours.store');
+    Route::put('tours/{tour}', [TourController::class, 'updateTour'])->name('tours.update');
+    Route::delete('tours/{tour}', [TourController::class, 'deleteTour'])->name('tours.destroy');
+    Route::post('tours/{tour}/hide', [TourController::class, 'hideTour'])->name('tours.hide');
+    Route::post('tours/{tour}/unhide', [TourController::class, 'unhideTour'])->name('tours.unhide');
+
+    Route::post('representatives', [TourController::class, 'storeRep'])->name('representatives.store');
+    Route::put('representatives/{representative}', [TourController::class, 'updateRep'])->name('representatives.update');
+    Route::delete('representatives/{representative}', [TourController::class, 'deleteRep'])->name('representatives.destroy');
+    Route::post('representatives/{id}/restore', [TourController::class, 'restoreRep'])->name('representatives.restore');
+
+    Route::get('unit-payments', [UnitPaymentController::class, 'index'])->name('unit-payments.index');
+
+    Route::post('unit-payments', [UnitPaymentController::class, 'store'])->name('unit-payments.store');
+    Route::put('unit-payments/{unitPayment}', [UnitPaymentController::class, 'update'])->name('unit-payments.update');
+    Route::delete('unit-payments/{unitPayment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
+
+    Route::post('unit-payments/{unitPayment}/hide', [UnitPaymentController::class, 'hide'])->name('unit-payments.hide');
+    Route::post('unit-payments/{unitPayment}/unhide', [UnitPaymentController::class, 'unhide'])->name('unit-payments.unhide');
 });
 
 // Additional route files

@@ -11,23 +11,23 @@ use App\Models\Cities;
 class PaymentPlanService
 {
     public function getAllPaymentPlans($perPage = 15, bool $isHidden = false)
-{
-    $perPageValue = ($perPage === 'all')
-        ? PaymentPlan::where('is_hidden', $isHidden)->count()
-        : (int) $perPage;
+    {
+        $perPageValue = ($perPage === 'all')
+            ? PaymentPlan::where('is_hidden', $isHidden)->count()
+            : (int) $perPage;
 
-    return PaymentPlan::with(['tenant.unit.property.city'])
-        ->where('is_hidden', $isHidden) // ✅ NEW
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPageValue)
-        ->withQueryString();
-}
+        return PaymentPlan::with(['tenant.unit.property.city'])
+            ->where('is_hidden', $isHidden) // ✅ NEW
+            ->orderBy('dates', 'desc')
+            ->paginate($perPageValue)
+            ->withQueryString();
+    }
 
     /**
      * Filter payment plans by NAME-based filters for city, property, unit, and tenant.
      * Uses LIKE matching similar to Payments filters.
      */
-    public function filterPaymentPlansByNames(?string $city = null, ?string $property = null, ?string $unit = null, ?string $tenant = null, $perPage = 15, bool $isHidden = false )
+    public function filterPaymentPlansByNames(?string $city = null, ?string $property = null, ?string $unit = null, ?string $tenant = null, $perPage = 15, bool $isHidden = false)
     {
         $query = PaymentPlan::with(['tenant.unit.property.city'])->where('is_hidden', $isHidden);
 
@@ -59,7 +59,7 @@ class PaymentPlanService
             ? (clone $query)->count()
             : (int) $perPage;
 
-        return $query->orderBy('created_at', 'desc')
+        return $query->orderBy('dates', 'desc')
             ->paginate($perPageValue)
             ->withQueryString();
     }
@@ -146,7 +146,7 @@ class PaymentPlanService
     public function updatePaymentPlan($id, array $data)
     {
         $paymentPlan = PaymentPlan::findOrFail($id);
-        
+
         // If tenant name is provided, find the tenant_id
         if (isset($data['tenant_name'])) {
             $tenant = $this->findTenantByName($data['tenant_name']);
@@ -170,17 +170,17 @@ class PaymentPlanService
     {
         // Get cities (deduplicated by name)
         $cities = Cities::orderBy('city')->get()->unique('city')->values();
-        
+
         // Get properties with city relationships
         $properties = PropertyInfoWithoutInsurance::with('city')
-                     ->orderBy('property_name')
-                     ->get();
+            ->orderBy('property_name')
+            ->get();
         $propertiesUniqueByName = $properties->unique('property_name')->values();
-        
+
         // Get units with their relationships for dropdowns
         $units = Unit::with(['property.city'])
-                    ->orderBy('unit_name')
-                    ->get();
+            ->orderBy('unit_name')
+            ->get();
 
         // Create ID-keyed lookup maps for cascading
         $propertiesByCityId = $properties->groupBy('city_id')->map(function ($cityProperties) {
@@ -206,9 +206,9 @@ class PaymentPlanService
 
         // Get tenants with their relationships
         $tenants = Tenant::with(['unit.property.city'])
-                         ->orderBy('first_name')
-                         ->orderBy('last_name')
-                         ->get();
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
 
         // Group tenants by unit ID
         $tenantsByUnitId = $tenants->groupBy('unit_id')->map(function ($unitTenants) {
@@ -282,7 +282,7 @@ class PaymentPlanService
             ->map(function ($tenant) {
                 return [
                     'id' => $tenant->id,
-                    'label' => $tenant->full_name . 
+                    'label' => $tenant->full_name .
                         ($tenant->unit ? ' - ' . $tenant->unit->unit_name : '') .
                         ($tenant->unit && $tenant->unit->property ? ' (' . $tenant->unit->property->property_name . ')' : ''),
                     'unit_id' => $tenant->unit_id,
@@ -296,15 +296,15 @@ class PaymentPlanService
     }
 
     public function hidePaymentPlan(PaymentPlan $plan): bool
-{
-    $plan->is_hidden = true;
-    return $plan->save();
-}
+    {
+        $plan->is_hidden = true;
+        return $plan->save();
+    }
 
-public function unhidePaymentPlan(PaymentPlan $plan): bool
-{
-    $plan->is_hidden = false;
-    return $plan->save();
-}
+    public function unhidePaymentPlan(PaymentPlan $plan): bool
+    {
+        $plan->is_hidden = false;
+        return $plan->save();
+    }
 
 }

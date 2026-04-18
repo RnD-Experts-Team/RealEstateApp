@@ -111,9 +111,9 @@ export default function Index({ payments, filters, cities, properties, units, ty
     const { auth } = usePage().props as any;
     const permissions: string[] = auth?.user?.permissions || [];
 
-    const canCreate = permissions.includes('unit-payment.create');
-    const canEdit = permissions.includes('unit-payment.edit');
-    const canDelete = permissions.includes('unit-payment.destroy');
+    const canCreate = permissions.includes('reports.create');
+    const canEdit = permissions.includes('reports.edit');
+    const canDelete = permissions.includes('reports.destroy');
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
@@ -148,7 +148,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
         if (!pendingAction) return;
 
         if (pendingAction.type === 'delete') {
-            router.delete(route('unit-payments.destroy', pendingAction.payment.id), {
+            router.delete(route('reports.destroy', pendingAction.payment.id), {
                 preserveState: true,
                 preserveScroll: true,
                 onFinish: () => setPendingAction(null),
@@ -158,7 +158,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
 
         if (pendingAction.type === 'hide') {
             router.post(
-                route('unit-payments.hide', pendingAction.payment.id),
+                route('reports.hide', pendingAction.payment.id),
                 {},
                 {
                     preserveState: true,
@@ -170,7 +170,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
         }
 
         router.post(
-            route('unit-payments.unhide', pendingAction.payment.id),
+            route('reports.unhide', pendingAction.payment.id),
             {},
             {
                 preserveState: true,
@@ -211,7 +211,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
     const dialogCopy = getDialogCopy();
 
     const handleSearch = (payload: Record<string, string>) => {
-        router.get(route('unit-payments.index'), payload, {
+        router.get(route('reports.index'), payload, {
             preserveState: true,
             preserveScroll: true,
             replace: true,
@@ -220,7 +220,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
 
     const handleClear = () => {
         router.get(
-            route('unit-payments.index'),
+            route('reports.index'),
             {},
             {
                 preserveState: true,
@@ -232,7 +232,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
 
     return (
         <AppLayout>
-            <Head title="Unit Payments" />
+            <Head title="Reports" />
 
             <div className="min-h-screen bg-background py-12 text-foreground transition-colors">
                 <div className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
@@ -277,7 +277,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
                                             disabled={(payments.meta?.current_page ?? 1) <= 1}
                                             onClick={() => {
                                                 router.get(
-                                                    route('unit-payments.index'),
+                                                    route('reports.index'),
                                                     {
                                                         ...filters,
                                                         page: (payments.meta?.current_page ?? 1) - 1,
@@ -302,7 +302,7 @@ export default function Index({ payments, filters, cities, properties, units, ty
                                             disabled={(payments.meta?.current_page ?? 1) >= (payments.meta?.last_page ?? 1)}
                                             onClick={() => {
                                                 router.get(
-                                                    route('unit-payments.index'),
+                                                    route('reports.index'),
                                                     {
                                                         ...filters,
                                                         page: (payments.meta?.current_page ?? 1) + 1,

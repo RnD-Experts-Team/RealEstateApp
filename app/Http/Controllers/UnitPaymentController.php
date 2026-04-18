@@ -15,10 +15,10 @@ class UnitPaymentController extends Controller
 {
     public function __construct(protected UnitPaymentService $service)
     {
-        $this->middleware('permission:unit-payment.index')->only('index');
-        $this->middleware('permission:unit-payment.create')->only('store');
-        $this->middleware('permission:unit-payment.edit')->only('update');
-        $this->middleware('permission:unit-payment.destroy')->only('destroy');
+        $this->middleware('permission:reports.index')->only('index');
+        $this->middleware('permission:reports.create')->only('store');
+        $this->middleware('permission:reports.edit')->only('update');
+        $this->middleware('permission:reports.destroy')->only('destroy');
     }
 
     public function index(Request $request)

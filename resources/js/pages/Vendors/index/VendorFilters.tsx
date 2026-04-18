@@ -7,6 +7,7 @@ interface VendorFiltersProps {
     tempFilters: {
         city: string;
         vendor_name: string;
+        vendor_type: string;
     };
     cities: Array<{ id: number; city: string }>;
     showCityDropdown: boolean;
@@ -83,6 +84,20 @@ export default function VendorFiltersComponent({
                     onChange={(e) => onTempFilterChange('vendor_name', e.target.value)}
                     className="w-full"
                 />
+            </div>
+
+            {/* Vendor Type Filter */}
+            <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Vendor Type</label>
+                <select
+                    value={tempFilters.vendor_type}
+                    onChange={(e) => onTempFilterChange('vendor_type', e.target.value)}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                    <option value="">All</option>
+                    <option value="main">Main</option>
+                    <option value="potential">Potential</option>
+                </select>
             </div>
 
             {/* Search and Clear Buttons */}

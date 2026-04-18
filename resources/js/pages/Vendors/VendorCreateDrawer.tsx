@@ -25,6 +25,7 @@ export default function VendorCreateDrawer({ cities, open, onOpenChange, onSucce
     const { data, setData, post, processing, errors, reset, transform } = useForm({
         city_id: '',
         vendor_name: '',
+        vendor_type: 'main',
         number: [] as string[],
         email: [] as string[],
         service_type: [] as string[]
@@ -109,7 +110,7 @@ export default function VendorCreateDrawer({ cities, open, onOpenChange, onSucce
         const getRedirectQuery = (): Record<string, string> => {
             try {
                 const params = new URLSearchParams(window.location.search);
-                const keys = ['city', 'city_id', 'vendor_name', 'number', 'email', 'per_page', 'page'];
+                const keys = ['city', 'city_id', 'vendor_name', 'vendor_type', 'number', 'email', 'per_page', 'page'];
                 const out: Record<string, string> = {};
                 keys.forEach((k) => {
                     const v = params.get(k);
@@ -129,6 +130,7 @@ export default function VendorCreateDrawer({ cities, open, onOpenChange, onSucce
                 ['city', 'filter_city'],
                 ['city_id', 'filter_city_id'],
                 ['vendor_name', 'filter_vendor_name'],
+                ['vendor_type', 'filter_vendor_type'],
                 ['number', 'filter_number'],
                 ['email', 'filter_email'],
                 ['per_page', 'filter_per_page'],
@@ -147,6 +149,7 @@ export default function VendorCreateDrawer({ cities, open, onOpenChange, onSucce
             preserveState: true,
             onSuccess: () => {
                 reset();
+                setData('vendor_type', 'main');
                 setSelectedCityName('');
                 setValidationError('');
                 setVendorNameValidationError('');
@@ -161,6 +164,7 @@ export default function VendorCreateDrawer({ cities, open, onOpenChange, onSucce
         setSelectedCityName('');
         setValidationError('');
         setVendorNameValidationError('');
+        setData('vendor_type', 'main');
         onOpenChange(false);
     };
 
@@ -186,6 +190,19 @@ export default function VendorCreateDrawer({ cities, open, onOpenChange, onSucce
                                 validationError={vendorNameValidationError}
                                 ref={vendorNameRef}
                             />
+
+                            <div>
+                                <label className="mb-1 block text-base font-semibold">Vendor Type</label>
+                                <select
+                                    value={data.vendor_type}
+                                    onChange={(e) => setData('vendor_type', e.target.value as 'main' | 'potential')}
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                >
+                                    <option value="main">Main</option>
+                                    <option value="potential">Potential</option>
+                                </select>
+                                {errors.vendor_type && <p className="mt-1 text-sm text-red-600">{errors.vendor_type}</p>}
+                            </div>
 
                             <PhoneNumberField
                                 value={data.number}

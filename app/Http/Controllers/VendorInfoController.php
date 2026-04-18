@@ -29,7 +29,7 @@ class VendorInfoController extends Controller
     public function index(Request $request): Response
     {
         $perPage = $request->get('per_page', 15);
-        $filters = $request->only(['city', 'city_id', 'vendor_name', 'number', 'email', 'per_page']);
+        $filters = $request->only(['city', 'city_id', 'vendor_name', 'vendor_type', 'number', 'email', 'per_page']);
         // Ensure filters always contain per_page for UI state
         $filters['per_page'] = $perPage;
 
@@ -134,6 +134,7 @@ class VendorInfoController extends Controller
                 'filter_city' => 'city',
                 'filter_city_id' => 'city_id',
                 'filter_vendor_name' => 'vendor_name',
+                'filter_vendor_type' => 'vendor_type',
                 'filter_number' => 'number',
                 'filter_email' => 'email',
                 'filter_per_page' => 'per_page',
@@ -145,7 +146,7 @@ class VendorInfoController extends Controller
                 }
             }
         } else {
-            $keys = ['city', 'city_id', 'vendor_name', 'number', 'email', 'per_page', 'page'];
+            $keys = ['city', 'city_id', 'vendor_name', 'vendor_type', 'number', 'email', 'per_page', 'page'];
             foreach ($keys as $key) {
                 if ($request->has($key)) {
                     $params[$key] = $request->input($key);

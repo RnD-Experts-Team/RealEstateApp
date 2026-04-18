@@ -179,10 +179,10 @@ class RolePermissionSeeder extends Seeder
             'representative.destroy',
 
             //Units Payments
-            'unit-payment.index',
-            'unit-payment.create',
-            'unit-payment.edit',
-            'unit-payment.destroy',
+            'reports.index',
+            'reports.create',
+            'reports.edit',
+            'reports.destroy',
         ];
 
         // Create permissions

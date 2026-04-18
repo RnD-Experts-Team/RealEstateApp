@@ -27,6 +27,7 @@ export default function VendorEditDrawer({ vendor, cities, open, onOpenChange, o
     const { data, setData, put, processing, errors, transform } = useForm({
         city_id: vendor?.city_id?.toString() || '',
         vendor_name: vendor?.vendor_name || '',
+        vendor_type: vendor?.vendor_type || 'main',
         number: (vendor?.number || []) as string[],
         email: (vendor?.email || []) as string[],
         service_type: (vendor?.service_type || []) as string[]
@@ -58,6 +59,7 @@ export default function VendorEditDrawer({ vendor, cities, open, onOpenChange, o
             setData({
                 city_id: cityId,
                 vendor_name: vendor.vendor_name,
+                vendor_type: vendor.vendor_type || 'main',
                 number: (vendor.number || []) as string[],
                 email: (vendor.email || []) as string[],
                 service_type: (vendor.service_type || []) as string[]
@@ -129,7 +131,7 @@ export default function VendorEditDrawer({ vendor, cities, open, onOpenChange, o
         const getRedirectQuery = (): Record<string, string> => {
             try {
                 const params = new URLSearchParams(window.location.search);
-                const keys = ['city', 'city_id', 'vendor_name', 'number', 'email', 'per_page', 'page'];
+                const keys = ['city', 'city_id', 'vendor_name', 'vendor_type', 'number', 'email', 'per_page', 'page'];
                 const out: Record<string, string> = {};
                 keys.forEach((k) => {
                     const v = params.get(k);
@@ -149,6 +151,7 @@ export default function VendorEditDrawer({ vendor, cities, open, onOpenChange, o
                 ['city', 'filter_city'],
                 ['city_id', 'filter_city_id'],
                 ['vendor_name', 'filter_vendor_name'],
+                ['vendor_type', 'filter_vendor_type'],
                 ['number', 'filter_number'],
                 ['email', 'filter_email'],
                 ['per_page', 'filter_per_page'],
@@ -182,6 +185,7 @@ export default function VendorEditDrawer({ vendor, cities, open, onOpenChange, o
             setData({
                 city_id: cityId,
                 vendor_name: vendor.vendor_name,
+                vendor_type: vendor.vendor_type || 'main',
                 number: (vendor.number || []) as string[],
                 email: (vendor.email || []) as string[],
                 service_type: (vendor.service_type || []) as string[]
@@ -218,6 +222,19 @@ export default function VendorEditDrawer({ vendor, cities, open, onOpenChange, o
                                 error={errors.vendor_name}
                                 validationError={vendorNameValidationError}
                             />
+
+                            <div>
+                                <label className="mb-1 block text-base font-semibold">Vendor Type</label>
+                                <select
+                                    value={data.vendor_type}
+                                    onChange={(e) => setData('vendor_type', e.target.value as 'main' | 'potential')}
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                >
+                                    <option value="main">Main</option>
+                                    <option value="potential">Potential</option>
+                                </select>
+                                {errors.vendor_type && <p className="mt-1 text-sm text-red-600">{errors.vendor_type}</p>}
+                            </div>
 
                             <PhoneNumberField
                                 value={data.number}

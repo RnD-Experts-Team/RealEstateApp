@@ -35,6 +35,9 @@ export default function VendorTable({
                             Email
                         </TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground text-center">
+                            Vendor Type
+                        </TableHead>
+                        <TableHead className="border border-border bg-muted text-muted-foreground text-center">
                             Service Type
                         </TableHead>
                         <TableHead className="border border-border bg-muted text-muted-foreground text-center">Actions</TableHead>
@@ -54,7 +57,7 @@ export default function VendorTable({
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                            <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                                 No vendors found
                             </TableCell>
                         </TableRow>

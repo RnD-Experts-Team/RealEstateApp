@@ -1,0 +1,1 @@
+import{j as t}from"./app-Bwm_pcOs.js";import"./app-ChjydqYx.js";function r(){return t.jsxs("div",{className:"py-8 text-center text-muted-foreground",children:[t.jsx("p",{className:"text-lg",children:"No tasks found matching your criteria."}),t.jsx("p",{className:"text-sm",children:"Try adjusting your search filters or clearing them to see all tasks."})]})}export{r as default};

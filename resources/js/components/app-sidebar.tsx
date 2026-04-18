@@ -189,17 +189,17 @@ const mainNavCategories: NavCategory[] = [
         permissions: ['tour.index'],
     },
     {
-        title: 'Unit Payments',
+        title: 'Reports',
         icon: CreditCard,
         items: [
             {
-                title: 'Unit Payments',
-                href: '/unit-payments',
+                title: 'Reports',
+                href: '/reports',
                 icon: CreditCard,
-                permission: 'unit-payment.index',
+                permission: 'reports.index',
             },
         ],
-        permissions: ['unit-payment.index'],
+        permissions: ['reports.index'],
     },
 ];
 

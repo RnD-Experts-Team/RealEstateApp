@@ -18,6 +18,7 @@ class VendorInfo extends Model
     protected $fillable = [
         'city_id',
         'vendor_name',
+        'vendor_type',
         'number',
         'email',
         'service_type',

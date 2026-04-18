@@ -30,6 +30,10 @@ class VendorInfoService
             $query->where('vendor_name', 'like', '%' . $filters['vendor_name'] . '%');
         }
 
+        if (!empty($filters['vendor_type'])) {
+            $query->where('vendor_type', $filters['vendor_type']);
+        }
+
         // Filter by phone number within JSON array
         if (!empty($filters['number'])) {
             $query->whereJsonContains('number', $filters['number']);
@@ -123,6 +127,10 @@ class VendorInfoService
      */
     private function cleanAndFormatJsonFields(array $data): array
     {
+        if (empty($data['vendor_type'])) {
+            $data['vendor_type'] = 'main';
+        }
+
         // Fields that should be stored as JSON arrays
         $jsonArrayFields = ['number', 'email', 'service_type'];
 

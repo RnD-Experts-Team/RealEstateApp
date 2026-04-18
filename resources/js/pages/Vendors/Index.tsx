@@ -14,7 +14,7 @@ import VendorPagination from './index/VendorPagination';
 
 // CSV Export utility function
 const exportToCSV = (data: VendorInfo[], filename: string = 'vendors.csv') => {
-    const headers = ['ID', 'City', 'Vendor Name', 'Number', 'Email', 'Service Type'];
+    const headers = ['ID', 'City', 'Vendor Name', 'Vendor Type', 'Number', 'Email', 'Service Type'];
 
     const formatArrayField = (field: string[] | null | undefined): string => {
         if (!field || !Array.isArray(field) || field.length === 0) {
@@ -30,6 +30,7 @@ const exportToCSV = (data: VendorInfo[], filename: string = 'vendors.csv') => {
                 vendor.id,
                 `"${vendor.city?.city || 'N/A'}"`,
                 `"${vendor.vendor_name}"`,
+                `"${vendor.vendor_type}"`,
                 `"${formatArrayField(vendor.number as string[])}"`,
                 `"${formatArrayField(vendor.email as string[])}"`,
                 `"${formatArrayField(vendor.service_type as string[])}"`,
@@ -71,6 +72,7 @@ export default function Index({ vendors, filters, cities }: Props) {
     const [tempFilters, setTempFilters] = useState({
         city: filters.city || '',
         vendor_name: filters.vendor_name || '',
+        vendor_type: filters.vendor_type || '',
     });
 
     // Per-page state (supports '15', '30', '50', 'all') and initialize from server filters
@@ -107,6 +109,7 @@ export default function Index({ vendors, filters, cities }: Props) {
         const clearedFilters = {
             city: '',
             vendor_name: '',
+            vendor_type: '',
         };
         setTempFilters(clearedFilters);
         setSearchFilters(clearedFilters as unknown as VendorFilters);
@@ -152,7 +155,7 @@ export default function Index({ vendors, filters, cities }: Props) {
         const getRedirectQuery = (): Record<string, string> => {
             try {
                 const params = new URLSearchParams(window.location.search);
-                const keys = ['city', 'city_id', 'vendor_name', 'number', 'email', 'per_page', 'page'];
+                const keys = ['city', 'city_id', 'vendor_name', 'vendor_type', 'number', 'email', 'per_page', 'page'];
                 const out: Record<string, string> = {};
                 keys.forEach((k) => {
                     const v = params.get(k);
@@ -170,6 +173,7 @@ export default function Index({ vendors, filters, cities }: Props) {
             ['city', 'filter_city'],
             ['city_id', 'filter_city_id'],
             ['vendor_name', 'filter_vendor_name'],
+            ['vendor_type', 'filter_vendor_type'],
             ['number', 'filter_number'],
             ['email', 'filter_email'],
             ['per_page', 'filter_per_page'],

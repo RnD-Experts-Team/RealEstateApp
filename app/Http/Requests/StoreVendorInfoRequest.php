@@ -24,6 +24,7 @@ class StoreVendorInfoRequest extends FormRequest
                 })
             ],
             'vendor_name' => 'required|string|max:255',
+            'vendor_type' => 'nullable|in:main,potential',
             'number' => 'nullable|array',
             'number.*' => 'nullable|string|max:255',
             'email' => 'nullable|array',
@@ -41,6 +42,7 @@ class StoreVendorInfoRequest extends FormRequest
             'city_id.exists' => 'The selected city is not valid. Please choose from available cities.',
             'vendor_name.required' => 'Vendor name is required.',
             'vendor_name.max' => 'Vendor name cannot exceed 255 characters.',
+            'vendor_type.in' => 'Vendor type must be either main or potential.',
             'number.array' => 'Numbers must be an array.',
             'number.*.string' => 'Each number must be a string.',
             'number.*.max' => 'Each number cannot exceed 255 characters.',

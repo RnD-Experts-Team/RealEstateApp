@@ -78,6 +78,9 @@ export default function VendorTableRow({
                 {renderLines(vendor.email as string[])}
             </TableCell>
             <TableCell className="border border-border text-center text-foreground">
+                {vendor.vendor_type === 'potential' ? 'Potential' : 'Main'}
+            </TableCell>
+            <TableCell className="border border-border text-center text-foreground">
                 {renderPairsPerLine(vendor.service_type as string[])}
             </TableCell>
             <TableCell className="border border-border text-center">

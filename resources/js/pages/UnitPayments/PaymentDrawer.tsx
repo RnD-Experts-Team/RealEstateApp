@@ -163,7 +163,7 @@ export default function PaymentDrawer({ open, onOpenChange, payment, cities, pro
         e.preventDefault();
 
         if (isEdit && payment) {
-            put(route('unit-payments.update', payment.id), {
+            put(route('reports.update', payment.id), {
                 preserveScroll: true,
                 preserveState: true,
                 onSuccess: () => onOpenChange(false),
@@ -171,7 +171,7 @@ export default function PaymentDrawer({ open, onOpenChange, payment, cities, pro
             return;
         }
 
-        post(route('unit-payments.store'), {
+        post(route('reports.store'), {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {

@@ -202,14 +202,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('representatives/{representative}', [TourController::class, 'deleteRep'])->name('representatives.destroy');
     Route::post('representatives/{id}/restore', [TourController::class, 'restoreRep'])->name('representatives.restore');
 
-    Route::get('unit-payments', [UnitPaymentController::class, 'index'])->name('unit-payments.index');
+    Route::get('reports', [UnitPaymentController::class, 'index'])->name('reports.index');
 
-    Route::post('unit-payments', [UnitPaymentController::class, 'store'])->name('unit-payments.store');
-    Route::put('unit-payments/{unitPayment}', [UnitPaymentController::class, 'update'])->name('unit-payments.update');
-    Route::delete('unit-payments/{unitPayment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
+    Route::post('reports', [UnitPaymentController::class, 'store'])->name('reports.store');
+    Route::put('reports/{unitPayment}', [UnitPaymentController::class, 'update'])->name('reports.update');
+    Route::delete('reports/{unitPayment}', [UnitPaymentController::class, 'destroy'])->name('reports.destroy');
 
-    Route::post('unit-payments/{unitPayment}/hide', [UnitPaymentController::class, 'hide'])->name('unit-payments.hide');
-    Route::post('unit-payments/{unitPayment}/unhide', [UnitPaymentController::class, 'unhide'])->name('unit-payments.unhide');
+    Route::post('reports/{unitPayment}/hide', [UnitPaymentController::class, 'hide'])->name('reports.hide');
+    Route::post('reports/{unitPayment}/unhide', [UnitPaymentController::class, 'unhide'])->name('reports.unhide');
 });
 
 // Additional route files

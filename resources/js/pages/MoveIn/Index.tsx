@@ -6,13 +6,13 @@ import { MoveIn } from '@/types/move-in';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import MoveInCreateDrawer from './MoveInCreateDrawer';
-import MoveInEditDrawer from './MoveInEditDrawer';
-import PageHeader from './index/PageHeader';
+import EmptyState from './index/EmptyState';
 import MoveInFilters from './index/MoveInFilters';
 import MoveInTable from './index/MoveInTable';
-import EmptyState from './index/EmptyState';
+import PageHeader from './index/PageHeader';
 import PaginationInfo from './index/PaginationInfo';
+import MoveInCreateDrawer from './MoveInCreateDrawer';
+import MoveInEditDrawer from './MoveInEditDrawer';
 
 // Updated Unit interface to include ID
 interface Unit {
@@ -304,8 +304,7 @@ export default function Index({ moveIns, filters, units, cities, properties, uni
         setIsEditDrawerOpen(true);
     };
 
-    const hasActiveFilters =
-        !!currentFilters.city || !!currentFilters.property || !!currentFilters.unit || !!currentFilters.is_hidden;
+    const hasActiveFilters = !!currentFilters.city || !!currentFilters.property || !!currentFilters.unit || !!currentFilters.is_hidden;
 
     // ✅ permission gate for hide/unhide (adjust to your permissions list)
     const canHide = hasAnyPermission(['move-in.hide', 'move-in.unhide', 'move-in.update']);
@@ -326,7 +325,7 @@ export default function Index({ moveIns, filters, units, cities, properties, uni
                     />
 
                     {/* Filters Card */}
-                    <Card className="bg-card text-card-foreground shadow-lg mb-6">
+                    <Card className="mb-6 bg-card text-card-foreground shadow-lg">
                         <MoveInFilters
                             cities={cities}
                             properties={properties}
@@ -361,11 +360,11 @@ export default function Index({ moveIns, filters, units, cities, properties, uni
                             />
 
                             {/* Table Footer Pagination Controls */}
-                            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                            <div className="mt-4 flex items-center justify-between border-t pt-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm">Rows per page:</span>
                                     <select
-                                        className="border rounded px-2 py-1 bg-background text-foreground"
+                                        className="rounded border bg-background px-2 py-1 text-foreground"
                                         value={currentPerPage}
                                         onChange={(e) => handlePerPageChange(e.target.value)}
                                     >
@@ -375,44 +374,11 @@ export default function Index({ moveIns, filters, units, cities, properties, uni
                                         <option value="all">All</option>
                                     </select>
                                 </div>
-
-                                <div className="flex items-center gap-4">
-                                    {currentPerPage !== 'all' && moveIns?.meta ? (
-                                        <>
-                                            <span className="text-sm">
-                                                Page {moveIns.meta?.current_page ?? 1} of {moveIns.meta?.last_page ?? 1}
-                                            </span>
-                                            <button
-                                                className="px-3 py-1 border rounded disabled:opacity-50"
-                                                disabled={(moveIns.meta?.current_page ?? 1) <= 1}
-                                                onClick={() => handlePageChange((moveIns.meta?.current_page ?? 1) - 1)}
-                                            >
-                                                Previous
-                                            </button>
-                                            <button
-                                                className="px-3 py-1 border rounded disabled:opacity-50"
-                                                disabled={(moveIns.meta?.current_page ?? 1) >= (moveIns.meta?.last_page ?? 1)}
-                                                onClick={() => handlePageChange((moveIns.meta?.current_page ?? 1) + 1)}
-                                            >
-                                                Next
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <span className="text-sm">Showing all {moveIns?.data?.length ?? 0} records</span>
-                                    )}
-                                </div>
                             </div>
 
                             {moveIns.data.length === 0 && <EmptyState hasActiveFilters={!!hasActiveFilters} />}
 
-                            {moveIns.meta && (
-                                <PaginationInfo
-                                    from={moveIns.meta.from}
-                                    to={moveIns.meta.to}
-                                    total={moveIns.meta.total}
-                                    hasActiveFilters={!!hasActiveFilters}
-                                />
-                            )}
+                            {moveIns.meta && <PaginationInfo meta={moveIns.meta} perPage={currentPerPage} onPageChange={handlePageChange} />}
                         </CardContent>
                     </Card>
                 </div>

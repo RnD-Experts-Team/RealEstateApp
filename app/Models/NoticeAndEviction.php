@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Notice;
 
 class NoticeAndEviction extends Model
@@ -93,6 +94,14 @@ class NoticeAndEviction extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    /**
+     * Get the images for this notice and eviction.
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(NoticeAndEvictionImage::class);
     }
 
     /**

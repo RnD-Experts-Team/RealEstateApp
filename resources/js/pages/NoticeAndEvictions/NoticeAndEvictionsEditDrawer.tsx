@@ -1,22 +1,23 @@
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { City, Notice, NoticeAndEviction, PropertyInfoWithoutInsurance, Tenant } from '@/types/NoticeAndEviction';
-import { useForm, router } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
+import { AttorneySection } from './edit/AttorneySection';
 import { CascadingSelectionSection } from './edit/CascadingSelectionSection';
+import { DateSection } from './edit/DateSection';
+import { EvictionPaymentPlanSection } from './edit/EvictionPaymentPlanSection';
+import { EvictionsSection } from './edit/EvictionsSection';
+import { ExceptionSection } from './edit/ExceptionSection';
+import { HearingDatesSection } from './edit/HearingDatesSection';
+import { IfLeftSection } from './edit/IfLeftSection';
+import ImagesSection from './edit/ImagesSection';
+import { NoteSection } from './edit/NoteSection';
+import { NoticeTypeSection } from './edit/NoticeTypeSection';
+import { OtherTenantsSection } from './edit/OtherTenantsSection';
 import { SelectionSummary } from './edit/SelectionSummary';
 import { StatusSection } from './edit/StatusSection';
-import { DateSection } from './edit/DateSection';
-import { NoticeTypeSection } from './edit/NoticeTypeSection';
-import { ExceptionSection } from './edit/ExceptionSection';
-import { NoteSection } from './edit/NoteSection';
-import { EvictionsSection } from './edit/EvictionsSection';
-import { AttorneySection } from './edit/AttorneySection';
-import { HearingDatesSection } from './edit/HearingDatesSection';
-import { EvictionPaymentPlanSection } from './edit/EvictionPaymentPlanSection';
-import { IfLeftSection } from './edit/IfLeftSection';
 import { WritDateSection } from './edit/WritDateSection';
-import { OtherTenantsSection } from './edit/OtherTenantsSection';
 
 interface Unit {
     id: number;
@@ -74,6 +75,9 @@ export default function NoticeAndEvictionsEditDrawer({
     const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
     const [filteredTenants, setFilteredTenants] = useState<ExtendedTenant[]>([]);
 
+    const [newImages, setNewImages] = useState<File[]>([]);
+    const [deleteImageIds, setDeleteImageIds] = useState<number[]>([]);
+
     const formatDateForInput = (dateString: string | null | undefined): string => {
         if (!dateString || dateString.trim() === '') {
             return '';
@@ -108,6 +112,11 @@ export default function NoticeAndEvictionsEditDrawer({
     });
 
     useEffect(() => {
+        if (open) {
+            setNewImages([]);
+            setDeleteImageIds([]);
+        }
+
         if (record && record.tenant_id && open) {
             const currentTenant = tenants.find((t) => t.id === record.tenant_id);
             if (currentTenant) {
@@ -219,10 +228,14 @@ export default function NoticeAndEvictionsEditDrawer({
         const submitData = {
             ...data,
             ...queryParams,
+            _method: 'post',
+            images: newImages,
+            delete_image_ids: deleteImageIds,
         };
 
-        // PUT form data with pagination/filter params in the request body
-        router.put(`/notice_and_evictions/${record.id}`, submitData, {
+        // POST form data with images (with method spoofing for PUT)
+        router.post(`/notice_and_evictions/${record.id}`, submitData, {
+            forceFormData: true,
             onSuccess: () => {
                 setValidationErrors({});
                 onOpenChange(false);
@@ -251,6 +264,8 @@ export default function NoticeAndEvictionsEditDrawer({
             other_tenants: record.other_tenants || '',
         });
         setValidationErrors({});
+        setNewImages([]);
+        setDeleteImageIds([]);
         onOpenChange(false);
     };
 
@@ -315,7 +330,11 @@ export default function NoticeAndEvictionsEditDrawer({
 
                             <NoteSection value={data.note || ''} onChange={(value) => setData('note', value)} error={errors.note} />
 
-                            <EvictionsSection value={data.evictions || ''} onChange={(value) => setData('evictions', value)} error={errors.evictions} />
+                            <EvictionsSection
+                                value={data.evictions || ''}
+                                onChange={(value) => setData('evictions', value)}
+                                error={errors.evictions}
+                            />
 
                             <AttorneySection
                                 value={data.sent_to_atorney}
@@ -338,6 +357,16 @@ export default function NoticeAndEvictionsEditDrawer({
                             <IfLeftSection value={data.if_left} onChange={(value) => setData('if_left', value)} error={errors.if_left} />
 
                             <WritDateSection value={data.writ_date} onChange={(value) => setData('writ_date', value)} error={errors.writ_date} />
+
+                            <div className="border-t pt-4">
+                                <ImagesSection
+                                    existingImages={record.images ?? []}
+                                    newFiles={newImages}
+                                    onNewFiles={setNewImages}
+                                    onDeleteExisting={(id) => setDeleteImageIds((prev) => [...prev, id])}
+                                    deletedImageIds={deleteImageIds}
+                                />
+                            </div>
                         </form>
                     </div>
 

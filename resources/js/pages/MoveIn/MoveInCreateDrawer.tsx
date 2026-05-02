@@ -1,17 +1,17 @@
-import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
+import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { City } from '@/types/City';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { useForm } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 import { CityPropertyUnitSelector } from './create/CityPropertyUnitSelector';
+import { DatePickerField as CreateDatePickerField } from './create/DatePickerField';
+import { InsuranceInformationFields } from './create/InsuranceInformationFields';
+import { KeysAndFormsFields } from './create/KeysAndFormsFields';
 import { LeaseInformationFields } from './create/LeaseInformationFields';
 import { PaymentInformationFields } from './create/PaymentInformationFields';
-import { KeysAndFormsFields } from './create/KeysAndFormsFields';
-import { InsuranceInformationFields } from './create/InsuranceInformationFields';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DatePickerField as CreateDatePickerField } from './create/DatePickerField';
 
 interface Unit {
     id: number;
@@ -35,6 +35,7 @@ type MoveInFormData = {
     date_of_insurance_expiration: string;
     delisted: boolean;
     utilities_under_their_name: boolean;
+    got_lockbox_from_tenant: boolean;
     first_name: string;
     last_name: string;
     last_notice_sent: string;
@@ -45,7 +46,7 @@ interface Props {
     units: Unit[];
     cities: City[];
     properties: PropertyInfoWithoutInsurance[];
-    unitsByProperty: Record<string, Array<{id: number, unit_name: string}>>;
+    unitsByProperty: Record<string, Array<{ id: number; unit_name: string }>>;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess?: () => void;
@@ -55,7 +56,17 @@ interface Props {
     currentPage: number;
 }
 
-export default function MoveInCreateDrawer({ cities, properties, unitsByProperty, open, onOpenChange, onSuccess, currentFilters, currentPerPage, currentPage }: Props) {
+export default function MoveInCreateDrawer({
+    cities,
+    properties,
+    unitsByProperty,
+    open,
+    onOpenChange,
+    onSuccess,
+    currentFilters,
+    currentPerPage,
+    currentPage,
+}: Props) {
     const DRAFT_STORAGE_KEY = 'moveInCreateDraft';
     const SKIP_RESTORE_KEY = 'moveInCreateDraftSkipRestore';
     const unitRef = useRef<HTMLButtonElement>(null!);
@@ -64,7 +75,7 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
     const [validationError, setValidationError] = useState<string>('');
     const [cityValidationError, setCityValidationError] = useState<string>('');
     const [propertyValidationError, setPropertyValidationError] = useState<string>('');
-    const [availableUnits, setAvailableUnits] = useState<Array<{id: number, unit_name: string}>>([]);
+    const [availableUnits, setAvailableUnits] = useState<Array<{ id: number; unit_name: string }>>([]);
     const [availableProperties, setAvailableProperties] = useState<PropertyInfoWithoutInsurance[]>([]);
     const [selectedCityId, setSelectedCityId] = useState<string>('');
     const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
@@ -84,6 +95,7 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
         date_of_insurance_expiration: '',
         delisted: false,
         utilities_under_their_name: false,
+        got_lockbox_from_tenant: false,
         first_name: '',
         last_name: '',
         last_notice_sent: '',
@@ -176,26 +188,29 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
             return;
         }
 
-        post(route('move-in.store', {
-            city: currentFilters.city?.trim() || undefined,
-            property: currentFilters.property?.trim() || undefined,
-            unit: currentFilters.unit?.trim() || undefined,
-            perPage: currentPerPage,
-            page: currentPage,
-        }), {
-            preserveState: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                // Clear saved draft after successful creation and skip next restore
-                try {
-                    localStorage.removeItem(DRAFT_STORAGE_KEY);
-                    localStorage.setItem(SKIP_RESTORE_KEY, 'true');
-                } catch {}
-                resetFormState();
-                onOpenChange(false);
-                onSuccess?.();
+        post(
+            route('move-in.store', {
+                city: currentFilters.city?.trim() || undefined,
+                property: currentFilters.property?.trim() || undefined,
+                unit: currentFilters.unit?.trim() || undefined,
+                perPage: currentPerPage,
+                page: currentPage,
+            }),
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    // Clear saved draft after successful creation and skip next restore
+                    try {
+                        localStorage.removeItem(DRAFT_STORAGE_KEY);
+                        localStorage.setItem(SKIP_RESTORE_KEY, 'true');
+                    } catch {}
+                    resetFormState();
+                    onOpenChange(false);
+                    onSuccess?.();
+                },
             },
-        });
+        );
     };
 
     const handleCancel = () => {
@@ -235,9 +250,7 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
 
                 // Recompute available properties based on city
                 if (cityId) {
-                    const filteredProperties = properties.filter(
-                        (property) => property.city_id?.toString() === cityId
-                    );
+                    const filteredProperties = properties.filter((property) => property.city_id?.toString() === cityId);
                     setAvailableProperties(filteredProperties);
                 }
 
@@ -347,13 +360,11 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
                                         onChange={(e) => setData('delisted', e.target.checked)}
                                         className="h-4 w-4 rounded border-gray-300"
                                     />
-                                    <Label htmlFor="delisted" className="text-base font-semibold cursor-pointer">
+                                    <Label htmlFor="delisted" className="cursor-pointer text-base font-semibold">
                                         Delisted
                                     </Label>
                                 </div>
-                                {errors.delisted && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.delisted}</p>
-                                )}
+                                {errors.delisted && <p className="mt-1 text-sm text-red-600">{errors.delisted}</p>}
                             </div>
 
                             <div className="rounded-lg border-l-4 border-l-blue-500 p-4">
@@ -365,13 +376,29 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
                                         onChange={(e) => setData('utilities_under_their_name', e.target.checked)}
                                         className="h-4 w-4 rounded border-gray-300"
                                     />
-                                    <Label htmlFor="utilities_under_their_name" className="text-base font-semibold cursor-pointer">
+                                    <Label htmlFor="utilities_under_their_name" className="cursor-pointer text-base font-semibold">
                                         Utilities Under Their Name
                                     </Label>
                                 </div>
                                 {errors.utilities_under_their_name && (
                                     <p className="mt-1 text-sm text-red-600">{errors.utilities_under_their_name}</p>
                                 )}
+                            </div>
+
+                            <div className="rounded-lg border-l-4 border-l-blue-500 p-4">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="got_lockbox_from_tenant"
+                                        checked={data.got_lockbox_from_tenant}
+                                        onChange={(e) => setData('got_lockbox_from_tenant', e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                    />
+                                    <Label htmlFor="got_lockbox_from_tenant" className="cursor-pointer text-base font-semibold">
+                                        Got The Lockbox From Tenant
+                                    </Label>
+                                </div>
+                                {errors.got_lockbox_from_tenant && <p className="mt-1 text-sm text-red-600">{errors.got_lockbox_from_tenant}</p>}
                             </div>
 
                             {/* Tenant & Notice Information */}
@@ -388,9 +415,7 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
                                     onChange={(e) => setData('first_name', e.target.value)}
                                     placeholder="Enter first name"
                                 />
-                                {errors.first_name && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>
-                                )}
+                                {errors.first_name && <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>}
                             </div>
 
                             <div className="rounded-lg border-l-4 border-l-blue-500 p-4">
@@ -406,9 +431,7 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
                                     onChange={(e) => setData('last_name', e.target.value)}
                                     placeholder="Enter last name"
                                 />
-                                {errors.last_name && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>
-                                )}
+                                {errors.last_name && <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>}
                             </div>
 
                             <CreateDatePickerField
@@ -421,11 +444,13 @@ export default function MoveInCreateDrawer({ cities, properties, unitsByProperty
 
                             <div className="rounded-lg border-l-4 border-l-slate-400 p-4">
                                 <div className="mb-2">
-                                    <Label htmlFor="notes" className="text-base font-semibold">Notes</Label>
+                                    <Label htmlFor="notes" className="text-base font-semibold">
+                                        Notes
+                                    </Label>
                                 </div>
                                 <textarea
                                     id="notes"
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                     rows={3}
                                     value={data.notes}
                                     onChange={(e) => setData('notes', e.target.value)}

@@ -1,5 +1,19 @@
 // resources/js/types/property.ts
 
+// Insurance Representative interface
+export interface InsuranceRepresentative {
+    id: number;
+    name: string;
+    deleted_at?: string | null;
+}
+
+// Property Insurance Attachment interface
+export interface PropertyInsuranceAttachment {
+    id: number;
+    file_name: string;
+    url: string;
+}
+
 // Interface for the property without insurance data
 export interface PropertyWithoutInsurance {
     id: number;
@@ -21,12 +35,13 @@ export interface PropertyWithoutInsurance {
 export interface Property {
     id: number;
     property_id: number;  // Foreign key reference to PropertyInfoWithoutInsurance
+    representative_id?: number | null;  // Foreign key to InsuranceRepresentative
     insurance_company_name: string;
     amount: number;
     policy_number: string;
     effective_date: string;
     expiration_date: string;
-    notes?: string;  // Added notes field
+    notes?: string;
     status: 'Active' | 'Expired';
     formatted_amount: string;
     is_archived: boolean;
@@ -35,9 +50,11 @@ export interface Property {
     days_left: number;
     created_at: string;
     updated_at: string;
-    
-    // Relationship - optional property reference
+
+    // Relationships
     property?: PropertyWithoutInsurance;
+    representative?: InsuranceRepresentative | null;
+    attachments?: PropertyInsuranceAttachment[];
 }
 
 // Add these to your existing property types
@@ -65,13 +82,16 @@ export interface PaginatedProperties {
 
 // Updated form data interface to match request validation
 export interface PropertyFormData {
-    property_id: number;  // Changed from property_name to property_id
+    property_id: number;
+    representative_id?: number | null;
     insurance_company_name: string;
     amount: string;
     policy_number: string;
     effective_date: string;
     expiration_date: string;
-    notes?: string;  // Added notes field
+    notes?: string;
+    attachments?: File[];
+    delete_attachment_ids?: number[];
 }
 
 // Updated filters interface - keeping property_name for UI filtering
@@ -88,19 +108,4 @@ export interface PropertyStatistics {
     total: number;
     active: number;
     expired: number;
-}
-
-export interface PaginatedProperties {
-    data: Property[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number;
-    to: number;
-    links: Array<{
-        url: string | null;
-        label: string;
-        active: boolean;
-    }>;
 }

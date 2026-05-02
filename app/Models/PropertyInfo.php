@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
@@ -16,7 +17,8 @@ class PropertyInfo extends Model
     protected $table = 'properties_info';
     protected $appends = ['formatted_amount'];
     protected $fillable = [
-        'property_id',  // Changed from 'property_name'
+        'property_id',
+        'representative_id',
         'insurance_company_name',
         'amount',
         'policy_number',
@@ -60,6 +62,22 @@ class PropertyInfo extends Model
     public function property(): BelongsTo
     {
         return $this->belongsTo(PropertyInfoWithoutInsurance::class, 'property_id');
+    }
+
+    /**
+     * Get the representative for this insurance.
+     */
+    public function representative(): BelongsTo
+    {
+        return $this->belongsTo(InsuranceRepresentative::class, 'representative_id')->withTrashed();
+    }
+
+    /**
+     * Get the attachments for this insurance.
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(PropertyInsuranceAttachment::class);
     }
 
     /**

@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Property, PaginatedProperties, PropertyFilters as PropertyFiltersType, PropertyStatistics, PropertyWithoutInsurance } from '@/types/property';
+import { Property, PaginatedProperties, PropertyFilters as PropertyFiltersType, PropertyStatistics, PropertyWithoutInsurance, InsuranceRepresentative } from '@/types/property';
 import type { PageProps } from '@/types/auth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { City } from '@/types/City';
 import PropertyCreateDrawer from './PropertyCreateDrawer';
 import PropertyEditDrawer from './PropertyEditDrawer';
+import RepresentativePopover from './RepresentativePopover';
 import PropertyPageHeader from './index/PropertyPageHeader';
 import PropertyFilters from './index/PropertyFilters';
 import PropertyTable from './index/PropertyTable';
@@ -80,10 +81,11 @@ interface Props extends PageProps {
     filters: PropertyFiltersType;
     cities: City[];
     availableProperties: PropertyWithoutInsurance[];
+    representatives: InsuranceRepresentative[];
 }
 
 
-export default function Index({ properties, filters, cities = [], availableProperties = [] }: Props) {
+export default function Index({ properties, filters, cities = [], availableProperties = [], representatives = [] }: Props) {
     const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermissions();
     
     // State for filters - initialized with filters from backend
@@ -311,9 +313,20 @@ export default function Index({ properties, filters, cities = [], availablePrope
     const handleShow = (property: Property) => {
         // Pass current filters to the show page for next/previous navigation
         const params = getCurrentQueryParams();
-        
+
         router.get(route('properties-info.show', property.id), params, {
             preserveState: false, // Don't preserve state when navigating to different page
+        });
+    };
+
+    /**
+     * Handle representative updates in popover
+     * Reloads the page to refresh the representatives list
+     */
+    const handleRepresentativeUpdated = () => {
+        router.get(route('properties-info.index'), getCurrentQueryParams(), {
+            preserveState: true,
+            preserveScroll: true,
         });
     };
 
@@ -324,20 +337,33 @@ export default function Index({ properties, filters, cities = [], availablePrope
             <div className="py-12 bg-background text-foreground transition-colors min-h-screen">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* Flash messages for success/error notifications */}
-                    <FlashMessages 
-                        success={(flash as any)?.success} 
-                        error={(flash as any)?.error} 
+                    <FlashMessages
+                        success={(flash as any)?.success}
+                        error={(flash as any)?.error}
                     />
 
+                    {/* Page header section with export/add buttons and representative management */}
+                    <div className="flex items-start justify-between gap-4 mb-6">
+                        <div className="flex-1">
+                            {/* Page header with export and add buttons */}
+                            <PropertyPageHeader
+                                onExport={handleCSVExport}
+                                onAddProperty={() => setIsDrawerOpen(true)}
+                                isExporting={isExporting}
+                                hasExportData={properties.data.length > 0}
+                                canCreate={hasAllPermissions(['properties.create', 'properties.store'])}
+                            />
+                        </div>
 
-                    {/* Page header with export and add buttons */}
-                    <PropertyPageHeader
-                        onExport={handleCSVExport}
-                        onAddProperty={() => setIsDrawerOpen(true)}
-                        isExporting={isExporting}
-                        hasExportData={properties.data.length > 0}
-                        canCreate={hasAllPermissions(['properties.create', 'properties.store'])}
-                    />
+                        {/* Representative management popover */}
+                        <RepresentativePopover
+                            reps={representatives}
+                            canCreate={hasPermission('properties.store')}
+                            canEdit={hasPermission('properties.update')}
+                            canDestroy={hasPermission('properties.destroy')}
+                            onRepUpdated={handleRepresentativeUpdated}
+                        />
+                    </div>
 
 
                     <Card className="bg-card text-card-foreground shadow-lg">
@@ -386,6 +412,7 @@ export default function Index({ properties, filters, cities = [], availablePrope
                 onOpenChange={setIsDrawerOpen}
                 cities={cities}
                 availableProperties={availableProperties}
+                representatives={representatives}
                 currentFilters={searchFilters}
                 currentPage={properties.current_page || 1}
                 currentPerPage={currentPerPageSelection || 15}
@@ -399,6 +426,7 @@ export default function Index({ properties, filters, cities = [], availablePrope
                     onOpenChange={setIsEditDrawerOpen}
                     property={selectedProperty}
                     availableProperties={availableProperties}
+                    representatives={representatives}
                     onSuccess={handleEditDrawerSuccess}
                     currentFilters={searchFilters}
                     currentPage={properties.current_page || 1}

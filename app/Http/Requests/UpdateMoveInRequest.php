@@ -32,6 +32,7 @@ class UpdateMoveInRequest extends FormRequest
             'delisted' => ['nullable', 'boolean'],
             'date_of_move_in_form_filled' => ['nullable', 'date'],
             'utilities_under_their_name' => ['nullable', 'boolean'],
+            'got_lockbox_from_tenant' => ['nullable', 'boolean'],
             'tenant_name' => ['nullable', 'string'],
             'last_notice_sent' => ['nullable', 'date'],
             'first_name' => ['nullable', 'string', 'max:255'],

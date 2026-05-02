@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import CascadingSelectionFields from './create/CascadingSelectionFields';
 import SelectionSummary from './create/SelectionSummary';
 import NoticeFormFields from './create/NoticeFormFields';
+import ImagesField from './create/ImagesField';
 
 interface Unit {
     id: number;
@@ -60,6 +61,8 @@ export default function NoticeAndEvictionsCreateDrawer({
     const [filteredProperties, setFilteredProperties] = useState<ExtendedProperty[]>([]);
     const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
     const [filteredTenants, setFilteredTenants] = useState<ExtendedTenant[]>([]);
+
+    const [images, setImages] = useState<File[]>([]);
 
     const { data, setData, processing, errors, reset } = useForm({
         tenant_id: null as number | null,
@@ -133,6 +136,7 @@ export default function NoticeAndEvictionsCreateDrawer({
         setFilteredUnits([]);
         setFilteredTenants([]);
         setValidationErrors({});
+        setImages([]);
     };
 
     /**
@@ -188,7 +192,11 @@ export default function NoticeAndEvictionsCreateDrawer({
         const url = `/notice_and_evictions${queryString}`;
 
         // POST form data to URL with query parameters
-        router.post(url, data, {
+        router.post(url, {
+            ...data,
+            images,
+        }, {
+            forceFormData: true,
             onSuccess: () => {
                 resetForm();
                 onOpenChange(false);
@@ -260,6 +268,10 @@ export default function NoticeAndEvictionsCreateDrawer({
                                 otherTenantsValue={data.other_tenants}
                                 onOtherTenantsChange={(value) => setData('other_tenants', value)}
                             />
+
+                            <div className="border-t pt-4">
+                                <ImagesField files={images} onChange={setImages} />
+                            </div>
                         </form>
                     </div>
 

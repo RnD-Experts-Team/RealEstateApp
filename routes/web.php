@@ -41,10 +41,24 @@ Route::middleware(['auth'])->group(function () {
     /**
      * properties-info CRUD & other resource routes
      */
-    Route::resource('properties-info', PropertyInfoController::class)->except(['create', 'edit']);
+    Route::resource('properties-info', PropertyInfoController::class)->except(['create', 'edit', 'update']);
+    Route::post('/properties-info/{properties_info}', [PropertyInfoController::class, 'update'])
+        ->name('properties-info.update');
+
+    // Insurance Representatives
+    Route::post('/insurance-representatives', [PropertyInfoController::class, 'storeRep'])
+        ->name('insurance-representatives.store');
+    Route::put('/insurance-representatives/{rep}', [PropertyInfoController::class, 'updateRep'])
+        ->name('insurance-representatives.update');
+    Route::delete('/insurance-representatives/{rep}', [PropertyInfoController::class, 'deleteRep'])
+        ->name('insurance-representatives.destroy');
+    Route::post('/insurance-representatives/{id}/restore', [PropertyInfoController::class, 'restoreRep'])
+        ->name('insurance-representatives.restore');
 
     // Notice & Evictions
-    Route::resource('notice_and_evictions', NoticeAndEvictionController::class)->except(['create', 'edit']);
+    Route::resource('notice_and_evictions', NoticeAndEvictionController::class)->except(['create', 'edit', 'update']);
+    Route::post('/notice_and_evictions/{notice_and_eviction}', [NoticeAndEvictionController::class, 'update'])
+        ->name('notice_and_evictions.update');
     Route::patch('/notice_and_evictions/{notice_and_eviction}/hide', [NoticeAndEvictionController::class, 'hide'])
         ->name('notice_and_evictions.hide');
     Route::patch('/notice_and_evictions/{notice_and_eviction}/unhide', [NoticeAndEvictionController::class, 'unhide'])

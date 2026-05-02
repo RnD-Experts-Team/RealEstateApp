@@ -1,7 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+
+const statusOptions = [
+    { value: 'New', label: 'New' },
+    { value: 'Approved', label: 'Approved' },
+    { value: 'Undecided', label: 'Undecided' },
+    { value: 'Rejected', label: 'Rejected' },
+    { value: 'Pending', label: 'Pending' },
+];
 
 interface CityData {
     id: number;
@@ -29,6 +38,7 @@ interface FilterBarProps {
         property: string;
         unit: string;
         name: string;
+        status: string;
         applicant_applied_from: string;
         is_hidden: boolean;
     }) => void;
@@ -38,6 +48,7 @@ interface FilterBarProps {
         property: string;
         unit: string;
         name: string;
+        status: string;
         applicant_applied_from: string;
         is_hidden: boolean;
     };
@@ -49,6 +60,7 @@ export default function FilterBar({ cities, properties, units, onSearch, onClear
         property: '',
         unit: '',
         name: '',
+        status: '',
         applicant_applied_from: '',
         is_hidden: false,
     });
@@ -60,6 +72,7 @@ export default function FilterBar({ cities, properties, units, onSearch, onClear
                 property: initialFilters.property || '',
                 unit: initialFilters.unit || '',
                 name: initialFilters.name || '',
+                status: initialFilters.status || '',
                 applicant_applied_from: initialFilters.applicant_applied_from || '',
                 is_hidden: Boolean(initialFilters.is_hidden) || false,
             });
@@ -138,6 +151,7 @@ export default function FilterBar({ cities, properties, units, onSearch, onClear
             property: '',
             unit: '',
             name: '',
+            status: '',
             applicant_applied_from: '',
             is_hidden: false,
         };
@@ -160,7 +174,7 @@ export default function FilterBar({ cities, properties, units, onSearch, onClear
     return (
         <div className="space-y-4">
             {/* Filters */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
                 {/* City */}
                 <div className="relative">
                     <Input
@@ -274,6 +288,20 @@ export default function FilterBar({ cities, properties, units, onSearch, onClear
                     onChange={(e) => handleTempFilterChange('name', e.target.value)}
                     className="bg-input text-input-foreground"
                 />
+
+                {/* Status */}
+                <Select value={tempFilters.status || undefined} onValueChange={(value) => handleTempFilterChange('status', value)}>
+                    <SelectTrigger className="bg-input text-input-foreground">
+                        <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {statusOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
                 {/* Applied From */}
                 <Input

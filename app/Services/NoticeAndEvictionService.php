@@ -3,28 +3,53 @@
 namespace App\Services;
 
 use App\Models\NoticeAndEviction;
+use App\Models\NoticeAndEvictionImage;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class NoticeAndEvictionService
 {
     public function create(array $data): NoticeAndEviction
     {
+        $uploadedFiles = $data['images'] ?? [];
+        unset($data['images']);
+
         $nev = NoticeAndEviction::create($data);
         $nev->calculateEvictions();
         $nev->save();
+
+        if (!empty($uploadedFiles)) {
+            $this->saveImages($nev, $uploadedFiles);
+        }
+
         return $nev;
     }
 
     public function update(NoticeAndEviction $nev, array $data): NoticeAndEviction
     {
+        $deleteIds = $data['delete_image_ids'] ?? [];
+        $uploadedFiles = $data['images'] ?? [];
+        unset($data['images'], $data['delete_image_ids']);
+
+        if (!empty($deleteIds)) {
+            $this->deleteImagesByIds($nev, $deleteIds);
+        }
+
         $nev->fill($data);
         $nev->calculateEvictions();
         $nev->save();
+
+        if (!empty($uploadedFiles)) {
+            $this->saveImages($nev, $uploadedFiles);
+        }
+
         return $nev;
     }
 
     public function delete(NoticeAndEviction $nev): void
     {
+        $this->deleteAllImages($nev);
         $nev->archive();
     }
 
@@ -193,5 +218,45 @@ class NoticeAndEvictionService
     {
         $noticeAndEviction->is_hidden = false;
         return $noticeAndEviction->save();
+    }
+
+    private function saveImages(NoticeAndEviction $nev, array $files): void
+    {
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile) {
+                $originalName = $file->getClientOriginalName();
+                $path = $file->store('notice_and_eviction_images', 'public');
+
+                NoticeAndEvictionImage::create([
+                    'notice_and_eviction_id' => $nev->id,
+                    'file_name' => $originalName,
+                    'file_path' => $path,
+                ]);
+            }
+        }
+    }
+
+    private function deleteImagesByIds(NoticeAndEviction $nev, array $ids): void
+    {
+        $images = $nev->images()->whereIn('id', $ids)->get();
+
+        foreach ($images as $image) {
+            if (Storage::disk('public')->exists($image->file_path)) {
+                Storage::disk('public')->delete($image->file_path);
+            }
+            $image->delete();
+        }
+    }
+
+    private function deleteAllImages(NoticeAndEviction $nev): void
+    {
+        $images = $nev->images()->get();
+
+        foreach ($images as $image) {
+            if (Storage::disk('public')->exists($image->file_path)) {
+                Storage::disk('public')->delete($image->file_path);
+            }
+            $image->delete();
+        }
     }
 }

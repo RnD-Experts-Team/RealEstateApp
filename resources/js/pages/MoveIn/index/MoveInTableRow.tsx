@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MoveIn } from '@/types/move-in';
-import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 interface MoveInTableRowProps {
     moveIn: MoveIn;
@@ -15,16 +15,7 @@ interface MoveInTableRowProps {
     onUnhide: (moveIn: MoveIn) => void; // ✅ NEW
 }
 
-export default function MoveInTableRow({
-    moveIn,
-    canEdit,
-    canDelete,
-    canHide,
-    onEdit,
-    onDelete,
-    onHide,
-    onUnhide,
-}: MoveInTableRowProps) {
+export default function MoveInTableRow({ moveIn, canEdit, canDelete, canHide, onEdit, onDelete, onHide, onUnhide }: MoveInTableRowProps) {
     const formatDateUTC = (dateStr?: string | null) => {
         if (!dateStr) return 'N/A';
         const d = new Date(dateStr);
@@ -89,16 +80,21 @@ export default function MoveInTableRow({
             <TableCell className="border border-border text-center text-foreground">{formatDateUTC(moveIn.date_of_insurance_expiration)}</TableCell>
             <TableCell className="border border-border text-center">{getBooleanBadge(moveIn.delisted)}</TableCell>
             <TableCell className="border border-border text-center">{getBooleanBadge(moveIn.utilities_under_their_name)}</TableCell>
+            <TableCell className="border border-border text-center">{getBooleanBadge((moveIn as any).got_lockbox_from_tenant)}</TableCell>
             <TableCell className="border border-border text-center text-foreground">{formatDateUTC(moveIn.last_notice_sent)}</TableCell>
             <TableCell className="border border-border text-center text-foreground">
                 {moveIn.notes ? (
-                    <div className="max-w-[160px] truncate" title={moveIn.notes}>{moveIn.notes}</div>
-                ) : 'N/A'}
+                    <div className="max-w-[160px] truncate" title={moveIn.notes}>
+                        {moveIn.notes}
+                    </div>
+                ) : (
+                    'N/A'
+                )}
             </TableCell>
 
             {(canEdit || canDelete || canHide) && (
                 <TableCell className="border border-border text-center">
-                    <div className="flex gap-1 justify-center">
+                    <div className="flex justify-center gap-1">
                         {canEdit && (
                             <Button variant="outline" size="sm" onClick={() => onEdit(moveIn)} title="Edit">
                                 <Edit className="h-4 w-4" />

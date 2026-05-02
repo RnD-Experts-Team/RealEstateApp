@@ -29,6 +29,7 @@ class MoveIn extends Model
         'last_notice_sent',
         'delisted',
         'utilities_under_their_name',
+        'got_lockbox_from_tenant',
         'notes',
         'is_archived',
     ];
@@ -44,6 +45,7 @@ class MoveIn extends Model
         'last_notice_sent' => 'date',
         'delisted' => 'boolean',
         'utilities_under_their_name' => 'boolean',
+        'got_lockbox_from_tenant' => 'boolean',
         'is_archived' => 'boolean',
         'is_hidden' => 'boolean',
     ];

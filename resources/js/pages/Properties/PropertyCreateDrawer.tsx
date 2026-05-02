@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
-import { PropertyWithoutInsurance, PropertyFilters as PropertyFiltersType } from '@/types/property';
+import { PropertyWithoutInsurance, PropertyFilters as PropertyFiltersType, InsuranceRepresentative } from '@/types/property';
 import { City } from '@/types/City';
 import CitySelectionSection from './create/CitySelectionSection';
 import PropertySelectionSection from './create/PropertySelectionSection';
@@ -11,12 +11,15 @@ import InsuranceCompanySection from './create/InsuranceCompanySection';
 import AmountPolicySection from './create/AmountPolicySection';
 import DatesSection from './create/DatesSection';
 import NotesSection from './create/NotesSection';
+import RepresentativeSection from './create/RepresentativeSection';
+import AttachmentsSection from './create/AttachmentsSection';
 
 interface PropertyCreateDrawerProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     cities: City[];
     availableProperties: PropertyWithoutInsurance[];
+    representatives: InsuranceRepresentative[];
     onSuccess?: () => void;
     // New props for preserving pagination and filters
     currentFilters: PropertyFiltersType;
@@ -24,18 +27,21 @@ interface PropertyCreateDrawerProps {
     currentPerPage: number | 'all';
 }
 
-export default function PropertyCreateDrawer({ 
-    open, 
-    onOpenChange, 
+export default function PropertyCreateDrawer({
+    open,
+    onOpenChange,
     cities = [],
     availableProperties = [],
+    representatives = [],
     currentFilters,
     currentPage,
     currentPerPage
 }: PropertyCreateDrawerProps) {
     const [selectedCityId, setSelectedCityId] = useState<string>('');
     const [filteredProperties, setFilteredProperties] = useState<PropertyWithoutInsurance[]>([]);
-    
+    const [representativeId, setRepresentativeId] = useState<number | null>(null);
+    const [newAttachments, setNewAttachments] = useState<File[]>([]);
+
     // Only validation error for required field (property_id)
     const [propertyIdValidationError, setPropertyIdValidationError] = useState<string>('');
 
@@ -81,6 +87,8 @@ export default function PropertyCreateDrawer({
         reset();
         setSelectedCityId('');
         setFilteredProperties([]);
+        setRepresentativeId(null);
+        setNewAttachments([]);
         setPropertyIdValidationError('');
         clearErrors();
     };
@@ -170,7 +178,7 @@ export default function PropertyCreateDrawer({
      */
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Only validate required field: property_id
         if (!data.property_id || data.property_id === 0) {
             setPropertyIdValidationError('Please select a property before submitting the form.');
@@ -178,11 +186,17 @@ export default function PropertyCreateDrawer({
         }
 
         // Namespace filters/pagination into body to preserve context on redirect
-        transform((formData) => ({ ...formData, ...buildNamespacedParams() }));
+        transform((formData) => ({
+            ...formData,
+            representative_id: representativeId,
+            attachments: newAttachments,
+            ...buildNamespacedParams()
+        }));
 
         post(route('properties-info.store'), {
             preserveState: true,
             preserveScroll: true,
+            forceFormData: true,
             onSuccess: () => {
                 resetForm();
                 onOpenChange(false);
@@ -268,6 +282,19 @@ export default function PropertyCreateDrawer({
                                 value={data.notes}
                                 onChange={handleNotesChange}
                                 errors={errors}
+                            />
+
+                            {/* Representative - optional */}
+                            <RepresentativeSection
+                                representatives={representatives}
+                                value={representativeId}
+                                onChange={setRepresentativeId}
+                            />
+
+                            {/* Attachments - optional */}
+                            <AttachmentsSection
+                                files={newAttachments}
+                                onChange={setNewAttachments}
                             />
                         </form>
                     </div>

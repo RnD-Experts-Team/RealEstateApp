@@ -57,7 +57,7 @@ class NoticeAndEvictionController extends Controller
         $page = $request->query('page') ?? $request->input('page') ?? 1;
 
         // Get filtered records with pagination
-        $query = NoticeAndEviction::with(['tenant.unit.property.city'])
+        $query = NoticeAndEviction::with(['tenant.unit.property.city', 'images'])
             ->where('is_archived', false)->orderBy('date', 'desc');
         $query = $this->service->applyFilters($query, $filters);
 
@@ -157,7 +157,9 @@ class NoticeAndEvictionController extends Controller
     public function store(NoticeAndEvictionRequest $request)
     {
         // Create the record using only validated entity data
-        $nev = $this->service->create($request->getValidatedData());
+        $data = $request->getValidatedData();
+        $data['images'] = $request->file('images', []);
+        $nev = $this->service->create($data);
 
         // Get pagination/filter parameters for redirect
         $redirectParams = $this->getRedirectParams($request);
@@ -169,7 +171,7 @@ class NoticeAndEvictionController extends Controller
 
     public function show(NoticeAndEviction $notice_and_eviction, Request $request)
     {
-        $notice_and_eviction->load(['tenant.unit.property.city']);
+        $notice_and_eviction->load(['tenant.unit.property.city', 'images']);
         $recordData = $this->mapRecordToArray($notice_and_eviction);
 
         // Get filters from query string or request body
@@ -220,7 +222,10 @@ class NoticeAndEvictionController extends Controller
     public function update(NoticeAndEvictionRequest $request, NoticeAndEviction $notice_and_eviction)
     {
         // Update the record using only validated entity data
-        $this->service->update($notice_and_eviction, $request->getValidatedData());
+        $data = $request->getValidatedData();
+        $data['images'] = $request->file('images', []);
+        $data['delete_image_ids'] = $request->input('delete_image_ids', []);
+        $this->service->update($notice_and_eviction, $data);
 
         // Get pagination/filter parameters for redirect
         $redirectParams = $this->getRedirectParams($request);
@@ -267,6 +272,7 @@ class NoticeAndEvictionController extends Controller
             'writ_date' => $record->writ_date,
             'other_tenants' => $record->other_tenants,
             'is_hidden' => (bool) $record->is_hidden,
+            'images' => $record->images->map(fn($img) => ['id' => $img->id, 'file_name' => $img->file_name, 'url' => $img->url])->toArray(),
             'created_at' => $record->created_at,
             'updated_at' => $record->updated_at,
         ];

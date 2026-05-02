@@ -5,20 +5,21 @@ export interface MoveIn {
     city_name: string;
     property_name: string;
     tenant_name: string | null;
-    last_notice_sent: string | null;  // ISO string date
+    last_notice_sent: string | null; // ISO string date
     signed_lease: 'Yes' | 'No' | null;
-    lease_signing_date: string | null;  // ISO string date
-    move_in_date: string | null;  // ISO string date
+    lease_signing_date: string | null; // ISO string date
+    move_in_date: string | null; // ISO string date
     paid_security_deposit_first_month_rent: 'Yes' | 'No' | null;
-    scheduled_paid_time: string | null;  // ISO string date
+    scheduled_paid_time: string | null; // ISO string date
     handled_keys: 'Yes' | 'No' | null;
-    move_in_form_sent_date: string | null;  // ISO string date
+    move_in_form_sent_date: string | null; // ISO string date
     filled_move_in_form: 'Yes' | 'No' | null;
-    date_of_move_in_form_filled: string | null;  // ISO string date
+    date_of_move_in_form_filled: string | null; // ISO string date
     submitted_insurance: 'Yes' | 'No' | null;
-    date_of_insurance_expiration: string | null;  // ISO string date
+    date_of_insurance_expiration: string | null; // ISO string date
     delisted: boolean;
     utilities_under_their_name: boolean;
+    got_lockbox_from_tenant: boolean;
     notes: string | null;
     is_hidden: boolean;
     is_archived: boolean;
@@ -41,6 +42,7 @@ export type MoveInFormData = {
     date_of_insurance_expiration: string;
     delisted: boolean;
     utilities_under_their_name: boolean;
+    got_lockbox_from_tenant: boolean;
 } & Record<string, any>;
 
 // Additional interface for unit objects used in dropdowns

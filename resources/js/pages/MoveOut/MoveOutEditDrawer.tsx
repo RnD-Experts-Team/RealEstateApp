@@ -1,10 +1,10 @@
-import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { MoveOut, MoveOutFormData } from '@/types/move-out';
+import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { City } from '@/types/City';
+import { MoveOut, MoveOutFormData } from '@/types/move-out';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { useForm } from '@inertiajs/react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { LocationSelectionFields } from './edit/LocationSelectionFields';
 import { MoveOutDateFields } from './edit/MoveOutDateFields';
 import { MoveOutDetailsFields } from './edit/MoveOutDetailsFields';
@@ -15,6 +15,7 @@ interface Props {
     properties: PropertyInfoWithoutInsurance[];
     propertiesByCityId: Record<number, PropertyInfoWithoutInsurance[]>;
     unitsByPropertyId: Record<number, Array<{ id: number; unit_name: string }>>;
+    tenantsByUnitId: Record<number, Array<{ id: number; full_name: string }>>;
     allUnits: Array<{ id: number; unit_name: string; city_name: string; property_name: string }>;
     moveOut: MoveOut;
     open: boolean;
@@ -29,32 +30,34 @@ interface Props {
     };
 }
 
-export default function MoveOutEditDrawer({ 
+export default function MoveOutEditDrawer({
     cities,
     properties,
     propertiesByCityId,
     unitsByPropertyId,
+    tenantsByUnitId,
     allUnits,
     moveOut,
-    open, 
-    onOpenChange, 
+    open,
+    onOpenChange,
     onSuccess,
-    redirectContext
+    redirectContext,
 }: Props) {
     const cityRef = useRef<HTMLButtonElement>(null!);
     const propertyRef = useRef<HTMLButtonElement>(null!);
     const unitRef = useRef<HTMLButtonElement>(null!);
-    
+
     const [validationErrors, setValidationErrors] = useState({
         city: '',
         property: '',
-        unit: ''
+        unit: '',
     });
-    
+
     const [selectedCity, setSelectedCity] = useState<number | null>(null);
     const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
     const [selectedUnit, setSelectedUnit] = useState<number | null>(null);
-    
+    const [selectedTenantIds, setSelectedTenantIds] = useState<number[]>([]);
+
     const [availableProperties, setAvailableProperties] = useState<PropertyInfoWithoutInsurance[]>([]);
     const [availableUnits, setAvailableUnits] = useState<Array<{ id: number; unit_name: string }>>([]);
 
@@ -82,31 +85,43 @@ export default function MoveOutEditDrawer({
 
     useEffect(() => {
         if (moveOut && allUnits && Array.isArray(allUnits) && Array.isArray(cities) && Array.isArray(properties)) {
-            const unitInfo = allUnits.find(unit => unit.unit_name === moveOut.unit_name);
-            
+            const unitInfo = allUnits.find((unit) => unit.unit_name === moveOut.unit_name);
+
             if (unitInfo) {
-                const selectedCityObj = cities.find(c => c.city === moveOut.city_name);
-                const selectedPropertyObj = properties.find(p => p.property_name === moveOut.property_name);
-                
+                const selectedCityObj = cities.find((c) => c.city === moveOut.city_name);
+                const selectedPropertyObj = properties.find((p) => p.property_name === moveOut.property_name);
+
                 if (selectedCityObj) {
                     setSelectedCity(selectedCityObj.id);
                     if (propertiesByCityId && propertiesByCityId[selectedCityObj.id]) {
                         setAvailableProperties(propertiesByCityId[selectedCityObj.id]);
                     }
                 }
-                
+
                 if (selectedPropertyObj) {
                     setSelectedProperty(selectedPropertyObj.id);
                     if (unitsByPropertyId && unitsByPropertyId[selectedPropertyObj.id]) {
                         setAvailableUnits(unitsByPropertyId[selectedPropertyObj.id]);
                     }
                 }
-                
+
                 setSelectedUnit(unitInfo.id);
                 setData('unit_id', unitInfo.id);
+
+                // Parse existing tenant names and find their IDs
+                if (moveOut.tenants && unitInfo.id && tenantsByUnitId[unitInfo.id]) {
+                    const tenantNames = moveOut.tenants.split(',').map((name) => name.trim());
+                    const tenantIds = tenantNames
+                        .map((name) => {
+                            const tenant = tenantsByUnitId[unitInfo.id].find((t) => t.full_name === name);
+                            return tenant?.id;
+                        })
+                        .filter((id) => id !== undefined) as number[];
+                    setSelectedTenantIds(tenantIds);
+                }
             }
         }
-    }, [moveOut, allUnits, cities, properties, propertiesByCityId, unitsByPropertyId]);
+    }, [moveOut, allUnits, cities, properties, propertiesByCityId, unitsByPropertyId, tenantsByUnitId]);
 
     const handleCityChange = (cityId: string) => {
         const cityIdNum = parseInt(cityId);
@@ -114,8 +129,8 @@ export default function MoveOutEditDrawer({
         setSelectedProperty(null);
         setSelectedUnit(null);
         setData('unit_id', null);
-        
-        setValidationErrors(prev => ({ ...prev, city: '', property: '', unit: '' }));
+
+        setValidationErrors((prev) => ({ ...prev, city: '', property: '', unit: '' }));
 
         if (cityIdNum && propertiesByCityId[cityIdNum]) {
             setAvailableProperties(propertiesByCityId[cityIdNum]);
@@ -130,8 +145,8 @@ export default function MoveOutEditDrawer({
         setSelectedProperty(propertyIdNum);
         setSelectedUnit(null);
         setData('unit_id', null);
-        
-        setValidationErrors(prev => ({ ...prev, property: '', unit: '' }));
+
+        setValidationErrors((prev) => ({ ...prev, property: '', unit: '' }));
 
         if (propertyIdNum && unitsByPropertyId[propertyIdNum]) {
             setAvailableUnits(unitsByPropertyId[propertyIdNum]);
@@ -144,54 +159,65 @@ export default function MoveOutEditDrawer({
         const unitIdNum = parseInt(unitId);
         setSelectedUnit(unitIdNum);
         setData('unit_id', unitIdNum);
-        
-        setValidationErrors(prev => ({ ...prev, unit: '' }));
+        setSelectedTenantIds([]);
+
+        setValidationErrors((prev) => ({ ...prev, unit: '' }));
     };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         setValidationErrors({
             city: '',
             property: '',
-            unit: ''
+            unit: '',
         });
-        
+
         let hasValidationErrors = false;
-        
+
         if (!selectedCity) {
-            setValidationErrors(prev => ({ ...prev, city: 'Please select a city before submitting the form.' }));
+            setValidationErrors((prev) => ({ ...prev, city: 'Please select a city before submitting the form.' }));
             if (cityRef.current) {
                 cityRef.current.focus();
                 cityRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             hasValidationErrors = true;
         }
-        
+
         if (!selectedProperty) {
-            setValidationErrors(prev => ({ ...prev, property: 'Please select a property before submitting the form.' }));
+            setValidationErrors((prev) => ({ ...prev, property: 'Please select a property before submitting the form.' }));
             if (propertyRef.current) {
                 propertyRef.current.focus();
                 propertyRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             hasValidationErrors = true;
         }
-        
+
         if (!selectedUnit || !data.unit_id) {
-            setValidationErrors(prev => ({ ...prev, unit: 'Please select a unit before submitting the form.' }));
+            setValidationErrors((prev) => ({ ...prev, unit: 'Please select a unit before submitting the form.' }));
             if (unitRef.current) {
                 unitRef.current.focus();
                 unitRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             hasValidationErrors = true;
         }
-        
+
         if (hasValidationErrors) {
             return;
         }
 
+        // Construct comma-separated tenant names from selected tenant IDs
+        const tenantNames = selectedTenantIds
+            .map((tenantId) => {
+                const tenant = tenantsByUnitId[selectedUnit]?.find((t) => t.id === tenantId);
+                return tenant?.full_name || '';
+            })
+            .filter((name) => name)
+            .join(', ');
+
         transform((form) => ({
             ...form,
+            tenants: tenantNames,
             move_out_date: form.move_out_date?.trim() ? form.move_out_date : null,
             date_lease_ending_on_buildium: form.date_lease_ending_on_buildium?.trim() ? form.date_lease_ending_on_buildium : null,
             date_utility_put_under_our_name: form.date_utility_put_under_our_name?.trim() ? form.date_utility_put_under_our_name : null,
@@ -234,13 +260,15 @@ export default function MoveOutEditDrawer({
             got_pics: moveOut.got_pics || false,
             utility_type: moveOut.utility_type || '',
         });
-        
+
+        setSelectedTenantIds([]);
+
         setValidationErrors({
             city: '',
             property: '',
-            unit: ''
+            unit: '',
         });
-        
+
         onOpenChange(false);
     };
 
@@ -264,47 +292,26 @@ export default function MoveOutEditDrawer({
                                 onCityChange={handleCityChange}
                                 onPropertyChange={handlePropertyChange}
                                 onUnitChange={handleUnitChange}
-                                tenants={data.tenants}
+                                tenantsByUnitId={tenantsByUnitId}
+                                selectedTenantIds={selectedTenantIds}
+                                onSelectedTenantsChange={setSelectedTenantIds}
                                 tenantsError={errors.tenants}
-                                onTenantsChange={(value) => setData('tenants', value)}
                             />
 
-                            <MoveOutDateFields
-                                data={data}
-                                errors={errors}
-                                onDataChange={setData}
-                            />
+                            <MoveOutDateFields data={data} errors={errors} onDataChange={setData} />
 
-                            <MoveOutDetailsFields
-                                data={data}
-                                errors={errors}
-                                onDataChange={setData}
-                            />
+                            <MoveOutDetailsFields data={data} errors={errors} onDataChange={setData} />
 
-                            <MoveOutStatusFields
-                                data={data}
-                                errors={errors}
-                                onDataChange={setData}
-                            />
+                            <MoveOutStatusFields data={data} errors={errors} onDataChange={setData} />
                         </form>
                     </div>
 
                     <DrawerFooter>
-                        <div className="flex gap-2 w-full">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleCancel}
-                                className="flex-1"
-                            >
+                        <div className="flex w-full gap-2">
+                            <Button type="button" variant="outline" onClick={handleCancel} className="flex-1">
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                onClick={submit}
-                                disabled={processing}
-                                className="flex-1"
-                            >
+                            <Button type="submit" onClick={submit} disabled={processing} className="flex-1">
                                 {processing ? 'Updating...' : 'Update Move-Out Record'}
                             </Button>
                         </div>

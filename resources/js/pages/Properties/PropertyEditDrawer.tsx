@@ -1,22 +1,25 @@
 // resources/js/pages/Properties/PropertyEditDrawer.tsx
-import React, { useState, useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Property, PropertyWithoutInsurance, PropertyFilters as PropertyFiltersType } from '@/types/property';
+import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { City } from '@/types/City';
+import { InsuranceRepresentative, Property, PropertyFilters as PropertyFiltersType, PropertyWithoutInsurance } from '@/types/property';
+import { useForm } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
 import CitySelectionSection from './create/CitySelectionSection';
 import PropertySelectionSection from './create/PropertySelectionSection';
-import InsuranceCompanyField from './edit/InsuranceCompanyField';
 import AmountPolicyFields from './edit/AmountPolicyFields';
+import AttachmentsSection from './edit/AttachmentsSection';
 import DateFields from './edit/DateFields';
+import InsuranceCompanyField from './edit/InsuranceCompanyField';
 import NotesField from './edit/NotesField';
+import RepresentativeSection from './edit/RepresentativeSection';
 
 interface PropertyEditDrawerProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     property: Property;
     availableProperties: PropertyWithoutInsurance[];
+    representatives: InsuranceRepresentative[];
     onSuccess?: () => void;
     // New props for preserving pagination and filters
     currentFilters: PropertyFiltersType;
@@ -26,16 +29,17 @@ interface PropertyEditDrawerProps {
     cities: City[];
 }
 
-export default function PropertyEditDrawer({ 
-    open, 
-    onOpenChange, 
+export default function PropertyEditDrawer({
+    open,
+    onOpenChange,
     property,
     availableProperties = [],
+    representatives = [],
     onSuccess,
     currentFilters,
     currentPage,
     currentPerPage,
-    cities = []
+    cities = [],
 }: PropertyEditDrawerProps) {
     // Only validation error for required field (property_id)
     const [propertyIdValidationError, setPropertyIdValidationError] = useState<string>('');
@@ -44,7 +48,12 @@ export default function PropertyEditDrawer({
     const [selectedCityId, setSelectedCityId] = useState<string>('');
     const [filteredProperties, setFilteredProperties] = useState<PropertyWithoutInsurance[]>([]);
 
-    const { data, setData, put, processing, errors, clearErrors, transform } = useForm({
+    // Representative and attachments state
+    const [representativeId, setRepresentativeId] = useState<number | null>(null);
+    const [newAttachments, setNewAttachments] = useState<File[]>([]);
+    const [deleteAttachmentIds, setDeleteAttachmentIds] = useState<number[]>([]);
+
+    const { data, setData, post, processing, errors, clearErrors, transform } = useForm({
         property_id: property.property_id || 0,
         insurance_company_name: property.insurance_company_name || '',
         amount: property.amount ? property.amount.toString() : '',
@@ -69,6 +78,9 @@ export default function PropertyEditDrawer({
                 notes: property.notes || '',
             });
             setPropertyIdValidationError('');
+            setRepresentativeId(property.representative_id ?? null);
+            setNewAttachments([]);
+            setDeleteAttachmentIds([]);
 
             // Initialize city selection based on the current property's city
             const currentProperty = property.property;
@@ -84,12 +96,12 @@ export default function PropertyEditDrawer({
     useEffect(() => {
         if (selectedCityId) {
             const cityIdNum = parseInt(selectedCityId);
-            let filtered = availableProperties.filter(p => p.city_id === cityIdNum);
+            let filtered = availableProperties.filter((p) => p.city_id === cityIdNum);
 
             // Ensure the currently selected property is included even if not in availableProperties
             const currentProperty = property?.property;
             if (currentProperty && currentProperty.city_id === cityIdNum) {
-                const exists = filtered.some(p => p.id === currentProperty.id);
+                const exists = filtered.some((p) => p.id === currentProperty.id);
                 if (!exists) {
                     filtered = [
                         {
@@ -201,7 +213,7 @@ export default function PropertyEditDrawer({
      */
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Only validate required field: property_id
         if (!data.property_id || data.property_id === 0) {
             setPropertyIdValidationError('Please select a property before submitting the form.');
@@ -209,11 +221,21 @@ export default function PropertyEditDrawer({
         }
 
         // Namespace filters/pagination into body to preserve context on redirect
-        transform((formData) => ({ ...formData, ...buildNamespacedParams() }));
+        transform((formData) => ({
+            ...formData,
+            _method: 'post',
+            representative_id: representativeId,
+            attachments: newAttachments,
+            delete_attachment_ids: deleteAttachmentIds,
+            ...buildNamespacedParams(),
+        }));
 
-        put(route('properties-info.update', property.id), {
+        // Use POST instead of PUT to support multipart file uploads
+        // Form method spoofing with _method: 'put' allows the server to treat this as a PUT request
+        post(route('properties-info.update', property.id), {
             preserveState: true,
             preserveScroll: true,
+            forceFormData: true,
             onSuccess: () => {
                 setPropertyIdValidationError('');
                 onOpenChange(false);
@@ -224,7 +246,7 @@ export default function PropertyEditDrawer({
             onError: () => {
                 // Errors from backend will be automatically handled
                 // They will appear in the errors state and shown in the form
-            }
+            },
         });
     };
 
@@ -245,6 +267,9 @@ export default function PropertyEditDrawer({
         });
         clearErrors();
         setPropertyIdValidationError('');
+        setRepresentativeId(property.representative_id ?? null);
+        setNewAttachments([]);
+        setDeleteAttachmentIds([]);
         onOpenChange(false);
     };
 
@@ -255,11 +280,7 @@ export default function PropertyEditDrawer({
                     <div className="flex-1 overflow-auto p-6">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* City selection - used to filter properties (same as create) */}
-                            <CitySelectionSection
-                                selectedCityId={selectedCityId}
-                                cities={cities}
-                                onCityChange={handleCityChange}
-                            />
+                            <CitySelectionSection selectedCityId={selectedCityId} cities={cities} onCityChange={handleCityChange} />
 
                             {/* Property selection - REQUIRED (same as create) */}
                             <PropertySelectionSection
@@ -302,29 +323,30 @@ export default function PropertyEditDrawer({
                             />
 
                             {/* Notes - optional */}
-                            <NotesField
-                                value={data.notes}
-                                onChange={handleNotesChange}
-                                error={errors.notes}
+                            <NotesField value={data.notes} onChange={handleNotesChange} error={errors.notes} />
+
+                            {/* Representative - optional */}
+                            <RepresentativeSection representatives={representatives} value={representativeId} onChange={setRepresentativeId} />
+
+                            {/* Attachments - optional */}
+                            <AttachmentsSection
+                                existingAttachments={property.attachments || []}
+                                newFiles={newAttachments}
+                                onNewFiles={setNewAttachments}
+                                onDeleteExisting={(id) => {
+                                    setDeleteAttachmentIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+                                }}
+                                deletedAttachmentIds={deleteAttachmentIds}
                             />
                         </form>
                     </div>
 
                     <DrawerFooter>
                         <div className="flex justify-end gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleCancel}
-                                disabled={processing}
-                            >
+                            <Button type="button" variant="outline" onClick={handleCancel} disabled={processing}>
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                onClick={handleSubmit}
-                                disabled={processing}
-                            >
+                            <Button type="submit" onClick={handleSubmit} disabled={processing}>
                                 {processing ? 'Updating...' : 'Update Property'}
                             </Button>
                         </div>

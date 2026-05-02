@@ -50,6 +50,11 @@ class TourService
             $query->whereDate('date', $filters['date']);
         }
 
+        if (array_key_exists('confirmed', $filters) && $filters['confirmed'] !== '' && $filters['confirmed'] !== null) {
+            $confirmed = filter_var($filters['confirmed'], FILTER_VALIDATE_BOOLEAN);
+            $query->where('confirmed', $confirmed);
+        }
+
         return $query
             ->orderBy('date', 'desc')
             ->orderBy('time', 'desc')

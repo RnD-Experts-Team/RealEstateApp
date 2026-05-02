@@ -4,8 +4,11 @@
 namespace App\Services;
 
 use App\Models\PropertyInfo;
+use App\Models\PropertyInsuranceAttachment;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class PropertyInfoService
@@ -21,7 +24,7 @@ class PropertyInfoService
     public function getAllPaginated(int|string $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         // Start query with eager loading of the property and its city to avoid N+1 queries
-        $query = PropertyInfo::with(['property.city']);
+        $query = PropertyInfo::with(['property.city', 'representative', 'attachments']);
 
         // Apply property name filter through the relationship
         if (!empty($filters['property_name'])) {
@@ -61,10 +64,17 @@ class PropertyInfoService
      */
     public function create(array $data): PropertyInfo
     {
+        $uploadedFiles = $data['attachments'] ?? [];
+        unset($data['attachments']);
+
         $property = PropertyInfo::create($data);
-        // Set initial status based on expiration date
         $property->updateStatus();
-        return $property->load('property');
+
+        if (!empty($uploadedFiles)) {
+            $this->saveAttachments($property, $uploadedFiles);
+        }
+
+        return $property->load(['property', 'representative', 'attachments']);
     }
 
     /**
@@ -76,7 +86,7 @@ class PropertyInfoService
      */
     public function findById(int $id): PropertyInfo
     {
-        return PropertyInfo::with(['property.city'])->findOrFail($id);
+        return PropertyInfo::with(['property.city', 'representative', 'attachments'])->findOrFail($id);
     }
 
     /**
@@ -88,10 +98,22 @@ class PropertyInfoService
      */
     public function update(PropertyInfo $propertyInfo, array $data): PropertyInfo
     {
+        $deleteIds = $data['delete_attachment_ids'] ?? [];
+        $uploadedFiles = $data['attachments'] ?? [];
+        unset($data['attachments'], $data['delete_attachment_ids']);
+
+        if (!empty($deleteIds)) {
+            $this->deleteAttachmentsByIds($propertyInfo, $deleteIds);
+        }
+
         $propertyInfo->update($data);
-        // Update status after updating the property
         $propertyInfo->updateStatus();
-        return $propertyInfo->fresh('property');
+
+        if (!empty($uploadedFiles)) {
+            $this->saveAttachments($propertyInfo, $uploadedFiles);
+        }
+
+        return $propertyInfo->fresh(['property', 'representative', 'attachments']);
     }
 
     /**
@@ -102,6 +124,7 @@ class PropertyInfoService
      */
     public function delete(PropertyInfo $propertyInfo): bool
     {
+        $this->deleteAllAttachments($propertyInfo);
         return $propertyInfo->archive();
     }
 
@@ -220,5 +243,45 @@ class PropertyInfoService
             'next_id' => $nextId,
             'previous_id' => $previousId,
         ];
+    }
+
+    private function saveAttachments(PropertyInfo $property, array $files): void
+    {
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile) {
+                $originalName = $file->getClientOriginalName();
+                $path = $file->store('property_insurance_attachments', 'public');
+
+                PropertyInsuranceAttachment::create([
+                    'property_info_id' => $property->id,
+                    'file_name' => $originalName,
+                    'file_path' => $path,
+                ]);
+            }
+        }
+    }
+
+    private function deleteAttachmentsByIds(PropertyInfo $property, array $ids): void
+    {
+        $attachments = $property->attachments()->whereIn('id', $ids)->get();
+
+        foreach ($attachments as $attachment) {
+            if (Storage::disk('public')->exists($attachment->file_path)) {
+                Storage::disk('public')->delete($attachment->file_path);
+            }
+            $attachment->delete();
+        }
+    }
+
+    private function deleteAllAttachments(PropertyInfo $property): void
+    {
+        $attachments = $property->attachments()->get();
+
+        foreach ($attachments as $attachment) {
+            if (Storage::disk('public')->exists($attachment->file_path)) {
+                Storage::disk('public')->delete($attachment->file_path);
+            }
+            $attachment->delete();
+        }
     }
 }

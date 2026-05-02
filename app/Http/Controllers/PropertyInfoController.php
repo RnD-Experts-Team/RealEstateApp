@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePropertyInfoRequest;
 use App\Http\Requests\UpdatePropertyInfoRequest;
+use App\Models\InsuranceRepresentative;
 use App\Services\PropertyInfoService;
 use App\Services\PropertyInfoWithoutInsuranceService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
@@ -57,6 +59,9 @@ class PropertyInfoController extends Controller
         // Get available properties (those without insurance) for selection
         $availableProperties = $this->propertyInfoWithoutInsuranceService->getAvailableProperties();
 
+        // Get all insurance representatives (including soft-deleted)
+        $representatives = InsuranceRepresentative::withTrashed()->orderBy('name')->get();
+
         return Inertia::render('Properties/Index', [
             'properties' => $properties,
             'statistics' => $statistics,
@@ -64,6 +69,7 @@ class PropertyInfoController extends Controller
             'filters' => array_merge($filters, ['per_page' => $perPageParam]),
             'cities' => $cities,
             'availableProperties' => $availableProperties,
+            'representatives' => $representatives,
         ]);
     }
 
@@ -77,7 +83,9 @@ class PropertyInfoController extends Controller
     public function store(StorePropertyInfoRequest $request): RedirectResponse
     {
         try {
-            $this->propertyInfoService->create($request->validated());
+            $data = $request->validated();
+            $data['attachments'] = $request->file('attachments', []);
+            $this->propertyInfoService->create($data);
 
             // Redirect to index with preserved filters/pagination from namespaced POST keys
             return redirect()->route('properties-info.index', $this->indexRedirectParams($request))
@@ -130,7 +138,10 @@ class PropertyInfoController extends Controller
     {
         try {
             $property = $this->propertyInfoService->findById($id);
-            $this->propertyInfoService->update($property, $request->validated());
+            $data = $request->validated();
+            $data['attachments'] = $request->file('attachments', []);
+            $data['delete_attachment_ids'] = $request->input('delete_attachment_ids', []);
+            $this->propertyInfoService->update($property, $data);
 
             // Redirect to index with preserved filters/pagination from namespaced POST keys
             return redirect()->route('properties-info.index', $this->indexRedirectParams($request))
@@ -203,5 +214,33 @@ class PropertyInfoController extends Controller
         }
 
         return $params;
+    }
+
+    // ====== Insurance Representatives CRUD ======
+
+    public function storeRep(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['name' => 'required|string|max:255']);
+        InsuranceRepresentative::create($data);
+        return redirect()->back();
+    }
+
+    public function updateRep(Request $request, InsuranceRepresentative $rep): RedirectResponse
+    {
+        $data = $request->validate(['name' => 'required|string|max:255']);
+        $rep->update($data);
+        return redirect()->back();
+    }
+
+    public function deleteRep(InsuranceRepresentative $rep): RedirectResponse
+    {
+        $rep->delete();
+        return redirect()->back();
+    }
+
+    public function restoreRep(int $id): RedirectResponse
+    {
+        InsuranceRepresentative::withTrashed()->findOrFail($id)->restore();
+        return redirect()->back();
     }
 }

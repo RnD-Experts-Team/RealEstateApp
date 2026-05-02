@@ -1,20 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
 import { City } from '@/types/City';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { useForm } from '@inertiajs/react';
-import { Input } from '@/components/ui/input';
-import FormSection from './edit/FormSection';
-import DatePickerField from './edit/DatePickerField';
 import React, { useEffect, useRef, useState } from 'react';
 import CitySelector from './edit/CitySelector';
-import PropertySelector from './edit/PropertySelector';
-import UnitSelector from './edit/UnitSelector';
+import DatePickerField from './edit/DatePickerField';
+import FormSection from './edit/FormSection';
+import InsuranceSection from './edit/InsuranceSection';
+import KeysAndFormsSection from './edit/KeysAndFormsSection';
 import LeaseSigningSection from './edit/LeaseSigningSection';
 import MoveInDetailsSection from './edit/MoveInDetailsSection';
 import PaymentSection from './edit/PaymentSection';
-import KeysAndFormsSection from './edit/KeysAndFormsSection';
-import InsuranceSection from './edit/InsuranceSection';
+import PropertySelector from './edit/PropertySelector';
+import UnitSelector from './edit/UnitSelector';
 
 // Updated Unit interface
 interface Unit {
@@ -65,6 +65,7 @@ type MoveInFormData = {
     date_of_insurance_expiration: string | null;
     delisted: boolean;
     utilities_under_their_name: boolean;
+    got_lockbox_from_tenant: boolean;
     first_name: string;
     last_name: string;
     last_notice_sent: string;
@@ -76,7 +77,7 @@ interface Props {
     units: Unit[];
     cities: City[];
     properties: PropertyInfoWithoutInsurance[];
-    unitsByProperty: Record<string, Array<{id: number, unit_name: string}>>;
+    unitsByProperty: Record<string, Array<{ id: number; unit_name: string }>>;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess?: () => void;
@@ -86,14 +87,14 @@ interface Props {
     currentPage: number;
 }
 
-export default function MoveInEditDrawer({ 
-    moveIn, 
-    units, 
-    cities, 
-    properties, 
-    unitsByProperty, 
-    open, 
-    onOpenChange, 
+export default function MoveInEditDrawer({
+    moveIn,
+    units,
+    cities,
+    properties,
+    unitsByProperty,
+    open,
+    onOpenChange,
     onSuccess,
     currentFilters,
     currentPerPage,
@@ -105,7 +106,7 @@ export default function MoveInEditDrawer({
     const [validationError, setValidationError] = useState<string>('');
     const [cityValidationError, setCityValidationError] = useState<string>('');
     const [propertyValidationError, setPropertyValidationError] = useState<string>('');
-    const [availableUnits, setAvailableUnits] = useState<Array<{id: number, unit_name: string}>>([]);
+    const [availableUnits, setAvailableUnits] = useState<Array<{ id: number; unit_name: string }>>([]);
     const [availableProperties, setAvailableProperties] = useState<PropertyInfoWithoutInsurance[]>([]);
     const [selectedCityId, setSelectedCityId] = useState<string>('');
     const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
@@ -128,10 +129,10 @@ export default function MoveInEditDrawer({
     const findCityAndProperty = () => {
         if (!moveIn.unit_id) return { cityId: '', propertyId: '' };
 
-        const unit = units.find(u => u.id === moveIn.unit_id);
+        const unit = units.find((u) => u.id === moveIn.unit_id);
         if (!unit) return { cityId: '', propertyId: '' };
 
-        const property = properties.find(p => p.property_name === unit.property_name);
+        const property = properties.find((p) => p.property_name === unit.property_name);
         if (!property) return { cityId: '', propertyId: '' };
 
         return {
@@ -190,6 +191,7 @@ export default function MoveInEditDrawer({
         date_of_insurance_expiration: normalizeDateOrNull(moveIn.date_of_insurance_expiration),
         delisted: (moveIn as any).delisted ?? false,
         utilities_under_their_name: (moveIn as any).utilities_under_their_name ?? false,
+        got_lockbox_from_tenant: (moveIn as any).got_lockbox_from_tenant ?? false,
         first_name: splitTenantName(moveIn.tenant_name).first,
         last_name: splitTenantName(moveIn.tenant_name).last,
         last_notice_sent: normalizeDateString(moveIn.last_notice_sent),
@@ -213,6 +215,7 @@ export default function MoveInEditDrawer({
             date_of_insurance_expiration: normalizeDateOrNull(moveIn.date_of_insurance_expiration),
             delisted: (moveIn as any).delisted ?? false,
             utilities_under_their_name: (moveIn as any).utilities_under_their_name ?? false,
+            got_lockbox_from_tenant: (moveIn as any).got_lockbox_from_tenant ?? false,
             first_name: splitTenantName(moveIn.tenant_name).first,
             last_name: splitTenantName(moveIn.tenant_name).last,
             last_notice_sent: normalizeDateString(moveIn.last_notice_sent),
@@ -501,13 +504,17 @@ export default function MoveInEditDrawer({
                                         onChange={(e) => setData('delisted', e.target.checked)}
                                         className="h-4 w-4 rounded border-gray-300"
                                     />
-                                    <label htmlFor="delisted" className="text-sm cursor-pointer">
+                                    <label htmlFor="delisted" className="cursor-pointer text-sm">
                                         Unit has been delisted
                                     </label>
                                 </div>
                             </FormSection>
 
-                            <FormSection label="Utilities Under Their Name" borderColor="border-l-blue-500" error={(errors as any).utilities_under_their_name}>
+                            <FormSection
+                                label="Utilities Under Their Name"
+                                borderColor="border-l-blue-500"
+                                error={(errors as any).utilities_under_their_name}
+                            >
                                 <div className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
@@ -516,8 +523,27 @@ export default function MoveInEditDrawer({
                                         onChange={(e) => setData('utilities_under_their_name', e.target.checked)}
                                         className="h-4 w-4 rounded border-gray-300"
                                     />
-                                    <label htmlFor="utilities_under_their_name" className="text-sm cursor-pointer">
+                                    <label htmlFor="utilities_under_their_name" className="cursor-pointer text-sm">
                                         Utilities are under tenant's name
+                                    </label>
+                                </div>
+                            </FormSection>
+
+                            <FormSection
+                                label="Got The Lockbox From Tenant"
+                                borderColor="border-l-blue-500"
+                                error={(errors as any).got_lockbox_from_tenant}
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="got_lockbox_from_tenant"
+                                        checked={data.got_lockbox_from_tenant}
+                                        onChange={(e) => setData('got_lockbox_from_tenant', e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                    />
+                                    <label htmlFor="got_lockbox_from_tenant" className="cursor-pointer text-sm">
+                                        Got the lockbox from tenant
                                     </label>
                                 </div>
                             </FormSection>
@@ -546,7 +572,7 @@ export default function MoveInEditDrawer({
                             <FormSection label="Last Notice Sent" borderColor="border-l-blue-500" error={errors.last_notice_sent}>
                                 <DatePickerField
                                     value={data.last_notice_sent}
-                                    onChange={(date) => setData('last_notice_sent', date?? '')}
+                                    onChange={(date) => setData('last_notice_sent', date ?? '')}
                                     isOpen={calendarStates.last_notice_sent}
                                     onOpenChange={(open) => setCalendarOpen('last_notice_sent', open)}
                                 />
@@ -555,7 +581,7 @@ export default function MoveInEditDrawer({
                             <FormSection label="Notes" borderColor="border-l-slate-400" error={errors.notes}>
                                 <textarea
                                     id="notes"
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                     rows={3}
                                     value={data.notes}
                                     onChange={(e) => setData('notes', e.target.value)}

@@ -16,12 +16,15 @@ class StorePropertyInfoRequest extends FormRequest
     {
         return [
             'property_id' => 'required|integer|exists:property_info_without_insurance,id',
+            'representative_id' => 'nullable|integer|exists:insurance_representatives,id',
             'insurance_company_name' => 'nullable|string|max:255',
             'amount' => 'nullable|numeric|min:0|max:999999999999.99',
             'policy_number' => 'nullable|string|max:255|unique:properties_info,policy_number',
             'effective_date' => 'nullable|date',
             'expiration_date' => 'nullable|date',
             'notes' => 'nullable|string|max:65535',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|mimes:jpeg,jpg,png,gif,webp,pdf|max:20480',
         ];
     }
 

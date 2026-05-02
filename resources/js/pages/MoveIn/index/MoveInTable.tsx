@@ -14,70 +14,55 @@ interface MoveInTableProps {
     onUnhide: (moveIn: MoveIn) => void; // ✅ NEW
 }
 
-export default function MoveInTable({
-    moveIns,
-    canEdit,
-    canDelete,
-    canHide,
-    showActions,
-    onEdit,
-    onDelete,
-    onHide,
-    onUnhide,
-}: MoveInTableProps) {
+export default function MoveInTable({ moveIns, canEdit, canDelete, canHide, showActions, onEdit, onDelete, onHide, onUnhide }: MoveInTableProps) {
     return (
-        <div className="relative overflow-x-auto">
-            <Table className="border-collapse rounded-md border border-border">
-                <TableHeader>
-                    <TableRow className="border-border">
-                        <TableHead className="sticky left-0 z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">
-                            City
-                        </TableHead>
-                        <TableHead className="sticky left-[120px] z-10 min-w-[150px] border border-border bg-muted text-muted-foreground">
-                            Property Name
-                        </TableHead>
-                        <TableHead className="sticky left-[270px] z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">
-                            Unit Name
-                        </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Tenant Name</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Signed Lease</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Lease Signing Date</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Move-In Date</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Paid Security & First Month</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Scheduled Payment Date</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Handled Keys</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Move in form sent On</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Filled Move-In Form</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Date of move in form filled in</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Submitted Insurance</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Date of Insurance expiration</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Delisted</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Utilities Under Their Name</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Last Notice Sent</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Notes</TableHead>
+        <Table containerClassName="relative max-h-[600px] overflow-auto" className="border-collapse rounded-md border border-border">
+            <TableHeader style={{ position: 'sticky', top: 0, zIndex: 20 }}>
+                <TableRow className="border-border">
+                    <TableHead className="sticky left-0 z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">City</TableHead>
+                    <TableHead className="sticky left-[120px] z-10 min-w-[150px] border border-border bg-muted text-muted-foreground">
+                        Property Name
+                    </TableHead>
+                    <TableHead className="sticky left-[270px] z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">
+                        Unit Name
+                    </TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Tenant Name</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Signed Lease</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Lease Signing Date</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Move-In Date</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Paid Security & First Month</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Scheduled Payment Date</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Handled Keys</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Move in form sent On</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Filled Move-In Form</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Date of move in form filled in</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Submitted Insurance</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Date of Insurance expiration</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Delisted</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Utilities Under Their Name</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Got The Lockbox From Tenant</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Last Notice Sent</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Notes</TableHead>
 
-                        {showActions && (
-                            <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>
-                        )}
-                    </TableRow>
-                </TableHeader>
+                    {showActions && <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>}
+                </TableRow>
+            </TableHeader>
 
-                <TableBody>
-                    {moveIns.map((moveIn) => (
-                        <MoveInTableRow
-                            key={moveIn.id}
-                            moveIn={moveIn}
-                            canEdit={canEdit}
-                            canDelete={canDelete}
-                            canHide={canHide}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                            onHide={onHide}
-                            onUnhide={onUnhide}
-                        />
-                    ))}
-                </TableBody>
-            </Table>
-        </div>
+            <TableBody>
+                {moveIns.map((moveIn) => (
+                    <MoveInTableRow
+                        key={moveIn.id}
+                        moveIn={moveIn}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        canHide={canHide}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onHide={onHide}
+                        onUnhide={onUnhide}
+                    />
+                ))}
+            </TableBody>
+        </Table>
     );
 }

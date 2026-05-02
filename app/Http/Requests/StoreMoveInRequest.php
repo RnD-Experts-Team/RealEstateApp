@@ -33,6 +33,7 @@ class StoreMoveInRequest extends FormRequest
             'date_of_insurance_expiration' => ['nullable', 'date'],
             'delisted' => ['nullable', 'boolean'],
             'utilities_under_their_name' => ['nullable', 'boolean'],
+            'got_lockbox_from_tenant' => ['nullable', 'boolean'],
             'tenant_name' => ['nullable', 'string'],
             'last_notice_sent' => ['nullable', 'date'],
             'first_name' => ['nullable', 'string', 'max:255'],

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { AlertTriangle, CalendarIcon, Clock3 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -42,6 +42,7 @@ interface Tour {
     time: string;
     note?: string | null;
     is_hidden: boolean;
+    confirmed: boolean;
     unit?: {
         id: number;
         unit_name?: string | null;
@@ -75,7 +76,16 @@ interface TourDatePickerFieldProps {
 }
 
 function TourDatePickerField({ label, value, onChange, error }: TourDatePickerFieldProps) {
-    const selectedDate = value ? parseISO(value) : undefined;
+    const selectedDate = value
+        ? (() => {
+              // Parse date string as local date (YYYY-MM-DD format)
+              const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+              if (match) {
+                  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+              }
+              return undefined;
+          })()
+        : undefined;
 
     return (
         <div className="space-y-2">
@@ -275,6 +285,7 @@ export default function TourDrawer({ open, onOpenChange, tour, representatives, 
         date: tour?.date || '',
         time: tour?.time ? String(tour.time).slice(0, 5) : '',
         note: tour?.note || '',
+        confirmed: tour?.confirmed || false,
     });
 
     useEffect(() => {
@@ -295,6 +306,7 @@ export default function TourDrawer({ open, onOpenChange, tour, representatives, 
             date: tour?.date || '',
             time: tour?.time ? String(tour.time).slice(0, 5) : '',
             note: tour?.note || '',
+            confirmed: tour?.confirmed || false,
         });
     }, [tour, setData]);
 
@@ -489,6 +501,19 @@ export default function TourDrawer({ open, onOpenChange, tour, representatives, 
                                     onChange={(value) => setData('time', value)}
                                     error={errors.time}
                                 />
+                            </div>
+
+                            <div className="flex items-center gap-3 rounded-md border border-input bg-background px-3 py-2">
+                                <input
+                                    type="checkbox"
+                                    id="confirmed"
+                                    checked={data.confirmed}
+                                    onChange={(e) => setData('confirmed', e.target.checked)}
+                                    className="h-4 w-4 rounded border-input"
+                                />
+                                <Label htmlFor="confirmed" className="flex-1 cursor-pointer">
+                                    Tour Confirmed
+                                </Label>
                             </div>
 
                             <div className="space-y-2">

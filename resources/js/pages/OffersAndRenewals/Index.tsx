@@ -325,34 +325,35 @@ const Index = ({
                         </CardHeader>
 
                         <CardContent>
-                            <div className="relative overflow-x-auto">
-                                <Table className="border-collapse rounded-md border border-border">
-                                    <OffersTableHeader
-                                        activeTab={activeTab}
-                                        hasPermissions={hasAnyPermission([
-                                            'offers-and-renewals.show',
-                                            'offers-and-renewals.edit',
-                                            'offers-and-renewals.update',
-                                            'offers-and-renewals.destroy',
-                                        ])}
-                                    />
-                                    <TableBody>
-                                        {filtered.map((offer) => (
-                                            <OffersTableRow
-                                                key={offer.id}
-                                                offer={offer}
-                                                activeTab={activeTab}
-                                                onEdit={handleEdit}
-                                                onDelete={handleDelete}
-                                                permissions={permissions}
-                                                currentFilters={tempFilters}
-                                                perPage={selectedPerPage}
-                                                page={currentPage}
-                                            />
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                            <Table
+                                containerClassName="relative max-h-[600px] overflow-auto"
+                                className="border-collapse rounded-md border border-border"
+                            >
+                                <OffersTableHeader
+                                    activeTab={activeTab}
+                                    hasPermissions={hasAnyPermission([
+                                        'offers-and-renewals.show',
+                                        'offers-and-renewals.edit',
+                                        'offers-and-renewals.update',
+                                        'offers-and-renewals.destroy',
+                                    ])}
+                                />
+                                <TableBody>
+                                    {filtered.map((offer) => (
+                                        <OffersTableRow
+                                            key={offer.id}
+                                            offer={offer}
+                                            activeTab={activeTab}
+                                            onEdit={handleEdit}
+                                            onDelete={handleDelete}
+                                            permissions={permissions}
+                                            currentFilters={tempFilters}
+                                            perPage={selectedPerPage}
+                                            page={currentPage}
+                                        />
+                                    ))}
+                                </TableBody>
+                            </Table>
 
                             {filtered.length === 0 && <EmptyState />}
 

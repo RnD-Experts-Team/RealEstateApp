@@ -44,7 +44,13 @@ class NoticeAndEvictionRequest extends FormRequest
             'if_left' => ['nullable', 'string', Rule::in(['Yes', 'No'])],
             'writ_date' => 'nullable|date|after_or_equal:date',
             'other_tenants' => 'nullable|string|max:255',
-            
+
+            // Image uploads
+            'images' => 'nullable|array',
+            'images.*' => 'file|mimes:jpeg,jpg,png,gif,webp|max:10240',
+            'delete_image_ids' => 'nullable|array',
+            'delete_image_ids.*' => 'integer|exists:notice_and_eviction_images,id',
+
             // Pagination parameters
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1',

@@ -1,3 +1,9 @@
+export interface NoticeAndEvictionImage {
+    id: number;
+    file_name: string;
+    url: string;
+}
+
 export interface NoticeAndEviction {
     id: number;
     tenant_id: number | null;
@@ -20,6 +26,7 @@ export interface NoticeAndEviction {
     other_tenants?: string;
     is_archived?: boolean;
     is_hidden?: boolean;
+    images?: NoticeAndEvictionImage[];
     created_at?: string;
     updated_at?: string;
 }
@@ -130,6 +137,8 @@ export interface NoticeAndEvictionFormData {
     if_left?: YesNoOption | '';
     writ_date?: string;
     other_tenants?: string;
+    images?: File[];
+    delete_image_ids?: number[];
 }
 
 // Cascading dropdown data interfaces

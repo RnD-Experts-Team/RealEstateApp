@@ -66,6 +66,7 @@ interface Tour {
     time: string;
     note?: string | null;
     is_hidden: boolean;
+    confirmed: boolean;
     unit?: {
         id: number;
         unit_name?: string | null;
@@ -100,6 +101,7 @@ interface Props {
         unit_id?: string;
         date?: string;
         is_hidden?: string | boolean;
+        confirmed?: string | boolean;
         page?: number;
     };
     representatives: Representative[];
@@ -244,6 +246,65 @@ export default function Index({ tours, filters, representatives, cities, propert
         );
     };
 
+    const exportToCSV = (data: Tour[], filename: string = 'tours.csv') => {
+        const headers = [
+            'ID',
+            'City',
+            'Property',
+            'Unit',
+            'Representative',
+            'Prospect',
+            'Phone',
+            'Email',
+            'Date',
+            'Time',
+            'Note',
+            'Confirmed',
+            'Visibility'
+        ];
+
+        const csvData = [
+            headers.join(','),
+            ...data.map(tour => [
+                tour.id,
+                `"${tour.unit?.property?.city?.city || 'N/A'}"`,
+                `"${tour.unit?.property?.property_name || 'N/A'}"`,
+                `"${tour.unit?.unit_name || 'N/A'}"`,
+                `"${tour.representative?.name || 'N/A'}"`,
+                `"${tour.prospect || ''}"`,
+                `"${tour.phone || ''}"`,
+                `"${tour.email || ''}"`,
+                `"${formatDateOnly(tour.date)}"`,
+                `"${formatTimeOnly(tour.time)}"`,
+                `"${(tour.note || '').replace(/"/g, '""')}"`,
+                tour.confirmed ? 'Yes' : 'No',
+                tour.is_hidden ? 'Hidden' : 'Visible'
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleCSVExport = () => {
+        if (tours.data.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        const filename = `tours-${new Date().toISOString().split('T')[0]}.csv`;
+        exportToCSV(tours.data, filename);
+    };
+
     const getDialogCopy = () => {
         if (!pendingAction) {
             return {
@@ -284,7 +345,13 @@ export default function Index({ tours, filters, representatives, cities, propert
 
             <div className="min-h-screen bg-background py-12 text-foreground transition-colors">
                 <div className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
-                    <PageHeader canCreate={canCreate} onAddTour={handleCreate} hasActiveFilters={activeFilters} />
+                    <PageHeader
+                        canCreate={canCreate}
+                        onAddTour={handleCreate}
+                        onExport={handleCSVExport}
+                        hasActiveFilters={activeFilters}
+                        hasExportData={tours.data.length > 0}
+                    />
 
                     <Card className="bg-card text-card-foreground shadow-lg">
                         <CardHeader className="space-y-6">

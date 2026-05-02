@@ -1,13 +1,15 @@
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Download } from 'lucide-react';
 
 interface PageHeaderProps {
     onAddPayment: () => void;
+    onExport: () => void;
     canCreate: boolean;
     hasActiveFilters?: boolean;
+    hasExportData: boolean;
 }
 
-export default function PageHeader({ onAddPayment, canCreate, hasActiveFilters }: PageHeaderProps) {
+export default function PageHeader({ onAddPayment, onExport, canCreate, hasActiveFilters, hasExportData }: PageHeaderProps) {
     return (
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -18,14 +20,20 @@ export default function PageHeader({ onAddPayment, canCreate, hasActiveFilters }
                 </p>
             </div>
 
-            {canCreate && (
-                <div className="flex w-full sm:w-auto">
-                    <Button onClick={onAddPayment} className="w-full sm:w-auto">
+            <div className="flex w-full gap-2 sm:w-auto">
+                {hasExportData && (
+                    <Button onClick={onExport} variant="outline" className="flex-1 sm:flex-initial">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export CSV
+                    </Button>
+                )}
+                {canCreate && (
+                    <Button onClick={onAddPayment} className="flex-1 sm:flex-initial">
                         <Plus className="mr-2 h-4 w-4" />
                         Add Payment
                     </Button>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

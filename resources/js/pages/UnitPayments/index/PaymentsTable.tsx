@@ -51,47 +51,46 @@ export default function PaymentsTable({
     permissions,
 }: PaymentsTableProps) {
     return (
-        <div className="relative w-full overflow-x-auto">
-            <Table className="min-w-[1200px] border-collapse rounded-md border border-border">
-                <TableHeader>
-                    <TableRow className="border-border">
-                        <TableHead className="sticky left-0 z-10 min-w-[140px] border border-border bg-muted text-muted-foreground">City</TableHead>
-                        <TableHead className="sticky left-[140px] z-10 min-w-[180px] border border-border bg-muted text-muted-foreground">
-                            Property
-                        </TableHead>
-                        <TableHead className="min-w-[140px] border border-border bg-muted text-muted-foreground xl:sticky xl:left-[320px] xl:z-10">
-                            Unit
-                        </TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Type</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Amount</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Date</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">To Whom</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Order ID</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Description</TableHead>
-                        <TableHead className="border border-border bg-muted text-muted-foreground">Visibility</TableHead>
+        <Table
+            containerClassName="relative w-full max-h-[600px] overflow-auto"
+            className="min-w-[1200px] border-collapse rounded-md border border-border"
+        >
+            <TableHeader style={{ position: 'sticky', top: 0, zIndex: 20 }}>
+                <TableRow className="border-border">
+                    <TableHead className="sticky left-0 z-10 min-w-[140px] border border-border bg-muted text-muted-foreground">City</TableHead>
+                    <TableHead className="sticky left-[140px] z-10 min-w-[180px] border border-border bg-muted text-muted-foreground">
+                        Property
+                    </TableHead>
+                    <TableHead className="min-w-[140px] border border-border bg-muted text-muted-foreground xl:sticky xl:left-[320px] xl:z-10">
+                        Unit
+                    </TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Type</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Amount</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Date</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">To Whom</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Order ID</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Description</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Visibility</TableHead>
 
-                        {permissions.hasAnyPermission && (
-                            <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>
-                        )}
-                    </TableRow>
-                </TableHeader>
+                    {permissions.hasAnyPermission && <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>}
+                </TableRow>
+            </TableHeader>
 
-                <TableBody>
-                    {payments.map((payment) => (
-                        <PaymentTableRow
-                            key={payment.id}
-                            payment={payment}
-                            formatDateOnly={formatDateOnly}
-                            formatMoney={formatMoney}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                            onHide={onHide}
-                            onUnhide={onUnhide}
-                            permissions={permissions}
-                        />
-                    ))}
-                </TableBody>
-            </Table>
-        </div>
+            <TableBody>
+                {payments.map((payment) => (
+                    <PaymentTableRow
+                        key={payment.id}
+                        payment={payment}
+                        formatDateOnly={formatDateOnly}
+                        formatMoney={formatMoney}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onHide={onHide}
+                        onUnhide={onUnhide}
+                        permissions={permissions}
+                    />
+                ))}
+            </TableBody>
+        </Table>
     );
 }

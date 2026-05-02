@@ -19,11 +19,13 @@ class Tour extends Model
         'time',
         'note',
         'is_hidden',
+        'confirmed',
     ];
 
     protected $casts = [
         'date' => 'date',
         'is_hidden' => 'boolean',
+        'confirmed' => 'boolean',
     ];
 
     public function unit()

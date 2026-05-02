@@ -18,6 +18,7 @@ interface Tour {
     time: string;
     note?: string | null;
     is_hidden: boolean;
+    confirmed: boolean;
     unit?: {
         id: number;
         name?: string | null;
@@ -76,6 +77,10 @@ export default function TourTableRow({ tour, formatDateOnly, formatTimeOnly, onE
                 <div className="max-w-52 truncate" title={tour.note || ''}>
                     {tour.note || '-'}
                 </div>
+            </TableCell>
+
+            <TableCell className="border border-border text-center">
+                <Badge variant={tour.confirmed ? 'default' : 'secondary'}>{tour.confirmed ? 'Confirmed' : 'Unconfirmed'}</Badge>
             </TableCell>
 
             <TableCell className="border border-border text-center">

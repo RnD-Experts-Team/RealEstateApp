@@ -128,6 +128,7 @@ interface Props {
     properties: any[];
     propertiesByCityId: Record<number, any[]>;
     unitsByPropertyId: Record<number, Array<{ id: number; unit_name: string }>>;
+    tenantsByUnitId: Record<number, Array<{ id: number; full_name: string }>>;
     allUnits: Array<{ id: number; unit_name: string; city_name: string; property_name: string }>;
     filterCities: string[];
     filterProperties: string[];
@@ -149,6 +150,7 @@ export default function Index({
     properties,
     propertiesByCityId,
     unitsByPropertyId,
+    tenantsByUnitId,
     allUnits,
     filterCities,
     filterProperties,
@@ -393,6 +395,7 @@ export default function Index({
                 properties={properties}
                 propertiesByCityId={propertiesByCityId}
                 unitsByPropertyId={unitsByPropertyId}
+                tenantsByUnitId={tenantsByUnitId}
                 allUnits={allUnits}
                 open={isDrawerOpen}
                 onOpenChange={setIsDrawerOpen}
@@ -403,7 +406,6 @@ export default function Index({
                     unit: currentFilters.unit ?? null,
                     page: String(currentPage),
                     perPage,
-
                 }}
             />
 
@@ -414,6 +416,7 @@ export default function Index({
                     properties={properties}
                     propertiesByCityId={propertiesByCityId}
                     unitsByPropertyId={unitsByPropertyId}
+                    tenantsByUnitId={tenantsByUnitId}
                     allUnits={allUnits}
                     moveOut={{
                         ...selectedMoveOut,

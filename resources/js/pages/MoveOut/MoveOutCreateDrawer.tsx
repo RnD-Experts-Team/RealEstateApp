@@ -1,12 +1,12 @@
-import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
+import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import { City } from '@/types/City';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { MoveOutFormData } from '@/types/move-out';
 import { useForm } from '@inertiajs/react';
-import React, { useState, useRef } from 'react';
-import LocationSection from './create/LocationSection';
+import React, { useRef, useState } from 'react';
 import DateFieldsSection from './create/DateFieldsSection';
+import LocationSection from './create/LocationSection';
 import PropertyDetailsSection from './create/PropertyDetailsSection';
 import StatusFieldsSection from './create/StatusFieldsSection';
 
@@ -15,6 +15,7 @@ interface Props {
     properties: PropertyInfoWithoutInsurance[];
     propertiesByCityId: Record<number, PropertyInfoWithoutInsurance[]>;
     unitsByPropertyId: Record<number, Array<{ id: number; unit_name: string }>>;
+    tenantsByUnitId: Record<number, Array<{ id: number; full_name: string }>>;
     allUnits: Array<{ id: number; unit_name: string; city_name: string; property_name: string }>;
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -28,32 +29,34 @@ interface Props {
     };
 }
 
-export default function MoveOutCreateDrawer({ 
+export default function MoveOutCreateDrawer({
     cities,
     propertiesByCityId,
     unitsByPropertyId,
-    open, 
-    onOpenChange, 
+    tenantsByUnitId,
+    open,
+    onOpenChange,
     onSuccess,
-    redirectContext
+    redirectContext,
 }: Props) {
     const cityRef = useRef<HTMLButtonElement>(null);
     const propertyRef = useRef<HTMLButtonElement>(null);
     const unitRef = useRef<HTMLButtonElement>(null);
-    
+
     const [validationErrors, setValidationErrors] = useState({
         city: '',
         property: '',
-        unit: ''
+        unit: '',
     });
-    
+
     const [selectedCity, setSelectedCity] = useState<number | null>(null);
     const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
     const [selectedUnit, setSelectedUnit] = useState<number | null>(null);
-    
+
     const [availableProperties, setAvailableProperties] = useState<PropertyInfoWithoutInsurance[]>([]);
     const [availableUnits, setAvailableUnits] = useState<Array<{ id: number; unit_name: string }>>([]);
-    
+    const [selectedTenantIds, setSelectedTenantIds] = useState<number[]>([]);
+
     const [calendarStates, setCalendarStates] = useState({
         move_out_date: false,
         date_lease_ending_on_buildium: false,
@@ -88,8 +91,8 @@ export default function MoveOutCreateDrawer({
         setSelectedProperty(null);
         setSelectedUnit(null);
         setData('unit_id', null);
-        
-        setValidationErrors(prev => ({ ...prev, city: '', property: '', unit: '' }));
+
+        setValidationErrors((prev) => ({ ...prev, city: '', property: '', unit: '' }));
 
         if (cityIdNum && propertiesByCityId[cityIdNum]) {
             setAvailableProperties(propertiesByCityId[cityIdNum]);
@@ -104,8 +107,8 @@ export default function MoveOutCreateDrawer({
         setSelectedProperty(propertyIdNum);
         setSelectedUnit(null);
         setData('unit_id', null);
-        
-        setValidationErrors(prev => ({ ...prev, property: '', unit: '' }));
+
+        setValidationErrors((prev) => ({ ...prev, property: '', unit: '' }));
 
         if (propertyIdNum && unitsByPropertyId[propertyIdNum]) {
             setAvailableUnits(unitsByPropertyId[propertyIdNum]);
@@ -118,61 +121,72 @@ export default function MoveOutCreateDrawer({
         const unitIdNum = parseInt(unitId);
         setSelectedUnit(unitIdNum);
         setData('unit_id', unitIdNum);
-        
-        setValidationErrors(prev => ({ ...prev, unit: '' }));
+        setSelectedTenantIds([]);
+
+        setValidationErrors((prev) => ({ ...prev, unit: '' }));
     };
 
     const handleCalendarToggle = (field: keyof typeof calendarStates) => {
-        setCalendarStates(prev => ({
+        setCalendarStates((prev) => ({
             ...prev,
-            [field]: !prev[field]
+            [field]: !prev[field],
         }));
     };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         setValidationErrors({
             city: '',
             property: '',
-            unit: ''
+            unit: '',
         });
-        
+
         let hasValidationErrors = false;
-        
+
         if (!selectedCity) {
-            setValidationErrors(prev => ({ ...prev, city: 'Please select a city before submitting the form.' }));
+            setValidationErrors((prev) => ({ ...prev, city: 'Please select a city before submitting the form.' }));
             if (cityRef.current) {
                 cityRef.current.focus();
                 cityRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             hasValidationErrors = true;
         }
-        
+
         if (!selectedProperty) {
-            setValidationErrors(prev => ({ ...prev, property: 'Please select a property before submitting the form.' }));
+            setValidationErrors((prev) => ({ ...prev, property: 'Please select a property before submitting the form.' }));
             if (propertyRef.current) {
                 propertyRef.current.focus();
                 propertyRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             hasValidationErrors = true;
         }
-        
+
         if (!selectedUnit || !data.unit_id) {
-            setValidationErrors(prev => ({ ...prev, unit: 'Please select a unit before submitting the form.' }));
+            setValidationErrors((prev) => ({ ...prev, unit: 'Please select a unit before submitting the form.' }));
             if (unitRef.current) {
                 unitRef.current.focus();
                 unitRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             hasValidationErrors = true;
         }
-        
+
         if (hasValidationErrors) {
             return;
         }
 
+        // Construct comma-separated tenant names from selected tenant IDs
+        const tenantNames = selectedTenantIds
+            .map((tenantId) => {
+                const tenant = tenantsByUnitId[selectedUnit]?.find((t) => t.id === tenantId);
+                return tenant?.full_name || '';
+            })
+            .filter((name) => name)
+            .join(', ');
+
         transform((form) => ({
             ...form,
+            tenants: tenantNames,
             move_out_date: form.move_out_date?.trim() ? form.move_out_date : null,
             date_lease_ending_on_buildium: form.date_lease_ending_on_buildium?.trim() ? form.date_lease_ending_on_buildium : null,
             date_utility_put_under_our_name: form.date_utility_put_under_our_name?.trim() ? form.date_utility_put_under_our_name : null,
@@ -198,10 +212,11 @@ export default function MoveOutCreateDrawer({
         setSelectedCity(null);
         setSelectedProperty(null);
         setSelectedUnit(null);
+        setSelectedTenantIds([]);
         setValidationErrors({
             city: '',
             property: '',
-            unit: ''
+            unit: '',
         });
         setAvailableProperties([]);
         setAvailableUnits([]);
@@ -228,9 +243,10 @@ export default function MoveOutCreateDrawer({
                                 onCityChange={handleCityChange}
                                 onPropertyChange={handlePropertyChange}
                                 onUnitChange={handleUnitChange}
-                                tenants={data.tenants}
+                                tenantsByUnitId={tenantsByUnitId}
+                                selectedTenantIds={selectedTenantIds}
+                                onSelectedTenantsChange={setSelectedTenantIds}
                                 tenantsError={errors.tenants}
-                                onTenantsChange={(value) => setData('tenants', value)}
                             />
 
                             <DateFieldsSection
@@ -241,36 +257,18 @@ export default function MoveOutCreateDrawer({
                                 onDataChange={setData}
                             />
 
-                            <PropertyDetailsSection
-                                data={data}
-                                errors={errors}
-                                onDataChange={setData}
-                            />
+                            <PropertyDetailsSection data={data} errors={errors} onDataChange={setData} />
 
-                            <StatusFieldsSection
-                                data={data}
-                                errors={errors}
-                                onDataChange={setData}
-                            />
+                            <StatusFieldsSection data={data} errors={errors} onDataChange={setData} />
                         </form>
                     </div>
 
                     <DrawerFooter>
-                        <div className="flex gap-2 w-full">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleCancel}
-                                className="flex-1"
-                            >
+                        <div className="flex w-full gap-2">
+                            <Button type="button" variant="outline" onClick={handleCancel} className="flex-1">
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                onClick={submit}
-                                disabled={processing}
-                                className="flex-1"
-                            >
+                            <Button type="submit" onClick={submit} disabled={processing} className="flex-1">
                                 {processing ? 'Creating...' : 'Create Move-Out Record'}
                             </Button>
                         </div>

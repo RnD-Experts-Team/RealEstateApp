@@ -34,6 +34,7 @@ interface FilterBarProps {
         unit_id?: string;
         date?: string;
         is_hidden?: string | boolean;
+        confirmed?: string | boolean;
     };
     representatives: Representative[];
     cities: CityOption[];
@@ -51,6 +52,7 @@ export default function FilterBar({ filters, representatives, cities, properties
         unit_id: filters.unit_id || '',
         date: filters.date || '',
         is_hidden: String(filters.is_hidden).toLowerCase() === 'true' || filters.is_hidden === true,
+        confirmed: filters.confirmed === undefined ? '' : (String(filters.confirmed).toLowerCase() === 'true' || filters.confirmed === true),
     });
 
     useEffect(() => {
@@ -61,6 +63,7 @@ export default function FilterBar({ filters, representatives, cities, properties
             unit_id: filters.unit_id || '',
             date: filters.date || '',
             is_hidden: String(filters.is_hidden).toLowerCase() === 'true' || filters.is_hidden === true,
+            confirmed: filters.confirmed === undefined ? '' : (String(filters.confirmed).toLowerCase() === 'true' || filters.confirmed === true),
         });
     }, [filters]);
 
@@ -83,6 +86,7 @@ export default function FilterBar({ filters, representatives, cities, properties
         if (tempFilters.unit_id) payload.unit_id = tempFilters.unit_id;
         if (tempFilters.date) payload.date = tempFilters.date;
         if (tempFilters.is_hidden) payload.is_hidden = 'true';
+        if (tempFilters.confirmed !== '') payload.confirmed = String(tempFilters.confirmed);
 
         onSearch(payload);
     };
@@ -95,6 +99,7 @@ export default function FilterBar({ filters, representatives, cities, properties
             unit_id: '',
             date: '',
             is_hidden: false,
+            confirmed: '',
         });
         onClear();
     };
@@ -212,6 +217,39 @@ export default function FilterBar({ filters, representatives, cities, properties
                             onClick={() => setTempFilters((prev) => ({ ...prev, is_hidden: true }))}
                         >
                             Hidden
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Confirmation Status</label>
+                    <div className="flex h-10 w-full items-center rounded-md border border-input bg-input p-1">
+                        <Button
+                            type="button"
+                            variant={tempFilters.confirmed === '' ? 'default' : 'outline'}
+                            size="sm"
+                            className="h-8 flex-1"
+                            onClick={() => setTempFilters((prev) => ({ ...prev, confirmed: '' }))}
+                        >
+                            All
+                        </Button>
+                        <Button
+                            type="button"
+                            variant={tempFilters.confirmed === true ? 'default' : 'outline'}
+                            size="sm"
+                            className="h-8 flex-1"
+                            onClick={() => setTempFilters((prev) => ({ ...prev, confirmed: true }))}
+                        >
+                            Confirmed
+                        </Button>
+                        <Button
+                            type="button"
+                            variant={tempFilters.confirmed === false ? 'default' : 'outline'}
+                            size="sm"
+                            className="h-8 flex-1"
+                            onClick={() => setTempFilters((prev) => ({ ...prev, confirmed: false }))}
+                        >
+                            Unconfirmed
                         </Button>
                     </div>
                 </div>

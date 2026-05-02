@@ -230,13 +230,74 @@ export default function Index({ payments, filters, cities, properties, units, ty
         );
     };
 
+    const exportToCSV = (data: Payment[], filename: string = 'payments.csv') => {
+        const headers = [
+            'ID',
+            'City',
+            'Property',
+            'Unit',
+            'Type',
+            'Amount',
+            'Date',
+            'To Whom',
+            'Description',
+            'Order ID',
+            'Visibility'
+        ];
+
+        const csvData = [
+            headers.join(','),
+            ...data.map(payment => [
+                payment.id,
+                `"${payment.unit?.property?.city?.city || 'N/A'}"`,
+                `"${payment.unit?.property?.property_name || 'N/A'}"`,
+                `"${payment.unit?.unit_name || 'N/A'}"`,
+                `"${payment.type || ''}"`,
+                formatMoney(payment.amount),
+                `"${formatDateOnly(payment.date)}"`,
+                `"${payment.to_whom || ''}"`,
+                `"${(payment.description || '').replace(/"/g, '""')}"`,
+                `"${payment.order_id || ''}"`,
+                payment.is_hidden ? 'Hidden' : 'Visible'
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleCSVExport = () => {
+        if (payments.data.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        const filename = `payments-${new Date().toISOString().split('T')[0]}.csv`;
+        exportToCSV(payments.data, filename);
+    };
+
     return (
         <AppLayout>
             <Head title="Reports" />
 
             <div className="min-h-screen bg-background py-12 text-foreground transition-colors">
                 <div className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
-                    <PageHeader canCreate={canCreate} onAddPayment={handleCreate} hasActiveFilters={activeFilters} />
+                    <PageHeader
+                        canCreate={canCreate}
+                        onAddPayment={handleCreate}
+                        onExport={handleCSVExport}
+                        hasActiveFilters={activeFilters}
+                        hasExportData={payments.data.length > 0}
+                    />
 
                     <Card className="bg-card text-card-foreground shadow-lg">
                         <CardHeader className="space-y-6">

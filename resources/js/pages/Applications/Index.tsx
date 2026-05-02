@@ -148,6 +148,7 @@ export default function Index({
         property: '',
         unit: '',
         name: '',
+        status: '',
         applicant_applied_from: '',
         is_hidden: false,
     });
@@ -167,6 +168,7 @@ export default function Index({
             property: (f.property as string) || '',
             unit: (f.unit as string) || '',
             name: (f.name as string) || '',
+            status: (f.status as string) || '',
             applicant_applied_from: (f.applicant_applied_from as string) || '',
             is_hidden: Boolean(f.is_hidden) || false,
         });
@@ -178,6 +180,7 @@ export default function Index({
         filter_property: searchFilters.property || '',
         filter_unit: searchFilters.unit || '',
         filter_name: searchFilters.name || '',
+        status: searchFilters.status || '',
         filter_applicant_applied_from: searchFilters.applicant_applied_from || '',
         filter_is_hidden: searchFilters.is_hidden ? 'true' : '',
         per_page: perPage,
@@ -189,6 +192,7 @@ export default function Index({
         property: string;
         unit: string;
         name: string;
+        status: string;
         applicant_applied_from: string;
         is_hidden: boolean;
     }) => {
@@ -209,6 +213,7 @@ export default function Index({
             property: '',
             unit: '',
             name: '',
+            status: '',
             applicant_applied_from: '',
             is_hidden: false,
         };

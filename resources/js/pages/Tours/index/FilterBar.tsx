@@ -35,6 +35,7 @@ interface FilterBarProps {
         date?: string;
         is_hidden?: string | boolean;
         confirmed?: string | boolean;
+        prospect?: string;
     };
     representatives: Representative[];
     cities: CityOption[];
@@ -53,6 +54,7 @@ export default function FilterBar({ filters, representatives, cities, properties
         date: filters.date || '',
         is_hidden: String(filters.is_hidden).toLowerCase() === 'true' || filters.is_hidden === true,
         confirmed: filters.confirmed === undefined ? '' : (String(filters.confirmed).toLowerCase() === 'true' || filters.confirmed === true),
+        prospect: filters.prospect || '',
     });
 
     useEffect(() => {
@@ -64,6 +66,7 @@ export default function FilterBar({ filters, representatives, cities, properties
             date: filters.date || '',
             is_hidden: String(filters.is_hidden).toLowerCase() === 'true' || filters.is_hidden === true,
             confirmed: filters.confirmed === undefined ? '' : (String(filters.confirmed).toLowerCase() === 'true' || filters.confirmed === true),
+            prospect: filters.prospect || '',
         });
     }, [filters]);
 
@@ -87,6 +90,7 @@ export default function FilterBar({ filters, representatives, cities, properties
         if (tempFilters.date) payload.date = tempFilters.date;
         if (tempFilters.is_hidden) payload.is_hidden = 'true';
         if (tempFilters.confirmed !== '') payload.confirmed = String(tempFilters.confirmed);
+        if (tempFilters.prospect) payload.prospect = tempFilters.prospect;
 
         onSearch(payload);
     };
@@ -100,6 +104,7 @@ export default function FilterBar({ filters, representatives, cities, properties
             date: '',
             is_hidden: false,
             confirmed: '',
+            prospect: '',
         });
         onClear();
     };
@@ -193,6 +198,17 @@ export default function FilterBar({ filters, representatives, cities, properties
                         type="date"
                         value={tempFilters.date}
                         onChange={(e) => setTempFilters((prev) => ({ ...prev, date: e.target.value }))}
+                        className="text-input-foreground w-full bg-input"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Prospect Name</label>
+                    <Input
+                        type="text"
+                        placeholder="Search by prospect name..."
+                        value={tempFilters.prospect}
+                        onChange={(e) => setTempFilters((prev) => ({ ...prev, prospect: e.target.value }))}
                         className="text-input-foreground w-full bg-input"
                     />
                 </div>

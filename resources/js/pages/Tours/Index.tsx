@@ -102,6 +102,7 @@ interface Props {
         date?: string;
         is_hidden?: string | boolean;
         confirmed?: string | boolean;
+        prospect?: string;
         page?: number;
     };
     representatives: Representative[];
@@ -162,6 +163,7 @@ export default function Index({ tours, filters, representatives, cities, propert
             filters.property_id ||
             filters.unit_id ||
             filters.date ||
+            filters.prospect ||
             String(filters.is_hidden).toLowerCase() === 'true'
         );
     }, [filters]);

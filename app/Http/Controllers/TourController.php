@@ -36,6 +36,7 @@ class TourController extends Controller
             'date',
             'is_hidden',
             'confirmed',
+            'prospect',
         ]);
 
         $tours = $this->service->list($filters, 20);

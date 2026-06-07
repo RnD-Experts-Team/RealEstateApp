@@ -64,7 +64,6 @@ interface Props {
 export default function VendorTaskTrackerEditDrawer({ 
     task,
     cities,
-    units,
     vendors,
     unitsByCity, 
     propertiesByCity,
@@ -105,21 +104,9 @@ export default function VendorTaskTrackerEditDrawer({
         setCalendarStates((prev) => ({ ...prev, [field]: open }));
     };
 
-    // Helper function to find vendor ID from vendor name
-    const findVendorIdByName = (vendorName: string): string => {
-        const vendor = vendors.find(v => v.vendor_name === vendorName);
-        return vendor ? vendor.id.toString() : '';
-    };
-
-    // Helper function to find unit ID from unit name
-    const findUnitIdByName = (unitName: string): string => {
-        const unit = units.find(u => u.unit_name === unitName);
-        return unit ? unit.id.toString() : '';
-    };
-
     const { data, setData, put, processing, errors, transform } = useForm<VendorTaskTrackerFormData>({
-        vendor_id: findVendorIdByName(task.vendor_name || ''),
-        unit_id: findUnitIdByName(task.unit_name || ''),
+        vendor_id: task.vendor_id?.toString() || '',
+        unit_id: task.unit_id?.toString() || '',
         task_submission_date: task.task_submission_date ?? '',
         assigned_tasks: task.assigned_tasks ?? '',
         any_scheduled_visits: task.any_scheduled_visits ?? '',
@@ -132,8 +119,8 @@ export default function VendorTaskTrackerEditDrawer({
     // Keep form and selection state in sync when a different task record is loaded
     useEffect(() => {
         setData({
-            vendor_id: findVendorIdByName(task.vendor_name || ''),
-            unit_id: findUnitIdByName(task.unit_name || ''),
+            vendor_id: task.vendor_id?.toString() || '',
+            unit_id: task.unit_id?.toString() || '',
             task_submission_date: task.task_submission_date ?? '',
             assigned_tasks: task.assigned_tasks ?? '',
             any_scheduled_visits: task.any_scheduled_visits ?? '',
@@ -334,8 +321,8 @@ export default function VendorTaskTrackerEditDrawer({
     const handleCancel = () => {
         // Reset form to original task data
         setData({
-            vendor_id: findVendorIdByName(task.vendor_name || ''),
-            unit_id: findUnitIdByName(task.unit_name || ''),
+            vendor_id: task.vendor_id?.toString() || '',
+            unit_id: task.unit_id?.toString() || '',
             task_submission_date: task.task_submission_date ?? '',
             assigned_tasks: task.assigned_tasks ?? '',
             any_scheduled_visits: task.any_scheduled_visits ?? '',

@@ -12,6 +12,8 @@ type ApplicationFormData = {
     unit_id: number | null;
     name: string;
     co_signer: string;
+    phone_number: string;
+    email: string;
     status: string;
     applicant_applied_from: string;
     date: string;
@@ -58,6 +60,8 @@ export default function ApplicationCreateDrawer({ cities, properties, units, ope
         unit_id: null,
         name: '',
         co_signer: '',
+        phone_number: '',
+        email: '',
         status: '',
         applicant_applied_from: '',
         date: '',
@@ -78,6 +82,8 @@ export default function ApplicationCreateDrawer({ cities, properties, units, ope
             unit_id: null,
             name: '',
             co_signer: '',
+            phone_number: '',
+            email: '',
             status: '',
             applicant_applied_from: '',
             date: '',
@@ -133,6 +139,14 @@ export default function ApplicationCreateDrawer({ cities, properties, units, ope
 
     const handleCoSignerChange = (coSigner: string) => {
         setData('co_signer', coSigner);
+    };
+
+    const handlePhoneNumberChange = (phoneNumber: string) => {
+        setData('phone_number', phoneNumber);
+    };
+
+    const handleEmailChange = (email: string) => {
+        setData('email', email);
     };
 
     const handleApplicantAppliedFromChange = (value: string) => {
@@ -231,9 +245,13 @@ export default function ApplicationCreateDrawer({ cities, properties, units, ope
                             <ApplicantInformationSection
                                 name={data.name}
                                 coSigner={data.co_signer}
+                                phoneNumber={data.phone_number}
+                                email={data.email}
                                 applicantAppliedFrom={data.applicant_applied_from}
                                 onNameChange={handleNameChange}
                                 onCoSignerChange={handleCoSignerChange}
+                                onPhoneNumberChange={handlePhoneNumberChange}
+                                onEmailChange={handleEmailChange}
                                 onApplicantAppliedFromChange={handleApplicantAppliedFromChange}
                                 errors={errors}
                                 validationErrors={validationErrors}

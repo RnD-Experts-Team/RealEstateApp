@@ -33,6 +33,8 @@ export interface Application {
     unit_id: number;
     name: string;
     co_signer: string | null;
+    phone_number: string | null;
+    email: string | null;
     status: string | null;
     applicant_applied_from: string | null;
     date: string | null;
@@ -81,6 +83,8 @@ export interface ApplicationFormData {
     unit_id: number | null;
     name: string;
     co_signer: string;
+    phone_number: string;
+    email: string;
     status: string;
     applicant_applied_from: string;
     date: string;
@@ -270,6 +274,8 @@ export interface ApplicationValidationErrors {
     property_id?: string;
     name?: string;
     co_signer?: string;
+    phone_number?: string;
+    email?: string;
     status?: string;
     applicant_applied_from?: string;
     date?: string;

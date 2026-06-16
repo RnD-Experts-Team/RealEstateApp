@@ -15,6 +15,8 @@ type ApplicationFormData = {
     unit_id: number | null;
     name: string;
     co_signer: string;
+    phone_number: string;
+    email: string;
     status: string;
     applicant_applied_from: string;
     date: string;
@@ -90,6 +92,8 @@ export default function ApplicationEditDrawer({ application, cities, properties,
         unit_id: application.unit_id,
         name: application.name || '',
         co_signer: application.co_signer ?? '',
+        phone_number: application.phone_number ?? '',
+        email: application.email ?? '',
         status: application.status || 'New',
         applicant_applied_from: application.applicant_applied_from ?? '',
         date: formatDateForInput(application.date),
@@ -156,6 +160,8 @@ export default function ApplicationEditDrawer({ application, cities, properties,
                 unit_id: application.unit_id,
                 name: application.name || '',
                 co_signer: application.co_signer ?? '',
+                phone_number: application.phone_number ?? '',
+                email: application.email ?? '',
                 status: application.status || 'New',
                 applicant_applied_from: application.applicant_applied_from ?? '',
                 date: formatDateForInput(application.date),
@@ -344,6 +350,8 @@ export default function ApplicationEditDrawer({ application, cities, properties,
                             <ApplicantInformationFields
                                 name={data.name}
                                 coSigner={data.co_signer}
+                                phoneNumber={data.phone_number}
+                                email={data.email}
                                 applicantAppliedFrom={data.applicant_applied_from}
                                 onNameChange={(name) => {
                                     setData('name', name);
@@ -351,6 +359,12 @@ export default function ApplicationEditDrawer({ application, cities, properties,
                                 }}
                                 onCoSignerChange={(coSigner) => {
                                     setData('co_signer', coSigner);
+                                }}
+                                onPhoneNumberChange={(phoneNumber) => {
+                                    setData('phone_number', phoneNumber);
+                                }}
+                                onEmailChange={(email) => {
+                                    setData('email', email);
                                 }}
                                 onApplicantAppliedFromChange={(value) => {
                                     setData('applicant_applied_from', value);

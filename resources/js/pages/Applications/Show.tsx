@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 // import { usePermissions } from '@/hooks/usePermissions';
-import { Calendar, MapPin, User, Home, FileText, Download, ClipboardList, Clock } from 'lucide-react';
+import { Calendar, MapPin, User, Home, FileText, Download, ClipboardList, Clock, Phone, Mail } from 'lucide-react';
 
 interface Props {
     application: Application;
@@ -234,6 +234,16 @@ export default function Show({ application, filters, prevId, nextId }: Props) {
                                         icon={User}
                                         label="Co-signer"
                                         value={application.co_signer || <span className="text-gray-400 italic">Not provided</span>}
+                                    />
+                                    <InfoItem
+                                        icon={Phone}
+                                        label="Phone Number"
+                                        value={application.phone_number || <span className="text-gray-400 italic">Not provided</span>}
+                                    />
+                                    <InfoItem
+                                        icon={Mail}
+                                        label="Email"
+                                        value={application.email || <span className="text-gray-400 italic">Not provided</span>}
                                     />
                                     <InfoItem
                                         icon={Home}

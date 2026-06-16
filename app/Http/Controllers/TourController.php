@@ -90,6 +90,7 @@ class TourController extends Controller
         $exists = Tour::where('date', $data['date'])
             ->where('time', $data['time'])
             ->where('unit_id', $data['unit_id'])
+            ->where('representative_id', $data['representative_id'])
             ->exists();
 
         if ($exists) {
@@ -143,6 +144,7 @@ class TourController extends Controller
         $exists = Tour::where('date', $date)
             ->where('time', $time)
             ->where('unit_id', $unitId)
+            ->where('representative_id', $data['representative_id'] ?? $tour->representative_id)
             ->where('id', '!=', $tour->id)
             ->exists();
 

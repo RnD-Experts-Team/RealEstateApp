@@ -20,6 +20,8 @@ class Application extends Model
         'unit_id',
         'name',
         'co_signer',
+        'phone_number',
+        'email',
         'status',
         'applicant_applied_from',
         'date',

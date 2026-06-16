@@ -6,9 +6,13 @@ import { APPLIED_FROM_OPTIONS } from '@/types/application';
 interface Props {
     name: string;
     coSigner: string;
+    phoneNumber: string;
+    email: string;
     applicantAppliedFrom: string;
     onNameChange: (name: string) => void;
     onCoSignerChange: (coSigner: string) => void;
+    onPhoneNumberChange: (phoneNumber: string) => void;
+    onEmailChange: (email: string) => void;
     onApplicantAppliedFromChange: (value: string) => void;
     errors: Record<string, string>;
     validationErrors: {
@@ -20,9 +24,13 @@ interface Props {
 export function ApplicantInformationFields({
     name,
     coSigner,
+    phoneNumber,
+    email,
     applicantAppliedFrom,
     onNameChange,
     onCoSignerChange,
+    onPhoneNumberChange,
+    onEmailChange,
     onApplicantAppliedFromChange,
     errors,
     validationErrors,
@@ -56,6 +64,39 @@ export function ApplicantInformationFields({
                 />
                 {errors.co_signer && <p className="mt-1 text-sm text-red-600">{errors.co_signer}</p>}
                 {validationErrors.co_signer && <p className="mt-1 text-sm text-red-600">{validationErrors.co_signer}</p>}
+            </div>
+
+            {/* Phone Number Field */}
+            <div className="rounded-lg border-l-4 border-l-violet-500 p-4">
+                <div className="mb-2">
+                    <Label htmlFor="phone_number" className="text-base font-semibold">
+                        Phone Number
+                    </Label>
+                </div>
+                <Input
+                    id="phone_number"
+                    value={phoneNumber}
+                    onChange={(e) => onPhoneNumberChange(e.target.value)}
+                    placeholder="Enter phone number (optional)"
+                />
+                {errors.phone_number && <p className="mt-1 text-sm text-red-600">{errors.phone_number}</p>}
+            </div>
+
+            {/* Email Field */}
+            <div className="rounded-lg border-l-4 border-l-pink-500 p-4">
+                <div className="mb-2">
+                    <Label htmlFor="email" className="text-base font-semibold">
+                        Email
+                    </Label>
+                </div>
+                <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => onEmailChange(e.target.value)}
+                    placeholder="Enter email address (optional)"
+                />
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
             {/* Applicant Applied From Field */}

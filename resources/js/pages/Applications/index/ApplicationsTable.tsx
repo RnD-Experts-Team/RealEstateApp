@@ -47,6 +47,8 @@ export default function ApplicationsTable({
                     <TableHead className="sticky left-[270px] z-10 min-w-[120px] border border-border bg-muted text-muted-foreground">Unit</TableHead>
                     <TableHead className="border border-border bg-muted text-muted-foreground">Name</TableHead>
                     <TableHead className="border border-border bg-muted text-muted-foreground">Co-signer</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Phone</TableHead>
+                    <TableHead className="border border-border bg-muted text-muted-foreground">Email</TableHead>
                     <TableHead className="border border-border bg-muted text-muted-foreground">Status</TableHead>
                     <TableHead className="border border-border bg-muted text-muted-foreground">Applied From</TableHead>
                     <TableHead className="border border-border bg-muted text-muted-foreground">Date</TableHead>

@@ -89,6 +89,14 @@ export default function ApplicationsTableRow({
                 {application.co_signer || <span className="text-muted-foreground">N/A</span>}
             </TableCell>
 
+            <TableCell className="border border-border text-center text-foreground">
+                {application.phone_number || <span className="text-muted-foreground">N/A</span>}
+            </TableCell>
+
+            <TableCell className="border border-border text-center text-foreground">
+                {application.email || <span className="text-muted-foreground">N/A</span>}
+            </TableCell>
+
             <TableCell className="border border-border text-center">{getStatusBadge(application.status)}</TableCell>
 
             <TableCell className="border border-border text-center text-foreground">

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { AlertTriangle, CalendarIcon, Clock3 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -254,6 +254,7 @@ function TourTimePickerField({ label, value, onChange, error }: TourTimePickerFi
 }
 
 export default function TourDrawer({ open, onOpenChange, tour, representatives, cities, properties, units }: Props) {
+    const { flash } = usePage().props as any;
     const isEdit = !!tour;
 
     const currentRepresentativeId = tour?.representative?.id ?? null;
@@ -327,7 +328,11 @@ export default function TourDrawer({ open, onOpenChange, tour, representatives, 
             put(route('tours.update', tour.id), {
                 preserveScroll: true,
                 preserveState: true,
-                onSuccess: () => onOpenChange(false),
+                onSuccess: (page) => {
+                    if (!(page.props.flash as any)?.error) {
+                        onOpenChange(false);
+                    }
+                },
             });
             return;
         }
@@ -335,11 +340,13 @@ export default function TourDrawer({ open, onOpenChange, tour, representatives, 
         post(route('tours.store'), {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () => {
-                reset();
-                setSelectedCityId('');
-                setSelectedPropertyId('');
-                onOpenChange(false);
+            onSuccess: (page) => {
+                if (!(page.props.flash as any)?.error) {
+                    reset();
+                    setSelectedCityId('');
+                    setSelectedPropertyId('');
+                    onOpenChange(false);
+                }
             },
         });
     };
@@ -357,6 +364,15 @@ export default function TourDrawer({ open, onOpenChange, tour, representatives, 
                 <div className="flex h-full flex-col">
                     <div className="flex-1 overflow-auto p-6">
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {flash?.error && (
+                                <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                                    <div className="flex items-start gap-2">
+                                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                                        <div>{flash.error}</div>
+                                    </div>
+                                </div>
+                            )}
+
                             {isEdit && currentRepresentativeDeleted && (
                                 <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
                                     <div className="flex items-start gap-2">

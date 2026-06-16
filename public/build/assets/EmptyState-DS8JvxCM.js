@@ -1,0 +1,1 @@
+import{j as t}from"./app-DvbGuWrL.js";import"./app-B-gEBhbK.js";const s=()=>t.jsxs("div",{className:"text-center py-8 text-muted-foreground",children:[t.jsx("p",{className:"text-lg",children:"No offers found."}),t.jsx("p",{className:"text-sm",children:"Try adjusting your search criteria."})]});export{s as EmptyState};

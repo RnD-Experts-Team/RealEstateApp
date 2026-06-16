@@ -85,7 +85,7 @@ export default function MoveOutEditDrawer({
 
     useEffect(() => {
         if (moveOut && allUnits && Array.isArray(allUnits) && Array.isArray(cities) && Array.isArray(properties)) {
-            const unitInfo = allUnits.find((unit) => unit.unit_name === moveOut.unit_name);
+            const unitInfo = allUnits.find((unit) => unit.id === moveOut.unit_id);
 
             if (unitInfo) {
                 const selectedCityObj = cities.find((c) => c.city === moveOut.city_name);

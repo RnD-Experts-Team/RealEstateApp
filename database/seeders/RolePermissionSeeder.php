@@ -183,6 +183,27 @@ class RolePermissionSeeder extends Seeder
             'reports.create',
             'reports.edit',
             'reports.destroy',
+
+            //inspection forms
+            'inspection-settings.index',
+            'inspection-settings.update',
+            'inspection-forms.manage',
+
+            //walkthrough & safety-inspection forms
+            'walkthrough-settings.index',
+            'walkthrough-settings.update',
+            'walkthrough-forms.manage',
+            'safety-inspections.index',
+            'safety-inspections.create',
+            'safety-inspections.destroy',
+
+            //agreements & leases
+            'agreement-types.index',
+            'agreement-types.update',
+            'agreements.index',
+            'agreements.create',
+            'agreements.update',
+            'agreements.destroy',
         ];
 
         // Create permissions

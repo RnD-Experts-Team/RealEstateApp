@@ -1,5 +1,7 @@
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { MoveOut } from '@/types/move-out';
+import { InspectionLink } from '@/types/inspection';
+import { WalkthroughLink } from '@/types/walkthrough';
 import MoveOutTableRow from './MoveOutTableRow';
 
 interface MoveOutTableProps {
@@ -15,6 +17,12 @@ interface MoveOutTableProps {
     onEdit: (moveOut: MoveOut) => void;
     onDelete: (moveOut: MoveOut) => void;
 
+    inspectionMap: Record<number, InspectionLink>;
+    onInspection: (moveOut: MoveOut) => void;
+
+    walkthroughMap: Record<number, WalkthroughLink>;
+    onWalkthrough: (moveOut: MoveOut) => void;
+
     filters?: { city?: string | null; property?: string | null; unit?: string | null; is_hidden?: string; perPage?: string };
 }
 
@@ -28,16 +36,21 @@ export default function MoveOutTable({
     onUnhide,
     onEdit,
     onDelete,
+    inspectionMap,
+    onInspection,
+    walkthroughMap,
+    onWalkthrough,
     filters,
 }: MoveOutTableProps) {
-    const showActions = hasAnyPermission([
-        'move-out.show',
-        'move-out.edit',
-        'move-out.update',
-        'move-out.destroy',
-        'move-out.hide',
-        'move-out.unhide',
-    ]);
+    const showActions =
+        hasAnyPermission([
+            'move-out.show',
+            'move-out.edit',
+            'move-out.update',
+            'move-out.destroy',
+            'move-out.hide',
+            'move-out.unhide',
+        ]) || hasPermission('inspection-forms.manage') || hasPermission('walkthrough-forms.manage');
 
     return (
         <Table containerClassName="relative max-h-[600px] overflow-auto" className="border-collapse rounded-md border border-border">
@@ -89,6 +102,10 @@ export default function MoveOutTable({
                         onUnhide={onUnhide}
                         onEdit={onEdit}
                         onDelete={onDelete}
+                        inspection={inspectionMap[moveOut.id] ?? null}
+                        onInspection={onInspection}
+                        walkthrough={walkthroughMap[moveOut.id] ?? null}
+                        onWalkthrough={onWalkthrough}
                         filters={filters}
                     />
                 ))}

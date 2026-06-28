@@ -1,5 +1,6 @@
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { MoveIn } from '@/types/move-in';
+import { InspectionLink } from '@/types/inspection';
 import MoveInTableRow from './MoveInTableRow';
 
 interface MoveInTableProps {
@@ -7,14 +8,17 @@ interface MoveInTableProps {
     canEdit: boolean;
     canDelete: boolean;
     canHide: boolean; // ✅ NEW
+    canInspect: boolean;
+    inspectionMap: Record<number, InspectionLink>;
     showActions: boolean;
     onEdit: (moveIn: MoveIn) => void;
     onDelete: (moveIn: MoveIn) => void;
     onHide: (moveIn: MoveIn) => void; // ✅ NEW
     onUnhide: (moveIn: MoveIn) => void; // ✅ NEW
+    onInspection: (moveIn: MoveIn) => void;
 }
 
-export default function MoveInTable({ moveIns, canEdit, canDelete, canHide, showActions, onEdit, onDelete, onHide, onUnhide }: MoveInTableProps) {
+export default function MoveInTable({ moveIns, canEdit, canDelete, canHide, canInspect, inspectionMap, showActions, onEdit, onDelete, onHide, onUnhide, onInspection }: MoveInTableProps) {
     return (
         <Table containerClassName="relative max-h-[600px] overflow-auto" className="border-collapse rounded-md border border-border">
             <TableHeader style={{ position: 'sticky', top: 0, zIndex: 20 }}>
@@ -56,10 +60,13 @@ export default function MoveInTable({ moveIns, canEdit, canDelete, canHide, show
                         canEdit={canEdit}
                         canDelete={canDelete}
                         canHide={canHide}
+                        canInspect={canInspect}
+                        inspection={inspectionMap[moveIn.id] ?? null}
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onHide={onHide}
                         onUnhide={onUnhide}
+                        onInspection={onInspection}
                     />
                 ))}
             </TableBody>

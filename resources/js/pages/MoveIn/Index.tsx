@@ -3,6 +3,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import AppLayout from '@/layouts/app-layout';
 import { City } from '@/types/City';
 import { MoveIn } from '@/types/move-in';
+import { InspectionLink } from '@/types/inspection';
 import { PropertyInfoWithoutInsurance } from '@/types/PropertyInfoWithoutInsurance';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ import PageHeader from './index/PageHeader';
 import PaginationInfo from './index/PaginationInfo';
 import MoveInCreateDrawer from './MoveInCreateDrawer';
 import MoveInEditDrawer from './MoveInEditDrawer';
+import InspectionLinkDialog from '../Inspection/InspectionLinkDialog';
 
 // Updated Unit interface to include ID
 interface Unit {
@@ -136,13 +138,21 @@ interface Props {
     cities: City[];
     properties: PropertyInfoWithoutInsurance[];
     unitsByProperty: Record<string, Array<{ id: number; unit_name: string }>>;
+    inspectionMap?: Record<number, InspectionLink>;
 }
 
-export default function Index({ moveIns, filters, units, cities, properties, unitsByProperty }: Props) {
+export default function Index({ moveIns, filters, units, cities, properties, unitsByProperty, inspectionMap = {} }: Props) {
     const [isExporting, setIsExporting] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
     const [selectedMoveIn, setSelectedMoveIn] = useState<MoveIn | null>(null);
+    const [inspectionMoveIn, setInspectionMoveIn] = useState<MoveIn | null>(null);
+    const [isInspectionDialogOpen, setIsInspectionDialogOpen] = useState(false);
+
+    const handleInspection = (moveIn: MoveIn) => {
+        setInspectionMoveIn(moveIn);
+        setIsInspectionDialogOpen(true);
+    };
 
     // ✅ Filters (include hidden)
     const [currentFilters, setCurrentFilters] = useState({
@@ -345,6 +355,8 @@ export default function Index({ moveIns, filters, units, cities, properties, uni
                                 canEdit={hasPermission('move-in.update')}
                                 canDelete={hasPermission('move-in.destroy')}
                                 canHide={canHide}
+                                canInspect={hasPermission('inspection-forms.manage')}
+                                inspectionMap={inspectionMap}
                                 showActions={hasAnyPermission([
                                     'move-in.show',
                                     'move-in.edit',
@@ -352,11 +364,13 @@ export default function Index({ moveIns, filters, units, cities, properties, uni
                                     'move-in.destroy',
                                     'move-in.hide',
                                     'move-in.unhide',
+                                    'inspection-forms.manage',
                                 ])}
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                                 onHide={handleHide}
                                 onUnhide={handleUnhide}
+                                onInspection={handleInspection}
                             />
 
                             {/* Table Footer Pagination Controls */}
@@ -412,6 +426,17 @@ export default function Index({ moveIns, filters, units, cities, properties, uni
                     currentFilters={currentFilters}
                     currentPerPage={currentPerPage}
                     currentPage={currentPage}
+                />
+            )}
+
+            {/* Tenant Inspection Form link/status dialog */}
+            {inspectionMoveIn && (
+                <InspectionLinkDialog
+                    open={isInspectionDialogOpen}
+                    onOpenChange={setIsInspectionDialogOpen}
+                    formType="move_in"
+                    referenceId={inspectionMoveIn.id}
+                    inspection={inspectionMap[inspectionMoveIn.id] ?? null}
                 />
             )}
         </AppLayout>

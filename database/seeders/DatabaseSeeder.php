@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
         RolePermissionSeeder::class,
+        InspectionDefaultSeeder::class,
+        WalkthroughDefaultSeeder::class,
+        AgreementDefaultSeeder::class,
         ]);
 
         $user->givePermissionTo(Permission::all());

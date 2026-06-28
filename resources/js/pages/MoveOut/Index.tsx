@@ -2,6 +2,10 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/usePermissions';
 import AppLayout from '@/layouts/app-layout';
 import { MoveOut } from '@/types/move-out';
+import { InspectionLink } from '@/types/inspection';
+import { WalkthroughLink, Representative } from '@/types/walkthrough';
+import InspectionLinkDialog from '../Inspection/InspectionLinkDialog';
+import WalkthroughLinkDialog from '../Walkthrough/WalkthroughLinkDialog';
 import { Head, router } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { useState } from 'react';
@@ -134,6 +138,9 @@ interface Props {
     filterProperties: string[];
     filterUnits: string[];
     perPage?: string;
+    inspectionMap?: Record<number, InspectionLink>;
+    walkthroughMap?: Record<number, WalkthroughLink>;
+    representatives?: Representative[];
 
     // ✅ NEW
     filters?: {
@@ -157,12 +164,29 @@ export default function Index({
     filterUnits,
     perPage: perPageProp,
     filters,
+    inspectionMap = {},
+    walkthroughMap = {},
+    representatives = [],
 }: Props) {
     const [isExporting, setIsExporting] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
     const [selectedMoveOut, setSelectedMoveOut] = useState<MoveOut | null>(null);
     const [perPage, setPerPage] = useState<string>(perPageProp ?? '15');
+    const [inspectionMoveOut, setInspectionMoveOut] = useState<MoveOut | null>(null);
+    const [isInspectionDialogOpen, setIsInspectionDialogOpen] = useState(false);
+    const [walkthroughMoveOut, setWalkthroughMoveOut] = useState<MoveOut | null>(null);
+    const [isWalkthroughDialogOpen, setIsWalkthroughDialogOpen] = useState(false);
+
+    const handleInspection = (moveOut: MoveOut) => {
+        setInspectionMoveOut(moveOut);
+        setIsInspectionDialogOpen(true);
+    };
+
+    const handleWalkthrough = (moveOut: MoveOut) => {
+        setWalkthroughMoveOut(moveOut);
+        setIsWalkthroughDialogOpen(true);
+    };
 
     const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermissions();
 
@@ -346,6 +370,10 @@ export default function Index({
                                         onUnhide={handleUnhide}
                                         onEdit={handleEditClick}
                                         onDelete={handleDelete}
+                                        inspectionMap={inspectionMap}
+                                        onInspection={handleInspection}
+                                        walkthroughMap={walkthroughMap}
+                                        onWalkthrough={handleWalkthrough}
                                         filters={{
                                             city: currentFilters.city ?? undefined,
                                             property: currentFilters.property ?? undefined,
@@ -434,6 +462,28 @@ export default function Index({
                         page: String(currentPage),
                         perPage,
                     }}
+                />
+            )}
+
+            {/* Tenant Inspection Form link/status dialog */}
+            {inspectionMoveOut && (
+                <InspectionLinkDialog
+                    open={isInspectionDialogOpen}
+                    onOpenChange={setIsInspectionDialogOpen}
+                    formType="move_out"
+                    referenceId={inspectionMoveOut.id}
+                    inspection={inspectionMap[inspectionMoveOut.id] ?? null}
+                />
+            )}
+
+            {/* Walkthrough link/status dialog */}
+            {walkthroughMoveOut && (
+                <WalkthroughLinkDialog
+                    open={isWalkthroughDialogOpen}
+                    onOpenChange={setIsWalkthroughDialogOpen}
+                    moveOutId={walkthroughMoveOut.id}
+                    walkthrough={walkthroughMap[walkthroughMoveOut.id] ?? null}
+                    representatives={representatives}
                 />
             )}
         </AppLayout>

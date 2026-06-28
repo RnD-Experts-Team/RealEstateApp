@@ -2,20 +2,24 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MoveIn } from '@/types/move-in';
-import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { InspectionLink } from '@/types/inspection';
+import { ClipboardCheck, Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 interface MoveInTableRowProps {
     moveIn: MoveIn;
     canEdit: boolean;
     canDelete: boolean;
     canHide: boolean; // ✅ NEW
+    canInspect: boolean;
+    inspection: InspectionLink | null;
     onEdit: (moveIn: MoveIn) => void;
     onDelete: (moveIn: MoveIn) => void;
     onHide: (moveIn: MoveIn) => void; // ✅ NEW
     onUnhide: (moveIn: MoveIn) => void; // ✅ NEW
+    onInspection: (moveIn: MoveIn) => void;
 }
 
-export default function MoveInTableRow({ moveIn, canEdit, canDelete, canHide, onEdit, onDelete, onHide, onUnhide }: MoveInTableRowProps) {
+export default function MoveInTableRow({ moveIn, canEdit, canDelete, canHide, canInspect, inspection, onEdit, onDelete, onHide, onUnhide, onInspection }: MoveInTableRowProps) {
     const formatDateUTC = (dateStr?: string | null) => {
         if (!dateStr) return 'N/A';
         const d = new Date(dateStr);
@@ -92,9 +96,25 @@ export default function MoveInTableRow({ moveIn, canEdit, canDelete, canHide, on
                 )}
             </TableCell>
 
-            {(canEdit || canDelete || canHide) && (
+            {(canEdit || canDelete || canHide || canInspect) && (
                 <TableCell className="border border-border text-center">
                     <div className="flex justify-center gap-1">
+                        {canInspect && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onInspection(moveIn)}
+                                className={
+                                    inspection?.status === 'submitted'
+                                        ? 'border-green-200 text-green-600 hover:bg-green-50 dark:border-green-900 dark:text-green-400 dark:hover:bg-green-950'
+                                        : 'border-primary/20 text-primary hover:bg-primary/10'
+                                }
+                                title={inspection?.status === 'submitted' ? 'Inspection form submitted' : 'Inspection form'}
+                            >
+                                <ClipboardCheck className="h-4 w-4" />
+                            </Button>
+                        )}
+
                         {canEdit && (
                             <Button variant="outline" size="sm" onClick={() => onEdit(moveIn)} title="Edit">
                                 <Edit className="h-4 w-4" />

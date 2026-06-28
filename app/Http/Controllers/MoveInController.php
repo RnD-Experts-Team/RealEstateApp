@@ -135,6 +135,9 @@ class MoveInController extends Controller
 
         $dropdownData = $this->moveInService->getDropdownData();
 
+        $inspectionMap = app(\App\Services\InspectionFormService::class)
+            ->mapForReferences('move_in', collect($moveIns['data'])->pluck('id')->all());
+
         return Inertia::render('MoveIn/Index', [
             'moveIns' => $moveIns,
             'filters' => array_merge($filters, [
@@ -145,6 +148,7 @@ class MoveInController extends Controller
             'cities' => $dropdownData['cities'],
             'properties' => $dropdownData['properties'],
             'unitsByProperty' => $dropdownData['unitsByProperty'],
+            'inspectionMap' => $inspectionMap,
         ]);
     }
 

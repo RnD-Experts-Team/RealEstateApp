@@ -22,6 +22,12 @@ use App\Http\Controllers\DashboardController;
 use Inertia\Inertia;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\UnitPaymentController;
+use App\Http\Controllers\InspectionSettingController;
+use App\Http\Controllers\InspectionFormController;
+use App\Http\Controllers\WalkthroughSettingController;
+use App\Http\Controllers\WalkthroughFormController;
+use App\Http\Controllers\AgreementTypeController;
+use App\Http\Controllers\AgreementController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -224,7 +230,115 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('reports/{unitPayment}/hide', [UnitPaymentController::class, 'hide'])->name('reports.hide');
     Route::post('reports/{unitPayment}/unhide', [UnitPaymentController::class, 'unhide'])->name('reports.unhide');
+
+    /**
+     * Inspection form settings (staff-configurable template: sections, items, settings)
+     */
+    Route::get('inspection-settings', [InspectionSettingController::class, 'index'])->name('inspection-settings.index');
+    Route::put('inspection-settings', [InspectionSettingController::class, 'updateSettings'])->name('inspection-settings.update');
+    Route::post('inspection-settings/sections', [InspectionSettingController::class, 'storeSection'])->name('inspection-settings.sections.store');
+    Route::put('inspection-settings/sections/{section}', [InspectionSettingController::class, 'updateSection'])->name('inspection-settings.sections.update');
+    Route::delete('inspection-settings/sections/{section}', [InspectionSettingController::class, 'destroySection'])->name('inspection-settings.sections.destroy');
+    Route::post('inspection-settings/items', [InspectionSettingController::class, 'storeItem'])->name('inspection-settings.items.store');
+    Route::put('inspection-settings/items/{item}', [InspectionSettingController::class, 'updateItem'])->name('inspection-settings.items.update');
+    Route::delete('inspection-settings/items/{item}', [InspectionSettingController::class, 'destroyItem'])->name('inspection-settings.items.destroy');
+
+    /**
+     * Inspection forms (staff side): generate the signed tenant link, view a filled form, download PDF
+     */
+    Route::post('inspections/generate', [InspectionFormController::class, 'generate'])->name('inspections.generate');
+    Route::get('inspections/{form}', [InspectionFormController::class, 'show'])->name('inspections.show');
+    Route::get('inspections/{form}/pdf', [InspectionFormController::class, 'pdf'])->name('inspections.pdf');
+    Route::post('inspections/{form}/reset', [InspectionFormController::class, 'reset'])->name('inspections.reset');
+
+    /**
+     * Walkthrough & Safety-Inspection form settings (typed-field builder, per kind)
+     */
+    Route::get('walkthrough-settings', [WalkthroughSettingController::class, 'index'])->name('walkthrough-settings.index');
+    Route::put('walkthrough-settings', [WalkthroughSettingController::class, 'updateSettings'])->name('walkthrough-settings.update');
+    Route::post('walkthrough-settings/fields', [WalkthroughSettingController::class, 'storeField'])->name('walkthrough-settings.fields.store');
+    Route::put('walkthrough-settings/fields/{field}', [WalkthroughSettingController::class, 'updateField'])->name('walkthrough-settings.fields.update');
+    Route::delete('walkthrough-settings/fields/{field}', [WalkthroughSettingController::class, 'destroyField'])->name('walkthrough-settings.fields.destroy');
+    Route::post('walkthrough-settings/options', [WalkthroughSettingController::class, 'storeOption'])->name('walkthrough-settings.options.store');
+    Route::put('walkthrough-settings/options/{option}', [WalkthroughSettingController::class, 'updateOption'])->name('walkthrough-settings.options.update');
+    Route::delete('walkthrough-settings/options/{option}', [WalkthroughSettingController::class, 'destroyOption'])->name('walkthrough-settings.options.destroy');
+
+    /**
+     * Walkthrough (move-out) staff side: generate signed link, view, PDF
+     */
+    Route::post('walkthroughs/generate', [WalkthroughFormController::class, 'generate'])->name('walkthroughs.generate');
+    Route::get('walkthroughs/{form}', [WalkthroughFormController::class, 'show'])->name('walkthroughs.show');
+    Route::get('walkthroughs/{form}/pdf', [WalkthroughFormController::class, 'pdf'])->name('walkthroughs.pdf');
+    Route::post('walkthroughs/{form}/reset', [WalkthroughFormController::class, 'resetForm'])->name('walkthroughs.reset');
+
+    /**
+     * Safety Inspections (standalone, per unit) — dedicated page
+     */
+    Route::get('safety-inspections', [WalkthroughFormController::class, 'safetyIndex'])->name('safety-inspections.index');
+    Route::post('safety-inspections', [WalkthroughFormController::class, 'safetyStore'])->name('safety-inspections.store');
+    Route::delete('safety-inspections/{form}', [WalkthroughFormController::class, 'safetyDestroy'])->name('safety-inspections.destroy');
+
+    /**
+     * Agreement types (configurable lease templates: clauses, options, variables)
+     */
+    Route::get('agreement-types', [AgreementTypeController::class, 'index'])->name('agreement-types.index');
+    Route::post('agreement-types', [AgreementTypeController::class, 'store'])->name('agreement-types.store');
+    Route::get('agreement-types/{agreementType}/edit', [AgreementTypeController::class, 'edit'])->name('agreement-types.edit');
+    Route::put('agreement-types/{agreementType}', [AgreementTypeController::class, 'update'])->name('agreement-types.update');
+    Route::delete('agreement-types/{agreementType}', [AgreementTypeController::class, 'destroy'])->name('agreement-types.destroy');
+    Route::post('agreement-clauses', [AgreementTypeController::class, 'storeClause'])->name('agreement-clauses.store');
+    Route::put('agreement-clauses/{clause}', [AgreementTypeController::class, 'updateClause'])->name('agreement-clauses.update');
+    Route::delete('agreement-clauses/{clause}', [AgreementTypeController::class, 'destroyClause'])->name('agreement-clauses.destroy');
+    Route::post('agreement-options', [AgreementTypeController::class, 'storeOption'])->name('agreement-options.store');
+    Route::put('agreement-options/{option}', [AgreementTypeController::class, 'updateOption'])->name('agreement-options.update');
+    Route::delete('agreement-options/{option}', [AgreementTypeController::class, 'destroyOption'])->name('agreement-options.destroy');
+    Route::post('agreement-variables', [AgreementTypeController::class, 'storeVariable'])->name('agreement-variables.store');
+    Route::put('agreement-variables/{variable}', [AgreementTypeController::class, 'updateVariable'])->name('agreement-variables.update');
+    Route::delete('agreement-variables/{variable}', [AgreementTypeController::class, 'destroyVariable'])->name('agreement-variables.destroy');
+
+    /**
+     * Agreements (instances created from a type)
+     */
+    Route::get('agreements', [AgreementController::class, 'index'])->name('agreements.index');
+    Route::post('agreements', [AgreementController::class, 'store'])->name('agreements.store');
+    Route::get('agreements/{agreement}/edit', [AgreementController::class, 'edit'])->name('agreements.edit');
+    Route::put('agreements/{agreement}', [AgreementController::class, 'update'])->name('agreements.update');
+    Route::delete('agreements/{agreement}', [AgreementController::class, 'destroy'])->name('agreements.destroy');
+    Route::post('agreements/{agreement}/link', [AgreementController::class, 'generateLink'])->name('agreements.link');
+    Route::post('agreements/{agreement}/agent-sign', [AgreementController::class, 'agentSign'])->name('agreements.agent-sign');
+    Route::get('agreements/{agreement}/pdf', [AgreementController::class, 'pdf'])->name('agreements.pdf');
 });
+
+/**
+ * Tenant-facing inspection form (no login) — protected by signed URLs.
+ * The link stays valid so the tenant can re-edit after submitting.
+ */
+Route::get('inspection/{form}', [InspectionFormController::class, 'fill'])
+    ->middleware('signed')
+    ->name('inspection.fill');
+Route::post('inspection/{form}', [InspectionFormController::class, 'submit'])
+    ->middleware('signed')
+    ->name('inspection.submit');
+
+/**
+ * Walkthrough / Safety-Inspection forms filled by representatives via signed URLs (no login).
+ */
+Route::get('walkthrough/{form}', [WalkthroughFormController::class, 'fill'])
+    ->middleware('signed')
+    ->name('walkthrough.fill');
+Route::post('walkthrough/{form}', [WalkthroughFormController::class, 'submit'])
+    ->middleware('signed')
+    ->name('walkthrough.submit');
+
+/**
+ * Owner-facing agreement signing via signed URLs (no login).
+ */
+Route::get('agreement/{agreement}', [AgreementController::class, 'sign'])
+    ->middleware('signed')
+    ->name('agreement.sign');
+Route::post('agreement/{agreement}', [AgreementController::class, 'submitSignature'])
+    ->middleware('signed')
+    ->name('agreement.submit-signature');
 
 // Additional route files
 require __DIR__ . '/settings.php';

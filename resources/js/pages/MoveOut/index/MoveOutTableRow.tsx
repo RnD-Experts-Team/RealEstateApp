@@ -2,8 +2,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MoveOut } from '@/types/move-out';
+import { InspectionLink } from '@/types/inspection';
+import { WalkthroughLink } from '@/types/walkthrough';
 import { Link } from '@inertiajs/react';
-import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { ClipboardCheck, Edit, Eye, EyeOff, Footprints, Trash2 } from 'lucide-react';
 
 interface MoveOutTableRowProps {
     moveOut: MoveOut;
@@ -19,6 +21,12 @@ interface MoveOutTableRowProps {
     onEdit: (moveOut: MoveOut) => void;
     onDelete: (moveOut: MoveOut) => void;
 
+    inspection: InspectionLink | null;
+    onInspection: (moveOut: MoveOut) => void;
+
+    walkthrough: WalkthroughLink | null;
+    onWalkthrough: (moveOut: MoveOut) => void;
+
     filters?: { city?: string | null; property?: string | null; unit?: string | null; is_hidden?: string; perPage?: string };
 }
 
@@ -32,6 +40,10 @@ export default function MoveOutTableRow({
     onUnhide,
     onEdit,
     onDelete,
+    inspection,
+    onInspection,
+    walkthrough,
+    onWalkthrough,
     filters,
 }: MoveOutTableRowProps) {
     const getYesNoBadge = (value: 'Yes' | 'No' | null) => {
@@ -97,7 +109,10 @@ export default function MoveOutTableRow({
         );
     };
 
-    const showActions = hasAnyPermission(['move-out.show', 'move-out.edit', 'move-out.update', 'move-out.destroy', 'move-out.hide', 'move-out.unhide']);
+    const canInspect = hasPermission('inspection-forms.manage');
+    const canWalkthrough = hasPermission('walkthrough-forms.manage');
+    const showActions =
+        hasAnyPermission(['move-out.show', 'move-out.edit', 'move-out.update', 'move-out.destroy', 'move-out.hide', 'move-out.unhide']) || canInspect || canWalkthrough;
 
     return (
         <TableRow className="border-border hover:bg-muted/50">
@@ -202,6 +217,38 @@ export default function MoveOutTableRow({
             {showActions && (
                 <TableCell className="border border-border text-center">
                     <div className="flex gap-1 justify-center">
+                        {canInspect && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onInspection(moveOut)}
+                                className={
+                                    inspection?.status === 'submitted'
+                                        ? 'border-green-200 text-green-600 hover:bg-green-50 dark:border-green-900 dark:text-green-400 dark:hover:bg-green-950'
+                                        : 'border-primary/20 text-primary hover:bg-primary/10'
+                                }
+                                title={inspection?.status === 'submitted' ? 'Inspection form submitted' : 'Inspection form'}
+                            >
+                                <ClipboardCheck className="h-4 w-4" />
+                            </Button>
+                        )}
+
+                        {canWalkthrough && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onWalkthrough(moveOut)}
+                                className={
+                                    walkthrough?.status === 'submitted'
+                                        ? 'border-green-200 text-green-600 hover:bg-green-50 dark:border-green-900 dark:text-green-400 dark:hover:bg-green-950'
+                                        : 'border-primary/20 text-primary hover:bg-primary/10'
+                                }
+                                title={walkthrough?.status === 'submitted' ? 'Walkthrough submitted' : 'Walkthrough form'}
+                            >
+                                <Footprints className="h-4 w-4" />
+                            </Button>
+                        )}
+
                         {hasPermission('move-out.show') && (
                             <Link
                                 href={route('move-out.show', moveOut.id)}

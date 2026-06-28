@@ -165,8 +165,17 @@ class MoveOutController extends Controller
 
         $dropdownData = $this->moveOutService->getDropdownData();
 
+        $inspectionMap = app(\App\Services\InspectionFormService::class)
+            ->mapForReferences('move_out', collect($moveOuts['data'])->pluck('id')->all());
+
+        $walkthroughService = app(\App\Services\WalkthroughFormService::class);
+        $walkthroughMap = $walkthroughService->mapForReferences('move_out', collect($moveOuts['data'])->pluck('id')->all());
+
         return Inertia::render('MoveOut/Index', [
             'moveOuts' => $moveOuts,
+            'inspectionMap' => $inspectionMap,
+            'walkthroughMap' => $walkthroughMap,
+            'representatives' => $walkthroughService->representativeOptions(),
 
             // ✅ NEW: send filters object to frontend (same idea as MoveIn)
             'filters' => [

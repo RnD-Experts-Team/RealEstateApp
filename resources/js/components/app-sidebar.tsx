@@ -201,6 +201,50 @@ const mainNavCategories: NavCategory[] = [
         ],
         permissions: ['reports.index'],
     },
+    {
+        title: 'Inspection Forms',
+        icon: ClipboardList,
+        items: [
+            {
+                title: 'Form Settings',
+                href: '/inspection-settings',
+                icon: Settings,
+                permission: 'inspection-settings.index',
+            },
+            {
+                title: 'Safety Inspections',
+                href: '/safety-inspections',
+                icon: ClipboardList,
+                permission: 'safety-inspections.index',
+            },
+            {
+                title: 'Walkthrough Settings',
+                href: '/walkthrough-settings',
+                icon: Settings,
+                permission: 'walkthrough-settings.index',
+            },
+        ],
+        permissions: ['inspection-settings.index', 'safety-inspections.index', 'walkthrough-settings.index'],
+    },
+    {
+        title: 'Agreements',
+        icon: FileText,
+        items: [
+            {
+                title: 'Agreements',
+                href: '/agreements',
+                icon: FileText,
+                permission: 'agreements.index',
+            },
+            {
+                title: 'Agreement Types',
+                href: '/agreement-types',
+                icon: Settings,
+                permission: 'agreement-types.index',
+            },
+        ],
+        permissions: ['agreements.index', 'agreement-types.index'],
+    },
 ];
 
 const footerNavItems: NavCategory['items'] = [

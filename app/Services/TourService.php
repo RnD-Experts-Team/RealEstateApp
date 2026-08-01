@@ -8,7 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TourService
 {
-    public function list(array $filters = [], int $perPage = 20): LengthAwarePaginator
+    public function list(array $filters = [], string|int $perPage = 20): LengthAwarePaginator
     {
         $query = Tour::with([
             'unit.property.city',
@@ -59,10 +59,12 @@ class TourService
             $query->where('confirmed', $confirmed);
         }
 
+        $perPageValue = ($perPage === 'all') ? max($query->count(), 1) : (int) $perPage;
+
         return $query
             ->orderBy('date', 'desc')
             ->orderBy('time', 'desc')
-            ->paginate($perPage)
+            ->paginate($perPageValue)
             ->withQueryString();
     }
 

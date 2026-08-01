@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import PaymentDrawer from './PaymentDrawer';
 import EmptyState from './index/EmptyState';
@@ -80,6 +80,7 @@ interface Props {
         type?: string;
         date?: string;
         is_hidden?: string | boolean;
+        perPage?: string;
     };
     cities: CityOption[];
     properties: PropertyOption[];
@@ -118,6 +119,11 @@ export default function Index({ payments, filters, cities, properties, units, ty
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
     const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+    const [currentPerPage, setCurrentPerPage] = useState<string>(filters?.perPage || '20');
+
+    useEffect(() => {
+        setCurrentPerPage(filters?.perPage || '20');
+    }, [filters]);
 
     const activeFilters = useMemo(() => {
         return !!(
@@ -211,17 +217,47 @@ export default function Index({ payments, filters, cities, properties, units, ty
     const dialogCopy = getDialogCopy();
 
     const handleSearch = (payload: Record<string, string>) => {
-        router.get(route('reports.index'), payload, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        });
+        router.get(
+            route('reports.index'),
+            { ...payload, perPage: currentPerPage, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
     };
 
     const handleClear = () => {
         router.get(
             route('reports.index'),
-            {},
+            { perPage: currentPerPage, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setCurrentPerPage(newPerPage);
+
+        router.get(
+            route('reports.index'),
+            { ...filters, perPage: newPerPage, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handlePageChange = (newPage: number) => {
+        router.get(
+            route('reports.index'),
+            { ...filters, perPage: currentPerPage, page: newPage },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -330,55 +366,21 @@ export default function Index({ payments, filters, cities, properties, units, ty
                                         }}
                                     />
 
-                                    <PaginationInfo meta={payments.meta} />
-
-                                    <div className="mt-4 flex items-center justify-end gap-3">
-                                        <button
-                                            className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
-                                            disabled={(payments.meta?.current_page ?? 1) <= 1}
-                                            onClick={() => {
-                                                router.get(
-                                                    route('reports.index'),
-                                                    {
-                                                        ...filters,
-                                                        page: (payments.meta?.current_page ?? 1) - 1,
-                                                    },
-                                                    {
-                                                        preserveState: true,
-                                                        preserveScroll: true,
-                                                        replace: true,
-                                                    },
-                                                );
-                                            }}
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <span className="text-sm">Rows per page:</span>
+                                        <select
+                                            className="rounded border bg-background px-2 py-1 text-foreground"
+                                            value={currentPerPage}
+                                            onChange={(e) => handlePerPageChange(e.target.value)}
                                         >
-                                            Previous
-                                        </button>
-
-                                        <span className="text-sm">
-                                            Page {payments.meta?.current_page ?? 1} of {payments.meta?.last_page ?? 1}
-                                        </span>
-
-                                        <button
-                                            className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
-                                            disabled={(payments.meta?.current_page ?? 1) >= (payments.meta?.last_page ?? 1)}
-                                            onClick={() => {
-                                                router.get(
-                                                    route('reports.index'),
-                                                    {
-                                                        ...filters,
-                                                        page: (payments.meta?.current_page ?? 1) + 1,
-                                                    },
-                                                    {
-                                                        preserveState: true,
-                                                        preserveScroll: true,
-                                                        replace: true,
-                                                    },
-                                                );
-                                            }}
-                                        >
-                                            Next
-                                        </button>
+                                            <option value="20">20</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="all">All</option>
+                                        </select>
                                     </div>
+
+                                    <PaginationInfo meta={payments.meta} perPage={currentPerPage} onPageChange={handlePageChange} />
                                 </>
                             ) : (
                                 <EmptyState />

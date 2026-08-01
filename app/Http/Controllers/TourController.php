@@ -39,7 +39,22 @@ class TourController extends Controller
             'prospect',
         ]);
 
-        $tours = $this->service->list($filters, 20);
+        $perPage = $request->input('perPage', 20);
+
+        $toursPaginator = $this->service->list($filters, $perPage);
+        $toursArray = $toursPaginator->toArray();
+        $tours = [
+            'data' => $toursArray['data'],
+            'links' => $toursArray['links'],
+            'meta' => [
+                'from' => $toursArray['from'],
+                'to' => $toursArray['to'],
+                'total' => $toursArray['total'],
+                'current_page' => $toursArray['current_page'],
+                'last_page' => $toursArray['last_page'],
+                'per_page' => $toursArray['per_page'],
+            ],
+        ];
         $representatives = $this->service->allRepresentatives();
 
         $cities = Cities::select('id', 'city')
@@ -58,7 +73,7 @@ class TourController extends Controller
 
         return Inertia::render('Tours/Index', [
             'tours' => $tours,
-            'filters' => $filters,
+            'filters' => array_merge($filters, ['perPage' => (string) $perPage]),
             'representatives' => $representatives,
             'cities' => $cities,
             'properties' => $properties,
@@ -85,19 +100,6 @@ class TourController extends Controller
             'note' => ['nullable', 'string'],
             'confirmed' => ['boolean'],
         ]);
-
-        // Check uniqueness of (date, time, unit_id) combination
-        $exists = Tour::where('date', $data['date'])
-            ->where('time', $data['time'])
-            ->where('unit_id', $data['unit_id'])
-            ->where('representative_id', $data['representative_id'])
-            ->exists();
-
-        if ($exists) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'A tour already exists for this unit, date, and time.');
-        }
 
         $this->service->createTour($data);
 
@@ -135,24 +137,6 @@ class TourController extends Controller
             'is_hidden' => ['boolean'],
             'confirmed' => ['boolean'],
         ]);
-
-        // Check uniqueness of (date, time, unit_id) combination, excluding current tour
-        $unitId = $data['unit_id'] ?? $tour->unit_id;
-        $date = $data['date'] ?? $tour->date;
-        $time = $data['time'] ?? $tour->time;
-
-        $exists = Tour::where('date', $date)
-            ->where('time', $time)
-            ->where('unit_id', $unitId)
-            ->where('representative_id', $data['representative_id'] ?? $tour->representative_id)
-            ->where('id', '!=', $tour->id)
-            ->exists();
-
-        if ($exists) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'A tour already exists for this unit, date, and time.');
-        }
 
         $this->service->updateTour($tour, $data);
 

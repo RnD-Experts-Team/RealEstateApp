@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import EmptyState from './index/EmptyState';
 import FilterBar from './index/FilterBar';
@@ -103,6 +103,7 @@ interface Props {
         is_hidden?: string | boolean;
         confirmed?: string | boolean;
         prospect?: string;
+        perPage?: string;
         page?: number;
     };
     representatives: Representative[];
@@ -155,6 +156,11 @@ export default function Index({ tours, filters, representatives, cities, propert
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
     const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+    const [currentPerPage, setCurrentPerPage] = useState<string>(filters?.perPage || '20');
+
+    useEffect(() => {
+        setCurrentPerPage(filters?.perPage || '20');
+    }, [filters]);
 
     const activeFilters = useMemo(() => {
         return !!(
@@ -229,17 +235,47 @@ export default function Index({ tours, filters, representatives, cities, propert
     };
 
     const handleSearch = (payload: Record<string, string>) => {
-        router.get(route('tours.index'), payload, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        });
+        router.get(
+            route('tours.index'),
+            { ...payload, perPage: currentPerPage, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
     };
 
     const handleClear = () => {
         router.get(
             route('tours.index'),
-            {},
+            { perPage: currentPerPage, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handlePerPageChange = (newPerPage: string) => {
+        setCurrentPerPage(newPerPage);
+
+        router.get(
+            route('tours.index'),
+            { ...filters, perPage: newPerPage, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handlePageChange = (newPage: number) => {
+        router.get(
+            route('tours.index'),
+            { ...filters, perPage: currentPerPage, page: newPage },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -402,55 +438,21 @@ export default function Index({ tours, filters, representatives, cities, propert
                                         }}
                                     />
 
-                                    <PaginationInfo meta={tours.meta} />
-
-                                    <div className="mt-4 flex items-center justify-end gap-3">
-                                        <button
-                                            className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
-                                            disabled={(tours.meta?.current_page ?? 1) <= 1}
-                                            onClick={() => {
-                                                router.get(
-                                                    route('tours.index'),
-                                                    {
-                                                        ...filters,
-                                                        page: (tours.meta?.current_page ?? 1) - 1,
-                                                    },
-                                                    {
-                                                        preserveState: true,
-                                                        preserveScroll: true,
-                                                        replace: true,
-                                                    },
-                                                );
-                                            }}
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <span className="text-sm">Rows per page:</span>
+                                        <select
+                                            className="rounded border bg-background px-2 py-1 text-foreground"
+                                            value={currentPerPage}
+                                            onChange={(e) => handlePerPageChange(e.target.value)}
                                         >
-                                            Previous
-                                        </button>
-
-                                        <span className="text-sm">
-                                            Page {tours.meta?.current_page ?? 1} of {tours.meta?.last_page ?? 1}
-                                        </span>
-
-                                        <button
-                                            className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
-                                            disabled={(tours.meta?.current_page ?? 1) >= (tours.meta?.last_page ?? 1)}
-                                            onClick={() => {
-                                                router.get(
-                                                    route('tours.index'),
-                                                    {
-                                                        ...filters,
-                                                        page: (tours.meta?.current_page ?? 1) + 1,
-                                                    },
-                                                    {
-                                                        preserveState: true,
-                                                        preserveScroll: true,
-                                                        replace: true,
-                                                    },
-                                                );
-                                            }}
-                                        >
-                                            Next
-                                        </button>
+                                            <option value="20">20</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="all">All</option>
+                                        </select>
                                     </div>
+
+                                    <PaginationInfo meta={tours.meta} perPage={currentPerPage} onPageChange={handlePageChange} />
                                 </>
                             ) : (
                                 <EmptyState />

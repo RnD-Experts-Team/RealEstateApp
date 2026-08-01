@@ -32,7 +32,22 @@ class UnitPaymentController extends Controller
             'is_hidden',
         ]);
 
-        $payments = $this->service->list($filters, 20);
+        $perPage = $request->input('perPage', 20);
+
+        $paymentsPaginator = $this->service->list($filters, $perPage);
+        $paymentsArray = $paymentsPaginator->toArray();
+        $payments = [
+            'data' => $paymentsArray['data'],
+            'links' => $paymentsArray['links'],
+            'meta' => [
+                'from' => $paymentsArray['from'],
+                'to' => $paymentsArray['to'],
+                'total' => $paymentsArray['total'],
+                'current_page' => $paymentsArray['current_page'],
+                'last_page' => $paymentsArray['last_page'],
+                'per_page' => $paymentsArray['per_page'],
+            ],
+        ];
 
         $cities = Cities::select('id', 'city')
             ->orderBy('city')
@@ -50,7 +65,7 @@ class UnitPaymentController extends Controller
 
         return Inertia::render('UnitPayments/Index', [
             'payments' => $payments,
-            'filters' => $filters,
+            'filters' => array_merge($filters, ['perPage' => (string) $perPage]),
             'cities' => $cities,
             'properties' => $properties,
             'units' => $units,

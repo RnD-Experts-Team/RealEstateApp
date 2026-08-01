@@ -1,0 +1,1 @@
+import{j as t}from"./app-CxncFUTr.js";import"./app-DpOdO2Zs.js";function s(){return t.jsxs("div",{className:"py-8 text-center text-muted-foreground",children:[t.jsx("p",{className:"text-lg",children:"No tours found matching your criteria."}),t.jsx("p",{className:"text-sm",children:"Try adjusting your filters or clearing them to see all tours."})]})}export{s as default};

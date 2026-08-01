@@ -7,7 +7,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UnitPaymentService
 {
-    public function list(array $filters = [], int $perPage = 20): LengthAwarePaginator
+    public function list(array $filters = [], string|int $perPage = 20): LengthAwarePaginator
     {
         $query = UnitPayment::with([
             'unit.property.city',
@@ -48,10 +48,12 @@ class UnitPaymentService
             $query->whereDate('date', $filters['date']);
         }
 
+        $perPageValue = ($perPage === 'all') ? max($query->count(), 1) : (int) $perPage;
+
         return $query
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc')
-            ->paginate($perPage)
+            ->paginate($perPageValue)
             ->withQueryString();
     }
 

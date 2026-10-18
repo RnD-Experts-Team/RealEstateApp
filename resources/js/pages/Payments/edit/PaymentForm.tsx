@@ -6,6 +6,7 @@ import DateField from './DateField';
 import OwesField from './OwesField';
 import PaidField from './PaidField';
 import AssistanceField from './AssistanceField';
+import { PaymentFlagsFields } from '../create/PaymentFlagsFields';
 import PermanentField from './PermanentField';
 import ReversedPaymentsField from './ReversedPaymentsField';
 import NotesField from './NotesField';
@@ -132,6 +133,13 @@ export default function PaymentForm({
                 data={data}
                 setData={setData}
                 errors={errors}
+            />
+
+            <PaymentFlagsFields
+                remind={data.remind}
+                addedToLedger={data.added_to_ledger}
+                onRemindChange={(value) => setData((prev: any) => ({ ...prev, remind: value }))}
+                onAddedToLedgerChange={(value) => setData((prev: any) => ({ ...prev, added_to_ledger: value }))}
             />
 
             <PermanentField

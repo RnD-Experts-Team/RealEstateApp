@@ -1,9 +1,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { OfferFilters } from '@/types/OfferRenewal';
 import { Link } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { Edit, Eye, Trash2 } from 'lucide-react';
+import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 import React from 'react';
 
 interface OfferRenewal {
@@ -32,6 +33,7 @@ interface OfferRenewal {
     other_tenants?: string;
     date_of_decline?: string;
     is_archived?: boolean;
+    is_hidden?: boolean;
     created_at?: string;
     updated_at?: string;
 }
@@ -41,12 +43,14 @@ interface OffersTableRowProps {
     activeTab: 'offers' | 'renewals' | 'both';
     onEdit: (offer: OfferRenewal) => void;
     onDelete: (offer: OfferRenewal) => void;
+    onToggleHidden: (offer: OfferRenewal) => void;
     permissions: {
         canView: boolean;
         canEdit: boolean;
         canDelete: boolean;
+        canHide: boolean;
     };
-    currentFilters: { city: string; property: string; unit: string; tenant: string };
+    currentFilters: OfferFilters;
     perPage: string | number;
     page: number;
 }
@@ -87,11 +91,13 @@ const getStatusBadge = (status: string | null) => {
 
 const getYesNoBadge = (value: string | null) => {
     if (!value || value === '-') return <Badge variant="outline">N/A</Badge>;
+    // lease_signed uses 'Signed'/'Unsigned' rather than 'Yes'/'No'
+    const positive = value === 'Yes' || value === 'Signed';
     return (
         <Badge
-            variant={value === 'Yes' ? 'default' : 'secondary'}
+            variant={positive ? 'default' : 'secondary'}
             className={
-                value === 'Yes'
+                positive
                     ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                     : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
             }
@@ -121,7 +127,17 @@ const getDaysLeftBadge = (days: string | number | null) => {
     }
 };
 
-export const OffersTableRow: React.FC<OffersTableRowProps> = ({ offer, activeTab, onEdit, onDelete, permissions, currentFilters, perPage, page }) => {
+export const OffersTableRow: React.FC<OffersTableRowProps> = ({
+    offer,
+    activeTab,
+    onEdit,
+    onDelete,
+    onToggleHidden,
+    permissions,
+    currentFilters,
+    perPage,
+    page,
+}) => {
     return (
         <TableRow className="border-border hover:bg-muted/50">
             <TableCell className="sticky left-0 z-10 border border-border bg-muted text-center font-medium text-foreground">
@@ -186,7 +202,7 @@ export const OffersTableRow: React.FC<OffersTableRowProps> = ({ offer, activeTab
                 <Badge variant={offer.expired === 'expired' ? 'destructive' : 'default'}>{offer.expired ?? 'N/A'}</Badge>
             </TableCell>
 
-            {(permissions.canView || permissions.canEdit || permissions.canDelete) && (
+            {(permissions.canView || permissions.canEdit || permissions.canDelete || permissions.canHide) && (
                 <TableCell className="border border-border text-center">
                     <div className="flex gap-1">
                         {permissions.canView && (
@@ -196,6 +212,8 @@ export const OffersTableRow: React.FC<OffersTableRowProps> = ({ offer, activeTab
                                     property_name: currentFilters.property || '',
                                     unit_name: currentFilters.unit || '',
                                     tenant_name: currentFilters.tenant || '',
+                                    is_hidden: currentFilters.is_hidden ? 'true' : '',
+                                    lease_filter: currentFilters.lease || '',
                                     per_page: String(perPage || ''),
                                     page: String(page || ''),
                                 }).toString()}`}
@@ -210,6 +228,28 @@ export const OffersTableRow: React.FC<OffersTableRowProps> = ({ offer, activeTab
                                 <Edit className="h-4 w-4" />
                             </Button>
                         )}
+                        {permissions.canHide &&
+                            (offer.is_hidden ? (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onToggleHidden(offer)}
+                                    className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-950"
+                                    title="Unhide"
+                                >
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onToggleHidden(offer)}
+                                    className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-900 dark:text-yellow-400 dark:hover:bg-yellow-950"
+                                    title="Hide"
+                                >
+                                    <EyeOff className="h-4 w-4" />
+                                </Button>
+                            ))}
                         {permissions.canDelete && (
                             <Button
                                 variant="outline"

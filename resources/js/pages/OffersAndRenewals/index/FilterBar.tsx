@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LeaseFilter, OfferFilters } from '@/types/OfferRenewal';
 import { Search, X, ChevronDown } from 'lucide-react';
 
 interface FilterBarProps {
@@ -8,13 +10,8 @@ interface FilterBarProps {
   properties: string[];
   units: string[];
   tenants: string[];
-  tempFilters: {
-    city: string;
-    property: string;
-    unit: string;
-    tenant: string;
-  };
-  onTempFiltersChange: (filters: any) => void;
+  tempFilters: OfferFilters;
+  onTempFiltersChange: (filters: OfferFilters) => void;
   onSearch: () => void;
   onClear: () => void;
 }
@@ -168,7 +165,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   );
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-4 lg:grid-cols-7">
       {/* City Filter with Autocomplete */}
       <div className="relative">
         <Input
@@ -293,8 +290,44 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         )}
       </div>
 
-      {/* Placeholder column for responsive grid */}
-      <div className="hidden md:block"></div>
+      {/* Lease signed filter (Radix Select can't use '' as a value, so 'all' stands in for no filter) */}
+      <Select
+        value={tempFilters.lease || 'all'}
+        onValueChange={(value) =>
+          onTempFiltersChange({ ...tempFilters, lease: value === 'all' ? '' : (value as LeaseFilter) })
+        }
+      >
+        <SelectTrigger className="bg-input text-input-foreground">
+          <SelectValue placeholder="Lease" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Lease: All</SelectItem>
+          <SelectItem value="signed">Lease: Signed</SelectItem>
+          <SelectItem value="unsigned">Lease: Not signed</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* Visible / Hidden toggle */}
+      <div className="flex h-10 w-full items-center rounded-md border border-input bg-input p-1">
+        <Button
+          type="button"
+          variant={tempFilters.is_hidden ? 'outline' : 'default'}
+          size="sm"
+          className="h-8 flex-1"
+          onClick={() => onTempFiltersChange({ ...tempFilters, is_hidden: false })}
+        >
+          Visible
+        </Button>
+        <Button
+          type="button"
+          variant={tempFilters.is_hidden ? 'default' : 'outline'}
+          size="sm"
+          className="h-8 flex-1"
+          onClick={() => onTempFiltersChange({ ...tempFilters, is_hidden: true })}
+        >
+          Hidden
+        </Button>
+      </div>
 
       {/* Search and Clear Buttons */}
       <div className="flex gap-2">

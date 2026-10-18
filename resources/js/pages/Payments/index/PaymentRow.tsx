@@ -89,6 +89,24 @@ export default function PaymentRow({
             <TableCell className="border border-border text-center text-foreground max-w-32 truncate">
                 {payment.assistance_company || <span className="text-muted-foreground">-</span>}
             </TableCell>
+            <TableCell className="border border-border text-center text-foreground">
+                {payment.remind ? (
+                    <span className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 px-2 py-1 rounded text-sm font-medium">
+                        Yes
+                    </span>
+                ) : (
+                    <span className="text-muted-foreground text-sm">No</span>
+                )}
+            </TableCell>
+            <TableCell className="border border-border text-center text-foreground">
+                {payment.added_to_ledger ? (
+                    <span className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-2 py-1 rounded text-sm font-medium">
+                        Yes
+                    </span>
+                ) : (
+                    <span className="text-muted-foreground text-sm">No</span>
+                )}
+            </TableCell>
             {showActions && (
                 <TableCell className="border border-border text-center">
                     <PaymentActions

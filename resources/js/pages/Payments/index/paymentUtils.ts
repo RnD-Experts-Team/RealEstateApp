@@ -51,6 +51,8 @@ export const exportToCSV = (data: Payment[], filename: string = 'payments.csv') 
             'Has Assistance',
             'Assistance Amount',
             'Assistance Company',
+            'Remind',
+            'Added to Ledger',
         ];
 
         const csvData = [
@@ -74,6 +76,8 @@ export const exportToCSV = (data: Payment[], filename: string = 'payments.csv') 
                             payment.has_assistance ? 'Yes' : 'No',
                             formatCurrency(payment.assistance_amount),
                             `"${formatString(payment.assistance_company)}"`,
+                            payment.remind ? 'Yes' : 'No',
+                            payment.added_to_ledger ? 'Yes' : 'No',
                         ].join(',');
                     } catch (rowError) {
                         console.error('Error processing payment row:', payment, rowError);

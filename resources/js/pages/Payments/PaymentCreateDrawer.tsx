@@ -8,6 +8,7 @@ import { PropertyField } from './create/PropertyField';
 import { UnitField } from './create/UnitField';
 import { FinancialFields } from './create/FinancialFields';
 import { AssistanceFields } from './create/AssistanceFields';
+import { PaymentFlagsFields } from './create/PaymentFlagsFields';
 import { PermanentField } from './create/PermanentField';
 import { ReversedPaymentsField } from './create/ReversedPaymentsField';
 import { NotesField } from './create/NotesField';
@@ -38,6 +39,8 @@ interface Props {
         unit?: string;
         permanent?: string[];
         is_hidden?: boolean;
+        remind?: boolean | null;
+        added_to_ledger?: boolean | null;
         per_page?: string;
         page?: number;
     };
@@ -77,6 +80,8 @@ export default function PaymentCreateDrawer({
         has_assistance: false as boolean,
         assistance_amount: '',
         assistance_company: '',
+        remind: false as boolean,
+        added_to_ledger: false as boolean,
     });
 
     const getAvailableProperties = (): string[] => {
@@ -209,6 +214,10 @@ export default function PaymentCreateDrawer({
             params.filter_permanent = filtersContext.permanent.join(',');
         }
         if (filtersContext?.is_hidden) params.filter_is_hidden = 'true';
+        if (typeof filtersContext?.remind === 'boolean') params.filter_remind = String(filtersContext.remind);
+        if (typeof filtersContext?.added_to_ledger === 'boolean') {
+            params.filter_added_to_ledger = String(filtersContext.added_to_ledger);
+        }
         if (filtersContext?.per_page) params.filter_per_page = filtersContext.per_page;
         if (filtersContext?.page) params.filter_page = filtersContext.page;
 
@@ -312,6 +321,13 @@ export default function PaymentCreateDrawer({
                                 onAssistanceCompanyChange={(value) => setData('assistance_company', value)}
                                 assistanceAmountError={errors.assistance_amount}
                                 assistanceCompanyError={errors.assistance_company}
+                            />
+
+                            <PaymentFlagsFields
+                                remind={data.remind}
+                                addedToLedger={data.added_to_ledger}
+                                onRemindChange={(value) => setData('remind', value)}
+                                onAddedToLedgerChange={(value) => setData('added_to_ledger', value)}
                             />
 
                             <PermanentField

@@ -9,6 +9,7 @@ import LeaseInformationSection from './create/LeaseInformationSection';
 import RenewalInformationSection from './create/RenewalInformationSection';
 import AdditionalFieldsSection from './create/AdditionalFieldsSection';
 import DateOfDeclineSection from './create/DateOfDeclineSection';
+import { OfferFilters } from '@/types/OfferRenewal';
 
 interface HierarchicalData {
     id: number;
@@ -37,7 +38,7 @@ interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess?: () => void;
-    currentFilters: { city: string; property: string; unit: string; tenant: string };
+    currentFilters: OfferFilters;
     perPage: string | number;
     page: number;
 }
@@ -200,6 +201,8 @@ export default function OffersAndRenewalsCreateDrawer({ hierarchicalData, open, 
             property_name: currentFilters.property || '',
             unit_name: currentFilters.unit || '',
             tenant_name: currentFilters.tenant || '',
+            is_hidden: currentFilters.is_hidden ? 'true' : '',
+            lease_filter: currentFilters.lease || '',
             per_page: String(perPage),
             page: page,
         };

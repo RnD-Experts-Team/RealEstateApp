@@ -36,20 +36,25 @@ class PaymentController extends Controller
         $unitFilter = $request->get('unit');
         $permanentFilter = $request->get('permanent') ? explode(',', $request->get('permanent')) : null;
         $isHiddenFilter = $request->get('is_hidden') === 'true';
+        $remindFilter = $this->booleanFilter($request, 'remind');
+        $addedToLedgerFilter = $this->booleanFilter($request, 'added_to_ledger');
         $perPageParam = $request->get('per_page', '15'); // '15' | '30' | '50' | 'all'
 
         // Update all payment statuses before displaying
         $this->paymentService->updateAllStatuses();
 
         // Handle filtering
-        if ($permanentFilter || $isHiddenFilter || $cityFilter || $propertyFilter || $unitFilter) {
+        $hasFlagFilter = $remindFilter !== null || $addedToLedgerFilter !== null;
+        if ($permanentFilter || $isHiddenFilter || $hasFlagFilter || $cityFilter || $propertyFilter || $unitFilter) {
             $payments = $this->paymentService->filterPayments(
                 $permanentFilter,
                 $isHiddenFilter,
                 $cityFilter,
                 $propertyFilter,
                 $unitFilter,
-                $perPageParam
+                $perPageParam,
+                $remindFilter,
+                $addedToLedgerFilter
             );
         } elseif ($search) {
             $payments = $this->paymentService->searchPayments($search, $perPageParam);
@@ -75,6 +80,8 @@ class PaymentController extends Controller
                 'assistance_amount' => $payment->assistance_amount ?? 0,
                 'assistance_company' => $payment->assistance_company,
                 'is_hidden' => $payment->is_hidden,
+                'remind' => $payment->remind,
+                'added_to_ledger' => $payment->added_to_ledger,
                 'created_at' => $payment->created_at,
                 'updated_at' => $payment->updated_at,
                 'city' => $payment->unit && $payment->unit->property && $payment->unit->property->city
@@ -101,6 +108,8 @@ class PaymentController extends Controller
                 'unit' => $unitFilter,
                 'permanent' => $permanentFilter,
                 'is_hidden' => $isHiddenFilter,
+                'remind' => $remindFilter,
+                'added_to_ledger' => $addedToLedgerFilter,
                 'per_page' => $perPageParam,
             ],
             'cities' => $dropdownData['cities'],
@@ -144,6 +153,8 @@ class PaymentController extends Controller
             'assistance_amount' => $payment->assistance_amount ?? 0,
             'assistance_company' => $payment->assistance_company,
             'is_hidden' => $payment->is_hidden,
+            'remind' => $payment->remind,
+            'added_to_ledger' => $payment->added_to_ledger,
             'created_at' => $payment->created_at,
             'updated_at' => $payment->updated_at,
             'city' => $payment->unit && $payment->unit->property && $payment->unit->property->city
@@ -160,6 +171,8 @@ class PaymentController extends Controller
         $permanentFilter = $request->get('permanent') ? explode(',', $request->get('permanent')) : null;
         $isHiddenParam = $request->get('is_hidden');
         $isHiddenFilter = in_array(strtolower((string)$isHiddenParam), ['true', '1', 'yes'], true);
+        $remindFilter = $this->booleanFilter($request, 'remind');
+        $addedToLedgerFilter = $this->booleanFilter($request, 'added_to_ledger');
 
         // Compute neighbors within filtered set (ignoring pagination)
         $orderedIds = $this->paymentService->getFilteredOrderedPaymentIds(
@@ -167,7 +180,9 @@ class PaymentController extends Controller
             $isHiddenFilter,
             $cityFilter,
             $propertyFilter,
-            $unitFilter
+            $unitFilter,
+            $remindFilter,
+            $addedToLedgerFilter
         );
 
         $prevId = null;
@@ -196,6 +211,8 @@ class PaymentController extends Controller
                 'unit' => $unitFilter,
                 'permanent' => $permanentFilter,
                 'is_hidden' => $isHiddenFilter,
+                'remind' => $remindFilter,
+                'added_to_ledger' => $addedToLedgerFilter,
             ],
         ]);
     }
@@ -258,6 +275,8 @@ class PaymentController extends Controller
                 'filter_unit' => 'unit',
                 'filter_permanent' => 'permanent',
                 'filter_is_hidden' => 'is_hidden',
+                'filter_remind' => 'remind',
+                'filter_added_to_ledger' => 'added_to_ledger',
                 'filter_per_page' => 'per_page',
                 'filter_page' => 'page',
             ];
@@ -267,7 +286,7 @@ class PaymentController extends Controller
                 }
             }
         } else {
-            $keys = ['city', 'property', 'unit', 'permanent', 'is_hidden', 'per_page', 'page'];
+            $keys = ['city', 'property', 'unit', 'permanent', 'is_hidden', 'remind', 'added_to_ledger', 'per_page', 'page'];
             foreach ($keys as $key) {
                 if ($request->has($key)) {
                     $params[$key] = $request->input($key);
@@ -276,5 +295,18 @@ class PaymentController extends Controller
         }
 
         return $params;
+    }
+
+    /**
+     * Read a Yes/No filter from the query: null when absent or invalid (= all), otherwise true/false.
+     */
+    private function booleanFilter(Request $request, string $key): ?bool
+    {
+        $value = $request->get($key);
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     }
 }

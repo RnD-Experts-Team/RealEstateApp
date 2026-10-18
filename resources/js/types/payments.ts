@@ -27,6 +27,10 @@ export interface Payment {
     
     // Visibility field - managed only via separate hide/unhide actions
     is_hidden: boolean;
+
+    // Follow-up flags
+    remind: boolean; // tenant needs reminding (can't use the portals)
+    added_to_ledger: boolean;
     
     // Audit fields
     is_archived: boolean;
@@ -159,6 +163,8 @@ export interface PaymentFilters {
     status?: string[];
     permanent?: string[];
     is_hidden?: boolean;
+    remind?: boolean | null; // null/undefined = all
+    added_to_ledger?: boolean | null;
     date_from?: string;
     date_to?: string;
     search?: string;

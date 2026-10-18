@@ -27,6 +27,8 @@ interface PaymentFormData {
     has_assistance: boolean;
     assistance_amount: string;
     assistance_company: string;
+    remind: boolean;
+    added_to_ledger: boolean;
     [key: string]: any;
 }
 
@@ -48,6 +50,8 @@ interface Props {
         unit?: string;
         permanent?: string[];
         is_hidden?: boolean;
+        remind?: boolean | null;
+        added_to_ledger?: boolean | null;
         per_page?: string;
         page?: number;
     };
@@ -94,6 +98,8 @@ export default function PaymentEditDrawer({
         has_assistance: false,
         assistance_amount: '',
         assistance_company: '',
+        remind: false,
+        added_to_ledger: false,
     });
 
     useEffect(() => {
@@ -110,6 +116,8 @@ export default function PaymentEditDrawer({
             has_assistance: (payment as any).has_assistance ?? false,
             assistance_amount: (payment as any).assistance_amount?.toString() ?? '',
             assistance_company: (payment as any).assistance_company ?? '',
+            remind: payment.remind ?? false,
+            added_to_ledger: payment.added_to_ledger ?? false,
         });
 
         setSelectedCity(payment.city ?? '');
@@ -285,6 +293,10 @@ export default function PaymentEditDrawer({
             params.filter_permanent = filtersContext.permanent.join(',');
         }
         if (filtersContext?.is_hidden) params.filter_is_hidden = 'true';
+        if (typeof filtersContext?.remind === 'boolean') params.filter_remind = String(filtersContext.remind);
+        if (typeof filtersContext?.added_to_ledger === 'boolean') {
+            params.filter_added_to_ledger = String(filtersContext.added_to_ledger);
+        }
         if (filtersContext?.per_page) params.filter_per_page = filtersContext.per_page;
         if (filtersContext?.page) params.filter_page = filtersContext.page;
 
@@ -317,6 +329,8 @@ export default function PaymentEditDrawer({
             has_assistance: (payment as any).has_assistance ?? false,
             assistance_amount: (payment as any).assistance_amount?.toString() ?? '',
             assistance_company: (payment as any).assistance_company ?? '',
+            remind: payment.remind ?? false,
+            added_to_ledger: payment.added_to_ledger ?? false,
         });
 
         setSelectedCity(payment.city ?? '');

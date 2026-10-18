@@ -55,6 +55,8 @@ class PaymentService
         // Never allow mass-assign on is_hidden
         unset($data['is_hidden']);
 
+        $data = $this->normalizeFlags($data);
+
         // If assistance is marked as false, nullify assistance fields
         if (array_key_exists('has_assistance', $data)) {
             $hasAssistance = filter_var($data['has_assistance'], FILTER_VALIDATE_BOOLEAN);
@@ -83,6 +85,8 @@ class PaymentService
 
         unset($data['is_hidden']);
 
+        $data = $this->normalizeFlags($data);
+
         // If assistance is marked as false, nullify assistance fields
         if (array_key_exists('has_assistance', $data)) {
             $hasAssistance = filter_var($data['has_assistance'], FILTER_VALIDATE_BOOLEAN);
@@ -101,6 +105,34 @@ class PaymentService
         }
 
         return $payment->update($data);
+    }
+
+    /**
+     * Cast the remind / added_to_ledger flags to booleans (null -> false; the columns are NOT NULL)
+     */
+    private function normalizeFlags(array $data): array
+    {
+        foreach (['remind', 'added_to_ledger'] as $flag) {
+            if (array_key_exists($flag, $data)) {
+                $data[$flag] = filter_var($data[$flag], FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Remind / Added to Ledger filters: null = all, true/false = only matching
+     */
+    private function applyFlagFilters($query, ?bool $remindFilter, ?bool $addedToLedgerFilter): void
+    {
+        if ($remindFilter !== null) {
+            $query->where('remind', $remindFilter);
+        }
+
+        if ($addedToLedgerFilter !== null) {
+            $query->where('added_to_ledger', $addedToLedgerFilter);
+        }
     }
 
     public function deletePayment(Payment $payment): bool
@@ -241,9 +273,13 @@ class PaymentService
         ?string $city = null,
         ?string $property = null,
         ?string $unit = null,
-        int|string $perPage = 15
+        int|string $perPage = 15,
+        ?bool $remindFilter = null,
+        ?bool $addedToLedgerFilter = null
     ): LengthAwarePaginator {
         $query = Payment::with(['unit.property.city']);
+
+        $this->applyFlagFilters($query, $remindFilter, $addedToLedgerFilter);
 
         // No status filtering; include all statuses
 
@@ -294,9 +330,13 @@ class PaymentService
         ?bool $isHiddenFilter = false,
         ?string $city = null,
         ?string $property = null,
-        ?string $unit = null
+        ?string $unit = null,
+        ?bool $remindFilter = null,
+        ?bool $addedToLedgerFilter = null
     ): array {
         $query = Payment::query()->with(['unit.property.city']);
+
+        $this->applyFlagFilters($query, $remindFilter, $addedToLedgerFilter);
 
         if ($permanentFilter && count($permanentFilter) > 0) {
             $query->whereIn('permanent', $permanentFilter);

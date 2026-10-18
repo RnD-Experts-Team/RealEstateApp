@@ -177,6 +177,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Offers & Renewals
     Route::resource('offers_and_renewals', OffersAndRenewalController::class);
+    Route::patch('/offers_and_renewals/{offers_and_renewal}/hide', [OffersAndRenewalController::class, 'hide'])->name('offers_and_renewals.hide');
+    Route::patch('/offers_and_renewals/{offers_and_renewal}/unhide', [OffersAndRenewalController::class, 'unhide'])->name('offers_and_renewals.unhide');
 
     // Notices
     Route::resource('notices', NoticeController::class);

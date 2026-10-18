@@ -26,8 +26,21 @@ export interface OfferRenewal {
   how_many_days_left?: number;
   expired?: string;
   is_archived?: boolean;
+  is_hidden?: boolean;
   created_at?: string;
   updated_at?: string;
+}
+
+export type LeaseFilter = '' | 'signed' | 'unsigned';
+
+// Index page filter state (also passed to rows/drawers to keep context on redirect)
+export interface OfferFilters {
+  city: string;
+  property: string;
+  unit: string;
+  tenant: string;
+  is_hidden: boolean;
+  lease: LeaseFilter;
 }
 
 export interface HierarchicalData {

@@ -45,10 +45,12 @@ class OffersAndRenewalController extends Controller
             'tenant_name' => $request->get('tenant_name'),
         ];
 
+        $flagFilters = $this->flagFilters($request);
+
         $perPage = $request->get('per_page', 15);
         $page = (int) $request->get('page', 1);
 
-        $offers = $this->service->getOffers($filters, $nameFilters, $perPage, $page);
+        $offers = $this->service->getOffers($filters, $nameFilters, $perPage, $page, $flagFilters);
 
         // Transform offers data to include relationship data as direct properties
         if ($offers instanceof \Illuminate\Pagination\LengthAwarePaginator) {
@@ -81,6 +83,7 @@ class OffersAndRenewalController extends Controller
                     'other_tenants' => $offer->other_tenants,
                     'date_of_decline' => $offer->date_of_decline,
                     'is_archived' => $offer->is_archived,
+                    'is_hidden' => (bool) $offer->is_hidden,
                     'created_at' => $offer->created_at,
                     'updated_at' => $offer->updated_at,
                 ];
@@ -115,6 +118,7 @@ class OffersAndRenewalController extends Controller
                     'other_tenants' => $offer->other_tenants,
                     'date_of_decline' => $offer->date_of_decline,
                     'is_archived' => $offer->is_archived,
+                    'is_hidden' => (bool) $offer->is_hidden,
                     'created_at' => $offer->created_at,
                     'updated_at' => $offer->updated_at,
                 ];
@@ -131,6 +135,8 @@ class OffersAndRenewalController extends Controller
             'property_name' => $nameFilters['property_name'],
             'unit_name' => $nameFilters['unit_name'],
             'tenant_name' => $nameFilters['tenant_name'],
+            'is_hidden' => $flagFilters['is_hidden'],
+            'lease_filter' => $flagFilters['lease_signed'],
             'hierarchicalData' => $dropdownData['hierarchicalData'],
             'filterCityNames' => $dropdownData['filterCityNames'],
             'filterPropertyNames' => $dropdownData['filterPropertyNames'],
@@ -145,16 +151,7 @@ class OffersAndRenewalController extends Controller
     {
         $offer = $this->service->createOffer($request->validatedWithTenantId());
 
-        $redirectParams = array_filter([
-            'city_name' => $request->input('city_name'),
-            'property_name' => $request->input('property_name'),
-            'unit_name' => $request->input('unit_name'),
-            'tenant_name' => $request->input('tenant_name'),
-            'per_page' => $request->input('per_page'),
-            'page' => $request->input('page'),
-        ], function ($v) {
-            return $v !== null && $v !== '';
-        });
+        $redirectParams = $this->redirectParams($request);
 
         return redirect()->route('offers_and_renewals.index', $redirectParams)
             ->with('success', 'Offer created successfully.');
@@ -175,6 +172,8 @@ class OffersAndRenewalController extends Controller
             'unit_name' => request()->get('unit_name'),
             'tenant_name' => request()->get('tenant_name'),
         ];
+
+        $flagFilters = $this->flagFilters(request());
 
         $perPage = request()->get('per_page');
         $page = request()->get('page');
@@ -209,11 +208,12 @@ class OffersAndRenewalController extends Controller
             'other_tenants' => $offerWithRelations->other_tenants,
             'date_of_decline' => $offerWithRelations->date_of_decline,
             'is_archived' => $offerWithRelations->is_archived,
+            'is_hidden' => (bool) $offerWithRelations->is_hidden,
             'created_at' => $offerWithRelations->created_at,
             'updated_at' => $offerWithRelations->updated_at,
         ];
 
-        $neighbors = $this->service->getNeighborOfferIds($filters, $nameFilters, $offers_and_renewal->id);
+        $neighbors = $this->service->getNeighborOfferIds($filters, $nameFilters, $offers_and_renewal->id, $flagFilters);
 
         return Inertia::render('OffersAndRenewals/Show', [
             'offer' => $transformedOffer,
@@ -223,6 +223,8 @@ class OffersAndRenewalController extends Controller
             'property_name' => $nameFilters['property_name'],
             'unit_name' => $nameFilters['unit_name'],
             'tenant_name' => $nameFilters['tenant_name'],
+            'is_hidden' => $flagFilters['is_hidden'],
+            'lease_filter' => $flagFilters['lease_signed'],
             'perPage' => $perPage,
             'page' => $page,
         ]);
@@ -232,16 +234,7 @@ class OffersAndRenewalController extends Controller
     {
         $offer = $this->service->updateOffer($offers_and_renewal, $request->validatedWithTenantId());
 
-        $redirectParams = array_filter([
-            'city_name' => $request->input('city_name'),
-            'property_name' => $request->input('property_name'),
-            'unit_name' => $request->input('unit_name'),
-            'tenant_name' => $request->input('tenant_name'),
-            'per_page' => $request->input('per_page'),
-            'page' => $request->input('page'),
-        ], function ($v) {
-            return $v !== null && $v !== '';
-        });
+        $redirectParams = $this->redirectParams($request);
 
         return redirect()->route('offers_and_renewals.index', $redirectParams)
             ->with('success', 'Offer updated successfully.');
@@ -251,19 +244,59 @@ class OffersAndRenewalController extends Controller
     {
         $this->service->deleteOffer($offers_and_renewal);
 
-        $redirectParams = array_filter([
-            'city_name' => request()->input('city_name'),
-            'property_name' => request()->input('property_name'),
-            'unit_name' => request()->input('unit_name'),
-            'tenant_name' => request()->input('tenant_name'),
-            'per_page' => request()->input('per_page'),
-            'page' => request()->input('page'),
-        ], function ($v) {
-            return $v !== null && $v !== '';
-        });
+        $redirectParams = $this->redirectParams(request());
 
         return redirect()->route('offers_and_renewals.index', $redirectParams)
             ->with('success', 'Offer archived successfully.');
+    }
+
+    public function hide(Request $request, OffersAndRenewal $offers_and_renewal)
+    {
+        $this->service->hideOffer($offers_and_renewal);
+
+        return redirect()->route('offers_and_renewals.index', $this->redirectParams($request))
+            ->with('success', 'Offer hidden.');
+    }
+
+    public function unhide(Request $request, OffersAndRenewal $offers_and_renewal)
+    {
+        $this->service->unhideOffer($offers_and_renewal);
+
+        return redirect()->route('offers_and_renewals.index', $this->redirectParams($request))
+            ->with('success', 'Offer unhidden.');
+    }
+
+    /**
+     * Visible/Hidden toggle and lease-signed filter (null = all, 'signed', 'unsigned')
+     */
+    private function flagFilters(Request $request): array
+    {
+        // Named lease_filter so it doesn't collide with the lease_signed form field on store/update
+        $leaseFilter = $request->get('lease_filter');
+
+        return [
+            'is_hidden' => filter_var($request->get('is_hidden', false), FILTER_VALIDATE_BOOLEAN),
+            'lease_signed' => in_array($leaseFilter, ['signed', 'unsigned'], true) ? $leaseFilter : null,
+        ];
+    }
+
+    /**
+     * Filters and pagination to keep when redirecting back to the index
+     */
+    private function redirectParams(Request $request): array
+    {
+        return array_filter([
+            'city_name' => $request->input('city_name'),
+            'property_name' => $request->input('property_name'),
+            'unit_name' => $request->input('unit_name'),
+            'tenant_name' => $request->input('tenant_name'),
+            'is_hidden' => $request->input('is_hidden'),
+            'lease_filter' => $request->input('lease_filter'),
+            'per_page' => $request->input('per_page'),
+            'page' => $request->input('page'),
+        ], function ($v) {
+            return $v !== null && $v !== '';
+        });
     }
 
     /**

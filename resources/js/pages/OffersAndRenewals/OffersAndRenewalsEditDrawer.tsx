@@ -11,6 +11,7 @@ import DatePickerField from './edit/DatePickerField';
 import RadioGroupField from './edit/RadioGroupField';
 import TextAreaField from './edit/TextAreaField';
 import DateOfDeclineSectionEdit from './edit/DateOfDeclineSectionEdit';
+import { OfferFilters } from '@/types/OfferRenewal';
 
 interface HierarchicalData {
   id: number;
@@ -64,7 +65,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-  currentFilters: { city: string; property: string; unit: string; tenant: string };
+  currentFilters: OfferFilters;
   perPage: string | number;
   page: number;
 }
@@ -304,6 +305,8 @@ export default function OffersAndRenewalsEditDrawer({ offer, hierarchicalData, o
       property_name: currentFilters.property || '',
       unit_name: currentFilters.unit || '',
       tenant_name: currentFilters.tenant || '',
+      is_hidden: currentFilters.is_hidden ? 'true' : '',
+      lease_filter: currentFilters.lease || '',
       per_page: String(perPage),
       page: page,
     };

@@ -16,6 +16,8 @@ interface Filters {
     unit?: string;
     permanent?: string[];
     is_hidden?: boolean;
+    remind?: boolean | null;
+    added_to_ledger?: boolean | null;
 }
 
 interface PaginationControlsProps {
@@ -37,6 +39,8 @@ export default function PaginationControls({ meta, links, perPage, onPerPageChan
         if (filters.unit) params.unit = filters.unit;
         if (filters.permanent && filters.permanent.length > 0) params.permanent = filters.permanent.join(',');
         if (filters.is_hidden) params.is_hidden = 'true';
+        if (typeof filters.remind === 'boolean') params.remind = String(filters.remind);
+        if (typeof filters.added_to_ledger === 'boolean') params.added_to_ledger = String(filters.added_to_ledger);
         params.per_page = extra.per_page ?? perPage;
         return { ...params, ...extra };
     };

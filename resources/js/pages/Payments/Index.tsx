@@ -42,6 +42,8 @@ interface Props {
         unit?: string;
         permanent?: string[];
         is_hidden?: boolean;
+        remind?: boolean | null;
+        added_to_ledger?: boolean | null;
         per_page?: string;
     };
     units: UnitData[];
@@ -82,6 +84,8 @@ export default function Index({
     // Status and other filters
     const [permanentFilter, setPermanentFilter] = useState<string[]>(filters?.permanent || []);
     const [isHiddenFilter, setIsHiddenFilter] = useState<boolean>(filters?.is_hidden || false);
+    const [remindFilter, setRemindFilter] = useState<boolean | null>(filters?.remind ?? null);
+    const [addedToLedgerFilter, setAddedToLedgerFilter] = useState<boolean | null>(filters?.added_to_ledger ?? null);
 
     // Shared per-page state for pagination and search
     const [perPage, setPerPage] = useState<string>(filters?.per_page || '15');
@@ -90,19 +94,36 @@ export default function Index({
         setPerPage(filters?.per_page || '15');
     }, [filters?.per_page]);
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        const params: any = {};
+    // Current filters as passed to child components
+    const currentFilters = {
+        city: cityFilter || undefined,
+        property: propertyFilter || undefined,
+        unit: unitFilter || undefined,
+        permanent: permanentFilter,
+        is_hidden: isHiddenFilter,
+        remind: remindFilter,
+        added_to_ledger: addedToLedgerFilter,
+    };
 
+    // Query params for the current filters, per-page and page
+    const buildFilterParams = (page: number = payments?.meta?.current_page || 1) => {
+        const params: any = {};
         if (cityFilter) params.city = cityFilter;
         if (propertyFilter) params.property = propertyFilter;
         if (unitFilter) params.unit = unitFilter;
         if (permanentFilter && permanentFilter.length > 0) params.permanent = permanentFilter.join(',');
         if (isHiddenFilter) params.is_hidden = 'true';
-
-        // Ensure current per-page is respected and reset to first page
+        if (remindFilter !== null) params.remind = String(remindFilter);
+        if (addedToLedgerFilter !== null) params.added_to_ledger = String(addedToLedgerFilter);
         params.per_page = perPage;
-        params.page = 1;
+        params.page = page;
+        return params;
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Ensure current per-page is respected and reset to first page
+        const params = buildFilterParams(1);
 
         router.get(route('payments.index'), params, {
             preserveState: true,
@@ -116,6 +137,8 @@ export default function Index({
         setUnitFilter('');
         setPermanentFilter([]);
         setIsHiddenFilter(false);
+        setRemindFilter(null);
+        setAddedToLedgerFilter(null);
         // Reset per_page to 15 and page to 1 when clearing filters
         setPerPage('15');
         router.get(route('payments.index'), { per_page: '15', page: 1 }, {
@@ -126,14 +149,7 @@ export default function Index({
 
     const handleDelete = (payment: Payment) => {
         if (confirm('Are you sure you want to delete this payment?')) {
-            const params: any = {};
-            if (cityFilter) params.city = cityFilter;
-            if (propertyFilter) params.property = propertyFilter;
-            if (unitFilter) params.unit = unitFilter;
-            if (permanentFilter && permanentFilter.length > 0) params.permanent = permanentFilter.join(',');
-            if (isHiddenFilter) params.is_hidden = 'true';
-            params.per_page = perPage;
-            params.page = payments?.meta?.current_page || 1;
+            const params = buildFilterParams();
 
             router.delete(route('payments.destroy', payment.id), {
                 data: params,
@@ -145,14 +161,7 @@ export default function Index({
 
     const handleHide = (payment: Payment) => {
         if (confirm('Are you sure you want to hide this payment?')) {
-            const params: any = {};
-            if (cityFilter) params.city = cityFilter;
-            if (propertyFilter) params.property = propertyFilter;
-            if (unitFilter) params.unit = unitFilter;
-            if (permanentFilter && permanentFilter.length > 0) params.permanent = permanentFilter.join(',');
-            if (isHiddenFilter) params.is_hidden = 'true';
-            params.per_page = perPage;
-            params.page = payments?.meta?.current_page || 1;
+            const params = buildFilterParams();
 
             router.patch(route('payments.hide', payment.id), params, {
                 preserveState: true,
@@ -163,14 +172,7 @@ export default function Index({
 
     const handleUnhide = (payment: Payment) => {
         if (confirm('Are you sure you want to unhide this payment?')) {
-            const params: any = {};
-            if (cityFilter) params.city = cityFilter;
-            if (propertyFilter) params.property = propertyFilter;
-            if (unitFilter) params.unit = unitFilter;
-            if (permanentFilter && permanentFilter.length > 0) params.permanent = permanentFilter.join(',');
-            if (isHiddenFilter) params.is_hidden = 'true';
-            params.per_page = perPage;
-            params.page = payments?.meta?.current_page || 1;
+            const params = buildFilterParams();
 
             router.patch(route('payments.unhide', payment.id), params, {
                 preserveState: true,
@@ -242,6 +244,10 @@ export default function Index({
                         setUnitFilter={setUnitFilter}
                         setPermanentFilter={setPermanentFilter}
                         setIsHiddenFilter={setIsHiddenFilter}
+                        remindFilter={remindFilter}
+                        setRemindFilter={setRemindFilter}
+                        addedToLedgerFilter={addedToLedgerFilter}
+                        setAddedToLedgerFilter={setAddedToLedgerFilter}
                         uniqueCities={allCities}
                         uniqueProperties={allProperties}
                         units={units}
@@ -262,26 +268,14 @@ export default function Index({
                                 hasAnyPermission={hasAnyPermission}
                                 hasAllPermissions={hasAllPermissions}
                                 hasPermission={hasPermission}
-                                filters={{
-                                    city: cityFilter || undefined,
-                                    property: propertyFilter || undefined,
-                                    unit: unitFilter || undefined,
-                                    permanent: permanentFilter,
-                                    is_hidden: isHiddenFilter,
-                                }}
+                                filters={currentFilters}
                             />
                             <PaginationControls
                                 meta={payments.meta}
                                 links={payments.links}
                                 perPage={perPage}
                                 onPerPageChange={setPerPage}
-                                filters={{
-                                    city: cityFilter || undefined,
-                                    property: propertyFilter || undefined,
-                                    unit: unitFilter || undefined,
-                                    permanent: permanentFilter,
-                                    is_hidden: isHiddenFilter,
-                                }}
+                                filters={currentFilters}
                             />
                             <PaginationInfo meta={payments.meta} />
                         </>
@@ -299,11 +293,7 @@ export default function Index({
                 unitsByProperty={unitsByProperty}
                 propertiesByCity={propertiesByCity}
                 filtersContext={{
-                    city: cityFilter || undefined,
-                    property: propertyFilter || undefined,
-                    unit: unitFilter || undefined,
-                    permanent: permanentFilter,
-                    is_hidden: isHiddenFilter,
+                    ...currentFilters,
                     per_page: perPage,
                     page: payments?.meta?.current_page || 1,
                 }}
@@ -322,11 +312,7 @@ export default function Index({
                     onOpenChange={setEditDrawerOpen}
                     onSuccess={handleEditSuccess}
                     filtersContext={{
-                        city: cityFilter || undefined,
-                        property: propertyFilter || undefined,
-                        unit: unitFilter || undefined,
-                        permanent: permanentFilter,
-                        is_hidden: isHiddenFilter,
+                        ...currentFilters,
                         per_page: perPage,
                         page: payments?.meta?.current_page || 1,
                     }}

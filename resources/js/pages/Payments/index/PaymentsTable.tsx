@@ -54,6 +54,8 @@ export default function PaymentsTable({
                             <TableHead className="border border-border bg-muted text-muted-foreground">Has Assistance</TableHead>
                             <TableHead className="border border-border bg-muted text-muted-foreground">Assistance Amount</TableHead>
                             <TableHead className="border border-border bg-muted text-muted-foreground">Assistance Company</TableHead>
+                            <TableHead className="border border-border bg-muted text-muted-foreground">Remind</TableHead>
+                            <TableHead className="border border-border bg-muted text-muted-foreground">Added to Ledger</TableHead>
                             {showActions && <TableHead className="border border-border bg-muted text-muted-foreground">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>

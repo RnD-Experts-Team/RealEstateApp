@@ -34,6 +34,8 @@ class UpdatePaymentRequest extends FormRequest
             'has_assistance' => ['sometimes', 'nullable', 'boolean'],
             'assistance_amount' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999.99'],
             'assistance_company' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'remind' => ['sometimes', 'nullable', 'boolean'],
+            'added_to_ledger' => ['sometimes', 'nullable', 'boolean'],
         ];
     }
 

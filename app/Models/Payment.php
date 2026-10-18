@@ -25,6 +25,8 @@ class Payment extends Model
         'has_assistance',
         'assistance_amount',
         'assistance_company',
+        'remind',
+        'added_to_ledger',
         // 'is_hidden' intentionally NOT mass-assignable; managed via actions only
     ];
 
@@ -37,6 +39,8 @@ class Payment extends Model
         'is_archived' => 'boolean',
         'has_assistance' => 'boolean',
         'is_hidden' => 'boolean',
+        'remind' => 'boolean',
+        'added_to_ledger' => 'boolean',
         'unit_id' => 'integer',
     ];
 

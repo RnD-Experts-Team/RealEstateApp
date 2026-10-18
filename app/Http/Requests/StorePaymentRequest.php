@@ -33,6 +33,8 @@ class StorePaymentRequest extends FormRequest
             'has_assistance' => ['nullable', 'boolean'],
             'assistance_amount' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'assistance_company' => ['nullable', 'string', 'max:255'],
+            'remind' => ['nullable', 'boolean'],
+            'added_to_ledger' => ['nullable', 'boolean'],
         ];
     }
 

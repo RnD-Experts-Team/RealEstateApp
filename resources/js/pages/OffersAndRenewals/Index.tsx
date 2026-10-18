@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Table, TableBody } from '@/components/ui/table';
 import { usePermissions } from '@/hooks/usePermissions';
 import AppLayout from '@/layouts/app-layout';
+import { LeaseFilter, OfferFilters } from '@/types/OfferRenewal';
 import { PaginatedResponse } from '@/types/PaymentPlan';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
@@ -42,6 +43,7 @@ interface OfferRenewal {
     other_tenants?: string;
     date_of_decline?: string;
     is_archived?: boolean;
+    is_hidden?: boolean;
     created_at?: string;
     updated_at?: string;
 }
@@ -54,6 +56,8 @@ interface Props {
     property_name?: string | null;
     unit_name?: string | null;
     tenant_name?: string | null;
+    is_hidden?: boolean;
+    lease_filter?: LeaseFilter | null;
     hierarchicalData: any[];
     filterCityNames: string[];
     filterPropertyNames: string[];
@@ -75,6 +79,8 @@ const Index = ({
     property_name,
     unit_name,
     tenant_name,
+    is_hidden,
+    lease_filter,
 }: Props) => {
     const [activeTab, setActiveTab] = useState<'offers' | 'renewals' | 'both'>('offers');
     const [isExporting, setIsExporting] = useState(false);
@@ -82,34 +88,24 @@ const Index = ({
     const [editDrawerOpen, setEditDrawerOpen] = useState(false);
     const [selectedOffer, setSelectedOffer] = useState<OfferRenewal | null>(null);
 
-    const [tempFilters, setTempFilters] = useState({
+    const filtersFromProps = (): OfferFilters => ({
         city: city_name || '',
         property: property_name || '',
         unit: unit_name || '',
         tenant: tenant_name || '',
+        is_hidden: Boolean(is_hidden),
+        lease: lease_filter || '',
     });
 
-    const [, setFilters] = useState({
-        city: city_name || '',
-        property: property_name || '',
-        unit: unit_name || '',
-        tenant: tenant_name || '',
-    });
+    const [tempFilters, setTempFilters] = useState<OfferFilters>(filtersFromProps);
+
+    const [, setFilters] = useState<OfferFilters>(filtersFromProps);
 
     useEffect(() => {
-        setTempFilters({
-            city: city_name || '',
-            property: property_name || '',
-            unit: unit_name || '',
-            tenant: tenant_name || '',
-        });
-        setFilters({
-            city: city_name || '',
-            property: property_name || '',
-            unit: unit_name || '',
-            tenant: tenant_name || '',
-        });
-    }, [city_name, property_name, unit_name, tenant_name]);
+        setTempFilters(filtersFromProps());
+        setFilters(filtersFromProps());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [city_name, property_name, unit_name, tenant_name, is_hidden, lease_filter]);
 
     const isPaginated = useMemo(() => {
         return !!(offers && (offers as any).data && Array.isArray((offers as any).data));
@@ -174,15 +170,22 @@ const Index = ({
 
     const filtered = offersData;
 
+    // Query params for the current filters (undefined values are dropped from the URL)
+    const filterParams = () => ({
+        city_name: tempFilters.city || undefined,
+        property_name: tempFilters.property || undefined,
+        unit_name: tempFilters.unit || undefined,
+        tenant_name: tempFilters.tenant || undefined,
+        is_hidden: tempFilters.is_hidden ? 'true' : undefined,
+        lease_filter: tempFilters.lease || undefined,
+    });
+
     const handlePerPageChange = (value: string) => {
         const nextPerPage = value === 'all' ? 'all' : parseInt(value, 10);
         router.get(
             route('offers_and_renewals.index'),
             {
-                city_name: tempFilters.city || undefined,
-                property_name: tempFilters.property || undefined,
-                unit_name: tempFilters.unit || undefined,
-                tenant_name: tempFilters.tenant || undefined,
+                ...filterParams(),
                 per_page: nextPerPage,
                 page: 1,
             },
@@ -196,10 +199,7 @@ const Index = ({
         router.get(
             route('offers_and_renewals.index'),
             {
-                city_name: tempFilters.city || undefined,
-                property_name: tempFilters.property || undefined,
-                unit_name: tempFilters.unit || undefined,
-                tenant_name: tempFilters.tenant || undefined,
+                ...filterParams(),
                 page,
                 per_page: selectedPerPage,
             },
@@ -213,10 +213,7 @@ const Index = ({
         router.get(
             route('offers_and_renewals.index'),
             {
-                city_name: tempFilters.city || null,
-                property_name: tempFilters.property || null,
-                unit_name: tempFilters.unit || null,
-                tenant_name: tempFilters.tenant || null,
+                ...filterParams(),
                 page: 1,
                 per_page: selectedPerPage,
             },
@@ -225,18 +222,9 @@ const Index = ({
     };
 
     const handleClearFilters = () => {
-        setTempFilters({
-            city: '',
-            property: '',
-            unit: '',
-            tenant: '',
-        });
-        setFilters({
-            city: '',
-            property: '',
-            unit: '',
-            tenant: '',
-        });
+        const cleared: OfferFilters = { city: '', property: '', unit: '', tenant: '', is_hidden: false, lease: '' };
+        setTempFilters(cleared);
+        setFilters(cleared);
 
         router.get(route('offers_and_renewals.index'), { per_page: selectedPerPage }, { preserveState: false });
     };
@@ -244,10 +232,7 @@ const Index = ({
     const handleDelete = (offer: OfferRenewal) => {
         if (window.confirm('Are you sure you want to delete this offer? This action cannot be undone.')) {
             const context = {
-                city_name: tempFilters.city || '',
-                property_name: tempFilters.property || '',
-                unit_name: tempFilters.unit || '',
-                tenant_name: tempFilters.tenant || '',
+                ...filterParams(),
                 per_page: selectedPerPage,
                 page: currentPage,
             };
@@ -258,6 +243,17 @@ const Index = ({
                 preserveState: true,
             });
         }
+    };
+
+    const handleToggleHidden = (offer: OfferRenewal) => {
+        const hiding = !offer.is_hidden;
+        if (!window.confirm(hiding ? 'Hide this record?' : 'Unhide this record?')) return;
+
+        router.patch(
+            route(hiding ? 'offers_and_renewals.hide' : 'offers_and_renewals.unhide', offer.id),
+            { ...filterParams(), per_page: selectedPerPage, page: currentPage },
+            { preserveScroll: true, preserveState: true },
+        );
     };
 
     const handleEdit = (offer: OfferRenewal) => {
@@ -292,6 +288,8 @@ const Index = ({
         canView: hasPermission('offers-and-renewals.show'),
         canEdit: hasAllPermissions(['offers-and-renewals.edit', 'offers-and-renewals.update']),
         canDelete: hasPermission('offers-and-renewals.destroy'),
+        // Same rule as other pages: hiding is available to anyone who can edit
+        canHide: hasAllPermissions(['offers-and-renewals.edit', 'offers-and-renewals.update']),
     };
 
     return (
@@ -346,6 +344,7 @@ const Index = ({
                                             activeTab={activeTab}
                                             onEdit={handleEdit}
                                             onDelete={handleDelete}
+                                            onToggleHidden={handleToggleHidden}
                                             permissions={permissions}
                                             currentFilters={tempFilters}
                                             perPage={selectedPerPage}

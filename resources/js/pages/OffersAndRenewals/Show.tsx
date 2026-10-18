@@ -10,7 +10,7 @@ import { AlertTriangle, Calendar, CheckCircle, Clock, FileText, Home, Key, MapPi
 import React from 'react';
 
 const Show: React.FC<OfferRenewalShowProps> = () => {
-    const { offer, prevId, nextId, city_name, property_name, unit_name, tenant_name, perPage, page } = usePage().props as any;
+    const { offer, prevId, nextId, city_name, property_name, unit_name, tenant_name, is_hidden, lease_filter, perPage, page } = usePage().props as any;
 
     // const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermissions();
 
@@ -250,6 +250,8 @@ const Show: React.FC<OfferRenewalShowProps> = () => {
                                                 property_name: property_name || '',
                                                 unit_name: unit_name || '',
                                                 tenant_name: tenant_name || '',
+                                                is_hidden: is_hidden ? 'true' : '',
+                                                lease_filter: lease_filter || '',
                                                 per_page: String(perPage || ''),
                                                 page: String(page || ''),
                                             }).toString()}`}
@@ -268,6 +270,8 @@ const Show: React.FC<OfferRenewalShowProps> = () => {
                                                 property_name: property_name || '',
                                                 unit_name: unit_name || '',
                                                 tenant_name: tenant_name || '',
+                                                is_hidden: is_hidden ? 'true' : '',
+                                                lease_filter: lease_filter || '',
                                                 per_page: String(perPage || ''),
                                                 page: String(page || ''),
                                             }).toString()}`}
@@ -293,6 +297,8 @@ const Show: React.FC<OfferRenewalShowProps> = () => {
                                         property_name: property_name || '',
                                         unit_name: unit_name || '',
                                         tenant_name: tenant_name || '',
+                                        is_hidden: is_hidden ? 'true' : '',
+                                        lease_filter: lease_filter || '',
                                         per_page: String(perPage || ''),
                                         page: String(page || ''),
                                     }).toString()}`}

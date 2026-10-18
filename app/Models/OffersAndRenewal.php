@@ -56,6 +56,7 @@ class OffersAndRenewal extends Model
         'date_of_decline' => 'date',
         'how_many_days_left' => 'integer',
         'is_archived' => 'boolean',
+        'is_hidden' => 'boolean', // managed via hide/unhide actions only
     ];
 
     /**

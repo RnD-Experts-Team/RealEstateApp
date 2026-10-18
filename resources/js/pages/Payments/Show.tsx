@@ -25,6 +25,8 @@ export default function Show({ payment, prevPaymentId, nextPaymentId, filters }:
             if (filters.unit) query.unit = filters.unit;
             if (filters.permanent && filters.permanent.length > 0) query.permanent = filters.permanent.join(',');
             if (typeof filters.is_hidden === 'boolean') query.is_hidden = filters.is_hidden ? 'true' : 'false';
+            if (typeof filters.remind === 'boolean') query.remind = String(filters.remind);
+            if (typeof filters.added_to_ledger === 'boolean') query.added_to_ledger = String(filters.added_to_ledger);
         }
         return route('payments.show', query);
     };
@@ -37,6 +39,8 @@ export default function Show({ payment, prevPaymentId, nextPaymentId, filters }:
             if (filters.unit) query.unit = filters.unit;
             if (filters.permanent && filters.permanent.length > 0) query.permanent = filters.permanent.join(',');
             if (filters.is_hidden === true) query.is_hidden = 'true';
+            if (typeof filters.remind === 'boolean') query.remind = String(filters.remind);
+            if (typeof filters.added_to_ledger === 'boolean') query.added_to_ledger = String(filters.added_to_ledger);
         }
         return route('payments.index', query);
     };
@@ -281,6 +285,16 @@ export default function Show({ payment, prevPaymentId, nextPaymentId, filters }:
                                         icon={EyeOff}
                                         label="Hidden"
                                         value={getYesNoBadge(payment.is_hidden as any)}
+                                    />
+                                    <InfoItem
+                                        icon={AlertCircle}
+                                        label="Remind"
+                                        value={getYesNoBadge(payment.remind as any)}
+                                    />
+                                    <InfoItem
+                                        icon={FileText}
+                                        label="Added to Ledger"
+                                        value={getYesNoBadge(payment.added_to_ledger as any)}
                                     />
                                     {payment.reversed_payments && (
                                         <InfoItem

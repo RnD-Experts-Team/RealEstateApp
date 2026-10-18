@@ -5,6 +5,7 @@ import React from 'react';
 import FilterDropdown from './FilterDropdown';
 import PermanentFilter from './PermanentFilter';
 import HiddenFilter from './HiddenFilter';
+import BooleanFilter from './BooleanFilter';
 
 
 interface UnitData {
@@ -26,6 +27,10 @@ interface FilterSectionProps {
     setUnitFilter: (value: string) => void;
     setPermanentFilter: (value: string[]) => void;
     setIsHiddenFilter: (value: boolean) => void;
+    remindFilter: boolean | null;
+    setRemindFilter: (value: boolean | null) => void;
+    addedToLedgerFilter: boolean | null;
+    setAddedToLedgerFilter: (value: boolean | null) => void;
     uniqueCities: string[];
     uniqueProperties: string[];
     units: UnitData[];
@@ -45,6 +50,10 @@ export default function FilterSection({
     setUnitFilter,
     setPermanentFilter,
     setIsHiddenFilter,
+    remindFilter,
+    setRemindFilter,
+    addedToLedgerFilter,
+    setAddedToLedgerFilter,
     uniqueCities,
     uniqueProperties,
     units,
@@ -64,7 +73,7 @@ export default function FilterSection({
     return (
         <Card className="bg-card text-card-foreground shadow-lg mb-6">
             <CardHeader>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-4 lg:grid-cols-7">
                     <FilterDropdown
                         value={cityFilter}
                         onChange={setCityFilter}
@@ -89,6 +98,18 @@ export default function FilterSection({
                     <PermanentFilter
                         value={permanentFilter}
                         onChange={setPermanentFilter}
+                    />
+
+                    <BooleanFilter
+                        label="Remind"
+                        value={remindFilter}
+                        onChange={setRemindFilter}
+                    />
+
+                    <BooleanFilter
+                        label="Ledger"
+                        value={addedToLedgerFilter}
+                        onChange={setAddedToLedgerFilter}
                     />
 
                     <HiddenFilter

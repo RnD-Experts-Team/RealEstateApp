@@ -106,6 +106,17 @@ class OffersAndRenewalService
         return $offer->restore();
     }
 
+    // Update only is_hidden so the saving hook doesn't rewrite expiry fields
+    public function hideOffer(OffersAndRenewal $offer): bool
+    {
+        return (bool) OffersAndRenewal::whereKey($offer->id)->update(['is_hidden' => true]);
+    }
+
+    public function unhideOffer(OffersAndRenewal $offer): bool
+    {
+        return (bool) OffersAndRenewal::whereKey($offer->id)->update(['is_hidden' => false]);
+    }
+
     public function getArchivedOffers(): Collection
     {
         $offers = OffersAndRenewal::onlyArchived()
@@ -348,9 +359,10 @@ class OffersAndRenewalService
         return $this->calculateExpiryForCollection($offers);
     }
 
-    public function getOffers(array $filters = [], array $nameFilters = [], $perPage = 15, $page = 1)
+    public function getOffers(array $filters = [], array $nameFilters = [], $perPage = 15, $page = 1, array $flagFilters = [])
     {
         $query = OffersAndRenewal::with(['tenant.unit.property.city']);
+        $this->applyFlagFilters($query, $flagFilters);
 
         $hasNameFilters = !empty(array_filter($nameFilters));
         $hasIdFilters = !empty(array_filter($filters));
@@ -410,9 +422,27 @@ class OffersAndRenewalService
         return $this->calculateExpiryForCollection($offers);
     }
 
-    private function buildQueryForFilters(array $filters = [], array $nameFilters = [])
+    /**
+     * Visible/Hidden and lease-signed filters; applied regardless of name/ID filters.
+     */
+    private function applyFlagFilters($query, array $flagFilters): void
+    {
+        $query->where('is_hidden', (bool) ($flagFilters['is_hidden'] ?? false));
+
+        $leaseSigned = $flagFilters['lease_signed'] ?? null;
+        if ($leaseSigned === 'signed') {
+            $query->where('lease_signed', 'Signed');
+        } elseif ($leaseSigned === 'unsigned') {
+            $query->where(function ($q) {
+                $q->whereNull('lease_signed')->orWhere('lease_signed', '!=', 'Signed');
+            });
+        }
+    }
+
+    private function buildQueryForFilters(array $filters = [], array $nameFilters = [], array $flagFilters = [])
     {
         $query = OffersAndRenewal::with(['tenant.unit.property.city']);
+        $this->applyFlagFilters($query, $flagFilters);
 
         $hasNameFilters = !empty(array_filter($nameFilters));
         $hasIdFilters = !empty(array_filter($filters));
@@ -465,9 +495,9 @@ class OffersAndRenewalService
         return $query;
     }
 
-    public function getNeighborOfferIds(array $filters, array $nameFilters, int $currentId): array
+    public function getNeighborOfferIds(array $filters, array $nameFilters, int $currentId, array $flagFilters = []): array
     {
-        $ids = $this->buildQueryForFilters($filters, $nameFilters)
+        $ids = $this->buildQueryForFilters($filters, $nameFilters, $flagFilters)
             ->pluck('id')
             ->toArray();
 

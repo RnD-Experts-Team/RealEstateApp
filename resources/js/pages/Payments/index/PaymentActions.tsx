@@ -32,6 +32,8 @@ export default function PaymentActions({
             if (filters.unit) params.unit = filters.unit;
             if (filters.permanent && filters.permanent.length > 0) params.permanent = filters.permanent.join(',');
             if (typeof filters.is_hidden === 'boolean') params.is_hidden = filters.is_hidden ? 'true' : 'false';
+            if (typeof filters.remind === 'boolean') params.remind = String(filters.remind);
+            if (typeof filters.added_to_ledger === 'boolean') params.added_to_ledger = String(filters.added_to_ledger);
         }
         return route('payments.show', params);
     };

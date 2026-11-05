@@ -60,14 +60,40 @@ export default function FilterSection({
     onSearch,
     onClear
 }: FilterSectionProps) {
+    // Case-insensitive "contains" match, same semantics as the server-side LIKE filters.
+    const matches = (candidate: string, term: string): boolean => {
+        const t = term.trim().toLowerCase();
+        return !t || (candidate ?? '').toLowerCase().includes(t);
+    };
+
+    // Each dropdown only offers values that are compatible with the OTHER selected filters.
+    const unique = (values: string[]): string[] =>
+        [...new Set(values)].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+    const getFilteredCities = (): string[] => {
+        if (!propertyFilter.trim() && !unitFilter.trim()) return uniqueCities;
+        return unique(
+            units
+                .filter((u) => matches(u.property_name, propertyFilter) && matches(u.unit_name, unitFilter))
+                .map((u) => u.city),
+        );
+    };
+
     const getFilteredProperties = (): string[] => {
-        // Properties should be independent of city selection
-        return uniqueProperties;
+        if (!cityFilter.trim() && !unitFilter.trim()) return uniqueProperties;
+        return unique(
+            units
+                .filter((u) => matches(u.city, cityFilter) && matches(u.unit_name, unitFilter))
+                .map((u) => u.property_name),
+        );
     };
 
     const getFilteredUnits = (): string[] => {
-        // Units should be independent of city and property selection
-        return [...new Set(units.map(unit => unit.unit_name))].sort();
+        return unique(
+            units
+                .filter((u) => matches(u.city, cityFilter) && matches(u.property_name, propertyFilter))
+                .map((u) => u.unit_name),
+        );
     };
 
     return (
@@ -78,7 +104,7 @@ export default function FilterSection({
                         value={cityFilter}
                         onChange={setCityFilter}
                         placeholder="Filter by city..."
-                        options={uniqueCities}
+                        options={getFilteredCities()}
                     />
 
                     <FilterDropdown

@@ -57,14 +57,8 @@ class Payment extends Model
             // Calculate status once, reuse
             $payment->status = $payment->calculateStatus();
 
-            // Auto-hide when status is Paid or Overpaid,
-            // BUT ONLY if is_hidden was NOT explicitly changed in this save.
-            if (!$payment->isDirty('is_hidden')) {
-                if (in_array($payment->status, ['Paid', 'Overpaid'])) {
-                    $payment->is_hidden = true;
-                }
-                // Do not auto-unhide; respect existing/manual value.
-            }
+            // New payments are visible by default (is_hidden defaults to false in the DB).
+            // Hiding/unhiding is only done manually via the hide/unhide actions.
         });
 
         // Global scope to filter out archived records by default
